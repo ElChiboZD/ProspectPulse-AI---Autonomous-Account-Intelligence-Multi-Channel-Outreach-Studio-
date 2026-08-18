@@ -2985,26 +2985,55 @@ function parseAndRenderResults(raw) {
     const co = data.company || 'your team';
     const compName = (data.competitor && data.competitor.name) || 'Incumbent Vendor';
     objListEl.innerHTML = `
-      <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--rose);">
+      <div style="background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--rose); cursor: pointer;" onclick="toggleObjectionDetail('vendor')">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <strong style="color: #fff;">1. "We already use ${compName}" (88% Likelihood)</strong>
-          <span class="badge badge-amber" style="font-size: 10px; cursor: pointer;" onclick="showObjection('vendor')">View Counter</span>
+          <strong style="color: #fff; font-size: 12.5px;">1. "We already use ${compName}" (88% Likelihood)</strong>
+          <span class="badge badge-rose" style="font-size: 10px;">⚡ View Counter</span>
         </div>
         <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">Wedge on direct USA manufacturing, 95%+ keep rate vs 90% trash swag.</div>
+        <div id="objDetail_vendor" style="display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: #E2E8F0;">
+          <div style="background: rgba(244,63,94,0.08); padding: 8px 10px; border-radius: 6px; border-left: 2px solid var(--rose); margin-bottom: 6px;">
+            <strong>Suggested Rebuttal:</strong> "Totally understand. Most teams we work with used catalog distributors like ${compName}, but found 90% of swag ended up in trash cans. We manufacture directly in North Carolina with custom woven combed cotton (95%+ keep rate). Would you be open to a 1-hour free design proof for your next event?"
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 8px;" onclick="event.stopPropagation(); showObjection('vendor')">📋 Copy Rebuttal</button>
+            <button class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 8px;" onclick="event.stopPropagation(); insertObjectionToDraft('vendor')">⚡ Insert to Email Draft</button>
+          </div>
+        </div>
       </div>
-      <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--amber);">
+
+      <div style="background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--amber); cursor: pointer;" onclick="toggleObjectionDetail('budget')">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <strong style="color: #fff;">2. "Budgets are frozen right now" (65% Likelihood)</strong>
-          <span class="badge badge-amber" style="font-size: 10px; cursor: pointer;" onclick="showObjection('budget')">View Counter</span>
+          <strong style="color: #fff; font-size: 12.5px;">2. "Budgets are frozen right now" (65% Likelihood)</strong>
+          <span class="badge badge-amber" style="font-size: 10px;">⚡ View Counter</span>
         </div>
         <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">Pivot to zero-commitment 1-hour digital design proof for next event queue.</div>
+        <div id="objDetail_budget" style="display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: #E2E8F0;">
+          <div style="background: rgba(245,158,11,0.08); padding: 8px 10px; border-radius: 6px; border-left: 2px solid var(--amber); margin-bottom: 6px;">
+            <strong>Suggested Rebuttal:</strong> "Completely get it. We offer completely free digital design proofs in under 1 hour with zero commitment, so your team has ready-to-order concepts in hand whenever your next event budget opens up."
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 8px;" onclick="event.stopPropagation(); showObjection('budget')">📋 Copy Rebuttal</button>
+            <button class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 8px;" onclick="event.stopPropagation(); insertObjectionToDraft('budget')">⚡ Insert to Email Draft</button>
+          </div>
+        </div>
       </div>
-      <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--sky);">
+
+      <div style="background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--sky); cursor: pointer;" onclick="toggleObjectionDetail('email')">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <strong style="color: #fff;">3. "Just email me a catalog/PDF" (72% Likelihood)</strong>
-          <span class="badge badge-sky" style="font-size: 10px; cursor: pointer;" onclick="showObjection('email')">View Counter</span>
+          <strong style="color: #fff; font-size: 12.5px;">3. "Just email me a catalog/PDF" (72% Likelihood)</strong>
+          <span class="badge badge-sky" style="font-size: 10px;">⚡ View Counter</span>
         </div>
         <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">Leverage pre-made virtual proof link to convert brush-off into meeting.</div>
+        <div id="objDetail_email" style="display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: #E2E8F0;">
+          <div style="background: rgba(6,182,212,0.08); padding: 8px 10px; border-radius: 6px; border-left: 2px solid var(--sky); margin-bottom: 6px;">
+            <strong>Suggested Rebuttal:</strong> "Will do! I have a 1-hour free design proof already rendered with ${co}'s official brand colors. What's the best email address to drop the 1-click preview link over to?"
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 8px;" onclick="event.stopPropagation(); showObjection('email')">📋 Copy Rebuttal</button>
+            <button class="btn btn-secondary btn-sm" style="font-size: 10.5px; padding: 2px 8px;" onclick="event.stopPropagation(); insertObjectionToDraft('email')">⚡ Insert to Email Draft</button>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -3893,27 +3922,66 @@ function updateCharCount() {
   countEl.className = len > 300 ? 'badge badge-amber' : 'badge badge-sky';
 }
 
-function showObjection(type) {
-  const box = document.getElementById('objectionRebuttalBox');
-  const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
-  
-  if (currentActivePreset === 'sockclub') {
-    if (type === 'vendor') {
-      box.innerHTML = `<strong>Talk Track:</strong> "Totally understand. Most teams we work with used generic catalog brokers, but found 90% of items ended up in trash cans. We manufacture directly in North Carolina with custom-woven combed cotton that has a 95%+ keep rate. Would you be open to seeing a free virtual design proof for your next event?"`;
-    } else if (type === 'budget') {
-      box.innerHTML = `<strong>Talk Track:</strong> "Completely get it. We offer free digital design proofs in under 1 hour with zero commitment, so your team has ready-to-order concepts in hand whenever your next event budget opens up."`;
-    } else if (type === 'email') {
-      box.innerHTML = `<strong>Talk Track:</strong> "Will do! I have a 1-hour free design proof already queued up for your brand. What's the best email address to send that over to?"`;
-    }
-  } else {
-    if (type === 'vendor') {
-      box.innerHTML = `<strong>Talk Track:</strong> "Totally understand. Many of our customers previously ran legacy stacks, but found high maintenance costs and slow iteration were holding them back. ${p.differentiator}. Would you be open to a 5-minute comparison?"`;
-    } else if (type === 'budget') {
-      box.innerHTML = `<strong>Talk Track:</strong> "Completely get it. We build custom ROI teardowns showing how the platform self-funds within the first quarter by eliminating ops overhead."`;
-    } else if (type === 'email') {
-      box.innerHTML = `<strong>Talk Track:</strong> "Will do! What's the best email address to drop the 2-minute executive brief over to?"`;
-    }
+// Interactive Pre-Call Objection Detail Expand & Insert Engine
+function toggleObjectionDetail(type) {
+  const el = document.getElementById(`objDetail_${type}`);
+  if (el) {
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
   }
+}
+
+function showObjection(type) {
+  let counterTrack = '';
+  const co = (currentAccountData && currentAccountData.company) || 'your company';
+  const comp = (currentAccountData && currentAccountData.competitor && currentAccountData.competitor.name) || 'Incumbent Vendor';
+
+  if (type === 'vendor') {
+    counterTrack = `Talk Track (${comp} Displacement): "Totally understand. Most teams we work with used catalog distributors like ${comp}, but found 90% of swag ended up in trash cans. We manufacture directly in North Carolina with custom woven combed cotton (95%+ keep rate). Would you be open to a 1-hour free design proof for your next event?"`;
+  } else if (type === 'budget') {
+    counterTrack = `Talk Track (Budget Freeze Timing): "Completely get it. We offer completely free digital design proofs in under 1 hour with zero commitment, so your team has ready-to-order concepts in hand whenever your next event budget opens up."`;
+  } else if (type === 'email') {
+    counterTrack = `Talk Track (Send Info Pivot): "Will do! I have a 1-hour free design proof already rendered with ${co}'s official brand colors. What's the best email address to drop the 1-click preview link over to?"`;
+  }
+
+  navigator.clipboard.writeText(counterTrack).then(() => {
+    showToast(`✓ Counter talk track copied to clipboard!`);
+  });
+}
+
+function insertObjectionToDraft(type) {
+  const co = (currentAccountData && currentAccountData.company) || 'your company';
+  const comp = (currentAccountData && currentAccountData.competitor && currentAccountData.competitor.name) || 'Incumbent Vendor';
+  let snippet = '';
+
+  if (type === 'vendor') {
+    snippet = `\n\nP.S. If your team is currently working with ${comp} or general catalog brokers, we eliminate the 90% landfill waste rate with custom woven US-made items that recipients actually wear for months.`;
+  } else if (type === 'budget') {
+    snippet = `\n\nP.S. Even if budgets are set for this quarter, our design team can turn around zero-commitment virtual mockups today so you have ready assets for upcoming events.`;
+  } else if (type === 'email') {
+    snippet = `\n\nP.S. Rather than sending a generic 40-page PDF catalog, I've already queued up a custom 1-click digital proof tailored to ${co}.`;
+  }
+
+  const emailInput = document.getElementById('emailBodyInput');
+  if (emailInput) {
+    emailInput.value += snippet;
+    runDeliverabilityAudit();
+    showToast('✓ Objection rebuttal wedge inserted into email draft!');
+  }
+}
+
+function copyDiscoveryQuestions() {
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  const questions = [
+    `1. Incumbent Process: How does ${co} currently source custom items for employee onboarding and major events?`,
+    `2. Hidden Landfill Friction: What percentage of generic catalog items (pens, plastic swag) end up in trash bins vs being worn 60 days later?`,
+    `3. Turnaround Risk: When last-minute event deadlines surge, how often do overseas brokers miss shipping windows?`,
+    `4. Economic Value: If your team could order direct from a USA mill with guaranteed 5-day rush, what would that save in rush broker fees?`,
+    `5. Decision Timing: Who on the Brand and People Ops team owns the final proof sign-off for upcoming quarterly summits?`
+  ].join('\n\n');
+
+  navigator.clipboard.writeText(questions).then(() => {
+    showToast('✓ 5-Whys Discovery Diagnostic Questions copied to clipboard!');
+  });
 }
 
 function updateSockColors() {
