@@ -941,6 +941,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._serve_static("index.html", "text/html; charset=utf-8")
         if path == "/dealroom.html":
             return self._serve_static("dealroom.html", "text/html; charset=utf-8")
+        if path == "/manifest.json":
+            return self._serve_static("manifest.json", "application/manifest+json")
+        if path == "/service-worker.js" or path == "/sw.js":
+            return self._serve_static("service-worker.js", "application/javascript")
         if path.startswith("/static/"):
             return self._serve_static(path[len("/static/"):], self._guess(path))
         if path.startswith("/data/") or path.startswith("/js/") or path.startswith("/css/") or path.startswith("/proofs/"):
