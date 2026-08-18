@@ -631,6 +631,7 @@
     <button class="btn btn-secondary btn-sm" onclick="openDeckModal()">📊 Architecture &amp; Deck</button>
     <button class="btn btn-secondary btn-sm" onclick="openBattlecardsModal()">⚔️ Battlecards</button>
     <button class="btn btn-secondary btn-sm" onclick="openHistoryModal()">📜 History</button>
+    <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.35); color: #fca5a5; background: rgba(239, 68, 68, 0.08);" title="Reset console and start a new search">🔄 Reset</button>
   </div>
 </header>
 
@@ -743,6 +744,7 @@
         <p id="s2WhyNow" style="color: var(--text-muted); font-size: 13.5px; margin-top: 4px;"></p>
       </div>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">🔄 Reset</button>
         <button class="btn btn-secondary btn-sm" onclick="openExecutiveBriefModal()">📄 1-Page Call Brief</button>
         <button class="btn btn-secondary btn-sm" onclick="exportSalesforceCsv()">📥 Export Salesforce CSV</button>
         <button class="btn btn-secondary btn-sm" onclick="openMultiThreadingModal()">👥 Multi-Thread All Leads</button>
@@ -806,7 +808,8 @@
         <h2 id="studioRecipientTitle" style="font-size: 22px;">Multi-Channel Outreach Studio</h2>
         <p style="color: var(--text-muted); font-size: 13.5px;">Switch between Cold Email, LinkedIn InMail, Cold Call scripts, and live virtual proofs.</p>
       </div>
-      <div style="display: flex; gap: 10px;">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">🔄 Reset</button>
         <button class="btn btn-secondary btn-sm" onclick="openInEmailClient()">✉️ Open in Gmail/Outlook</button>
         <button class="btn btn-secondary btn-sm" onclick="copyFullCadence()">📋 Copy 5-Touch Cadence</button>
         <button class="btn btn-primary btn-sm" onclick="copyActiveChannelContent()">📋 Copy Active Channel</button>
@@ -2693,6 +2696,78 @@ function saveHistory(data) {
     date: new Date().toLocaleDateString()
   });
   localStorage.setItem('antigravity_hist', JSON.stringify(hist.slice(0, 10)));
+}
+
+// Toast Feedback System
+function showToast(msg, duration = 3000) {
+  let toastEl = document.getElementById('appToast');
+  if (!toastEl) {
+    toastEl = document.createElement('div');
+    toastEl.id = 'appToast';
+    toastEl.style.position = 'fixed';
+    toastEl.style.bottom = '24px';
+    toastEl.style.right = '24px';
+    toastEl.style.background = 'rgba(15, 23, 42, 0.95)';
+    toastEl.style.backdropFilter = 'blur(12px)';
+    toastEl.style.border = '1px solid rgba(99, 102, 241, 0.4)';
+    toastEl.style.boxShadow = '0 12px 36px rgba(0,0,0,0.6)';
+    toastEl.style.color = '#fff';
+    toastEl.style.padding = '12px 20px';
+    toastEl.style.borderRadius = '10px';
+    toastEl.style.fontSize = '13.5px';
+    toastEl.style.fontWeight = '600';
+    toastEl.style.display = 'flex';
+    toastEl.style.alignItems = 'center';
+    toastEl.style.gap = '10px';
+    toastEl.style.zIndex = '99999';
+    toastEl.style.transition = 'all 0.3s ease';
+    toastEl.style.opacity = '0';
+    toastEl.style.transform = 'translateY(10px)';
+    document.body.appendChild(toastEl);
+  }
+  toastEl.innerHTML = msg;
+  toastEl.style.opacity = '1';
+  toastEl.style.transform = 'translateY(0)';
+  setTimeout(() => {
+    toastEl.style.opacity = '0';
+    toastEl.style.transform = 'translateY(10px)';
+  }, duration);
+}
+
+// Master Console Reset Function
+function resetEntireProduct() {
+  // 1. Clear input & state
+  const omni = document.getElementById('omniInput');
+  if (omni) {
+    omni.value = '';
+    omni.focus();
+  }
+  const batchInput = document.getElementById('batchDomainsInput');
+  if (batchInput) batchInput.value = '';
+  
+  currentAccountData = null;
+  currentDraftData = null;
+  batchResults = [];
+  
+  // 2. Clear reply triage & roleplay
+  const replyIn = document.getElementById('replyInput');
+  if (replyIn) replyIn.value = '';
+  const replyOut = document.getElementById('replyOutput');
+  if (replyOut) replyOut.value = '';
+  const replyArea = document.getElementById('replyResponseArea');
+  if (replyArea) replyArea.style.display = 'none';
+  
+  resetRoleplayChat();
+
+  // 3. Clear batch table
+  const batchTbl = document.getElementById('batchResultsTableContainer');
+  if (batchTbl) batchTbl.style.display = 'none';
+
+  // 4. Return to Screen 1
+  gotoScreen(1);
+
+  // 5. Toast feedback
+  showToast('🔄 Console reset. Ready for a new account search!');
 }
 
 // Initial setup
