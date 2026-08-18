@@ -815,7 +815,7 @@
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">🔄 Reset</button>
         <button class="btn btn-secondary btn-sm" onclick="openExecutiveBriefModal()">📄 1-Page Call Brief</button>
-        <button class="btn btn-secondary btn-sm" onclick="exportFullDossier()">📥 Export Dossier (.MD)</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportFullDossier('pdf')">📄 Export Dossier (PDF)</button>
         <button class="btn btn-secondary btn-sm" onclick="exportSalesforceCsv()">📥 Export Salesforce CSV</button>
         <button class="btn btn-secondary btn-sm" onclick="openMultiThreadingModal()">👥 Multi-Thread All Leads</button>
         <button class="btn btn-primary btn-sm" onclick="gotoScreen(3)">⚡ Outreach Studio</button>
@@ -2741,8 +2741,8 @@ function openVerifiedLinkedInProfile() {
   }
 }
 
-// Export Full Account Executive Dossier (.MD)
-function exportFullDossier() {
+// Export Full Account Executive Dossier (PDF & .MD)
+function exportFullDossier(format = 'pdf') {
   if (!currentAccountData) {
     alert('Please search an account first to generate an executive dossier.');
     return;
@@ -2751,7 +2751,95 @@ function exportFullDossier() {
   const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
   const whyNow = currentAccountData.whyNow || 'High growth and active events calendar';
   const summary = currentAccountData.summary || '';
-  
+  const domain = currentAccountData.companyZoomInfoUrl ? currentAccountData.companyZoomInfoUrl.split('/').pop() : 'domain.com';
+  const contacts = (currentAccountData.tiers && currentAccountData.tiers[0] && currentAccountData.tiers[0].contacts) || [];
+  const topLead = contacts[0] || { name: 'Key Executive', title: 'Director / VP', email: 'lead@domain.com' };
+
+  if (format === 'pdf') {
+    const area = document.getElementById('briefPrintArea');
+    const subj = document.getElementById('emailSubjectInput') ? document.getElementById('emailSubjectInput').value : `Made some socks for ${co}`;
+    const body = document.getElementById('emailBodyInput') ? document.getElementById('emailBodyInput').value : 'Outreach synthesis';
+    const inmail = document.getElementById('linkedinInmailInput') ? document.getElementById('linkedinInmailInput').value : '';
+    const phone = document.getElementById('callOpenerText') ? document.getElementById('callOpenerText').textContent : '';
+
+    area.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #6366F1; padding-bottom: 12px; margin-bottom: 18px;">
+        <div>
+          <h1 style="font-size: 26px; color: #1E293B; margin: 0; font-weight: 800;">${co} — Executive Account Dossier</h1>
+          <div style="font-size: 13px; color: #64748B; margin-top: 4px;">Prepared by: ${p.senderName} (${p.companyName}) · Developed by @ElChibo</div>
+        </div>
+        <div style="text-align: right; font-size: 12px; color: #64748B;">
+          <div style="font-weight: 700; color: #10B981; font-size: 14px;">Intent Score: 96 / 100</div>
+          <div>Date: ${new Date().toLocaleDateString()}</div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: FIRMOGRAPHICS & SIGNALS -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+        <div style="border: 1px solid #E2E8F0; padding: 14px; border-radius: 8px; background: #F8FAFC;">
+          <strong style="color: #4F46E5; font-size: 12px; text-transform: uppercase;">🏢 Account Intelligence &amp; Why Now</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 6px; line-height: 1.5;">${whyNow}</p>
+          <div style="font-size: 12px; color: #64748B; margin-top: 6px;">Domain: <strong>${domain}</strong> · Model: <strong>${p.productName}</strong></div>
+        </div>
+        <div style="border: 1px solid #E2E8F0; padding: 14px; border-radius: 8px; background: #F8FAFC;">
+          <strong style="color: #059669; font-size: 12px; text-transform: uppercase;">👤 Primary Verified Decision Maker</strong>
+          <div style="font-size: 15px; font-weight: 700; color: #0F172A; margin-top: 4px;">${topLead.name}</div>
+          <div style="font-size: 13px; color: #475569;">${topLead.title}</div>
+          <div style="font-size: 12.5px; color: #2563EB; margin-top: 4px;">Email: <strong>${topLead.email}</strong></div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: DISPLACEMENT BATTLECARD -->
+      <div style="border: 1px solid #FDE68A; background: #FFFBEB; padding: 14px; border-radius: 8px; margin-bottom: 18px;">
+        <strong style="color: #D97706; font-size: 12px; text-transform: uppercase;">⚔️ Incumbent Displacement Battlecard &amp; Trap Question</strong>
+        <div style="font-size: 13.5px; color: #92400E; margin-top: 4px; font-weight: 600;">Strategic Angle: ${currentAccountData.competitor ? currentAccountData.competitor.angle : 'Position on 95%+ wearable retention.'}</div>
+        <div style="font-size: 13px; color: #78350F; margin-top: 6px; background: #FEF3C7; padding: 8px 12px; border-radius: 6px; border-left: 3px solid #D97706;">
+          <strong>Trap Question to Ask:</strong> "${(currentAccountData.competitor && currentAccountData.competitor.battlecard && currentAccountData.competitor.battlecard.trapQuestion) || 'What percentage of the swag you sent last quarter is still being actively worn today?'}"
+        </div>
+      </div>
+
+      <!-- SECTION 3: QUANTITATIVE ROI -->
+      <div style="border: 1px solid #C7D2FE; background: #EEF2FF; padding: 14px; border-radius: 8px; margin-bottom: 18px;">
+        <strong style="color: #4F46E5; font-size: 12px; text-transform: uppercase;">🧮 Quantitative ROI Proof Model</strong>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px; text-align: center;">
+          <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 11px; color: #64748B;">Waste Eliminated</div>
+            <div style="font-size: 16px; font-weight: 800; color: #E11D48;">$4,500+</div>
+          </div>
+          <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 11px; color: #64748B;">Wearer Retention</div>
+            <div style="font-size: 16px; font-weight: 800; color: #059669;">95%+ Keep Rate</div>
+          </div>
+          <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #E2E8F0;">
+            <div style="font-size: 11px; color: #64748B;">Turnaround Time</div>
+            <div style="font-size: 16px; font-weight: 800; color: #2563EB;">5-Day Rush Mill</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: OUTREACH SEQUENCES -->
+      <div style="border: 1px solid #E2E8F0; padding: 14px; border-radius: 8px; background: #fff;">
+        <strong style="color: #334155; font-size: 12px; text-transform: uppercase;">✉️ 5-Touch Multi-Channel Sequence Cheat Sheet</strong>
+        <div style="margin-top: 10px; font-size: 12.5px; line-height: 1.5; color: #1E293B;">
+          <strong>Touch 1 (Day 0 Cold Email):</strong><br>
+          <span style="color: #64748B;">Subject: ${subj}</span><br>
+          <div style="background: #F8FAFC; padding: 8px; border-radius: 6px; margin: 4px 0 10px; border: 1px solid #E2E8F0; white-space: pre-wrap;">${body}</div>
+          
+          <strong>Touch 2 (LinkedIn InMail):</strong><br>
+          <div style="background: #F8FAFC; padding: 8px; border-radius: 6px; margin: 4px 0 10px; border: 1px solid #E2E8F0; white-space: pre-wrap;">${inmail}</div>
+
+          <strong>Touch 3 (Cold Call Phone Opener):</strong><br>
+          <div style="background: #F8FAFC; padding: 8px; border-radius: 6px; margin: 4px 0 0; border: 1px solid #E2E8F0;">${phone}</div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('briefModal').style.display = 'grid';
+    setTimeout(() => { window.print(); }, 200);
+    return;
+  }
+
+  // Markdown fallback
   let md = `# ⚡ ProspectPulse Executive Account Dossier: ${co}\n\n`;
   md += `**Generated**: ${new Date().toLocaleDateString()} | **Author**: @ElChibo | **Pitching As**: ${p.companyName}\n\n`;
   md += `---\n\n`;
