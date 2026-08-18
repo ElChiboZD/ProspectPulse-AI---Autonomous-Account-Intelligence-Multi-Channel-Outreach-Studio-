@@ -897,85 +897,74 @@
   </div>
 
   <!-- SCREEN 2: DUAL WORKSPACE -->
+  <!-- SCREEN 2: INTEL, HIERARCHY & BUYING COMMITTEE -->
   <div id="screen2" class="screen-view" style="display: none;">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-      <div>
-        <h2 id="s2AccountTitle" style="font-size: 22px; display: flex; align-items: center; gap: 10px;">
+    
+    <!-- EXECUTIVE ACCOUNT HERO HEADER BAR -->
+    <div style="background: rgba(15,23,42,0.85); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <!-- Left: Account & Logo -->
+        <div id="s2AccountTitle" style="font-size: 20px; font-weight: 800;">
           <span>Account Intelligence</span>
-          <span id="s2AccountBadge" class="badge badge-emerald">Verified Lead</span>
-        </h2>
-        <p id="s2WhyNow" style="color: var(--text-muted); font-size: 13.5px; margin-top: 4px;"></p>
-      </div>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">🔄 Reset</button>
-        <button class="btn btn-secondary btn-sm" onclick="openExecutiveBriefModal()">📄 1-Page Call Brief</button>
-        <button class="btn btn-secondary btn-sm" onclick="exportFullDossier('pdf')">📄 Export Dossier (PDF)</button>
-        <button class="btn btn-secondary btn-sm" onclick="exportSalesforceCsv()">📥 Export Salesforce CSV</button>
-        <button class="btn btn-secondary btn-sm" onclick="openMultiThreadingModal()">👥 Multi-Thread All Leads</button>
-        <button class="btn btn-primary btn-sm" onclick="gotoScreen(3)">⚡ Outreach Studio</button>
-      </div>
-    </div>
-
-    <!-- INTENT SCORE & TIMING GAUGE -->
-    <div class="intent-score-card" id="intentScoreWidget">
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <div style="width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--emerald); display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(16,185,129,0.15);">
-          <span id="intentScoreNumber" style="font-weight: 800; font-size: 16px; color: var(--emerald);">94</span>
-          <span style="font-size: 8px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">SCORE</span>
         </div>
-        <div>
+
+        <!-- Middle: Key Metrics Pill Strip -->
+        <div style="display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.4); padding: 6px 16px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.06);">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <strong style="font-size: 14px; color: #fff;">High Propensity-to-Buy Window</strong>
-            <span class="badge badge-emerald" id="intentScoreBadge">🟢 High Intent</span>
+            <div style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--emerald); display: flex; align-items: center; justify-content: center; background: rgba(16,185,129,0.15); font-weight: 800; font-size: 12px; color: var(--emerald);" id="intentScoreNumber">96</div>
+            <div style="font-size: 11px;">
+              <div style="color: var(--text-faint); text-transform: uppercase; font-weight: 700; font-size: 9px;">Intent Score</div>
+              <strong style="color: var(--emerald);">High Propensity</strong>
+            </div>
           </div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;" id="intentScoreSummary">
-            Active hiring surge + Incumbent vendor displacement timing + Event season window.
+
+          <div style="height: 20px; width: 1px; background: var(--border);"></div>
+
+          <div>
+            <div style="color: var(--text-faint); text-transform: uppercase; font-weight: 700; font-size: 9px;">Estimated ARR</div>
+            <strong style="color: #fff; font-size: 13px;" id="dealArrVal">$19,400</strong>
+          </div>
+
+          <div style="height: 20px; width: 1px; background: var(--border);"></div>
+
+          <div>
+            <div style="color: var(--text-faint); text-transform: uppercase; font-weight: 700; font-size: 9px;">Est. Commission</div>
+            <strong style="color: var(--sky); font-size: 13px;" id="dealCommissionVal">$1,940</strong>
           </div>
         </div>
+
+        <!-- Right: Actions -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="exportFullDossier('pdf')">📄 Export PDF</button>
+          <button class="btn btn-secondary btn-sm" onclick="openMultiThreadingModal()">👥 Multi-Thread</button>
+          <button class="btn btn-primary btn-sm" onclick="gotoScreen(3)">Next: Deal Autopsy →</button>
+        </div>
       </div>
-      <div style="text-align: right; font-size: 11.5px; color: var(--text-muted); line-height: 1.5; border-left: 1px solid var(--border); padding-left: 16px;">
-        <div>Hiring Velocity: <strong style="color: var(--emerald);" id="intentHiringVal">96%</strong></div>
-        <div>Displacement Timing: <strong style="color: var(--amber);" id="intentChurnVal">92%</strong></div>
-        <div>Decision-Maker Density: <strong style="color: var(--sky);" id="intentBudgetVal">95%</strong></div>
+
+      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--text-muted);">
+        <div><strong>Why Now Trigger:</strong> <span id="s2WhyNow">Loading verified timing triggers...</span></div>
+        <div style="font-size: 11.5px; color: var(--text-faint);" id="dealTierName">Tier-1 Enterprise Account</div>
       </div>
     </div>
 
-    <div class="split-workspace">
-      <!-- LEFT COLUMN -->
-      <div class="left-col">
-        <!-- PIPELINE VALUE & COMMISSION ESTIMATOR -->
-        <div class="panel-card" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.03);">
-          <div class="panel-head">
-            <span class="panel-title" style="color: var(--emerald);">💰 Pipeline Value &amp; Deal Tier</span>
-            <span class="badge badge-emerald" id="pipelineWinLikelihood">38% Win Likelihood</span>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
-            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
-              <div style="font-size: 11px; color: var(--text-faint);">Estimated Initial Deal</div>
-              <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 2px;" id="dealInitialVal">$4,850</div>
-            </div>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
-              <div style="font-size: 11px; color: var(--text-faint);">Annualized Account ARR</div>
-              <div style="font-size: 16px; font-weight: 800; color: var(--emerald); margin-top: 2px;" id="dealArrVal">$19,400</div>
-            </div>
-          </div>
-          <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-muted); display: flex; justify-content: space-between;">
-            <span>Est. Rep Commission @ 10%: <strong style="color: var(--sky);" id="dealCommissionVal">$1,940</strong></span>
-            <span>Tier: <strong style="color: #fff;" id="dealTierName">Enterprise Account</strong></span>
-          </div>
-        </div>
-
+    <!-- BALANCED 2-COLUMN WORKSPACE -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      
+      <!-- LEFT COLUMN: COMPANY DNA & PLAYBOOK -->
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        
+        <!-- CARD 1: FIRMOGRAPHICS & HIERARCHY -->
         <div class="panel-card">
           <div class="panel-head">
-            <span class="panel-title">🏢 Firmographics (Sumble Verified)</span>
-            <span id="sumbleVerifiedPill" class="badge badge-emerald">Live API</span>
+            <span class="panel-title">🏢 Account DNA &amp; Multi-Unit Hierarchy</span>
+            <span id="sumbleVerifiedPill" class="badge badge-emerald">Sumble Verified</span>
           </div>
-          <div id="firmographicsContent" style="font-size: 13.5px; line-height: 1.6;"></div>
+          <div id="firmographicsContent" style="font-size: 13px; line-height: 1.6;"></div>
 
           <!-- ACCOUNT HIERARCHY & SUBSIDIARY TREE -->
-          <div class="hierarchy-tree-card" id="accountHierarchyCard">
+          <div class="hierarchy-tree-card" id="accountHierarchyCard" style="margin-top: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <strong style="color: var(--indigo); font-size: 11.5px; text-transform: uppercase;">🏢 Multi-Unit Account Hierarchy</strong>
+              <strong style="color: var(--indigo); font-size: 11.5px; text-transform: uppercase;">🏢 Account Hierarchy &amp; Buying Centers</strong>
               <span class="badge badge-indigo" id="hierarchyUnitCount">3 Units Mapped</span>
             </div>
             <div id="hierarchyTreeContent">
@@ -984,109 +973,108 @@
                 <span style="font-size: 11px; opacity: 0.8; margin-left: auto;">Primary Org</span>
               </div>
               <div class="tree-node-child">
-                <span>📍 North America Commercial &amp; Retail</span>
-                <span style="color: var(--emerald);">Active Buying Center</span>
+                <span>📍 North America Brand, Marketing &amp; People</span>
+                <span style="color: var(--emerald); font-weight: 600;">Active Target</span>
               </div>
               <div class="tree-node-child">
-                <span>📍 Global Brand &amp; Event Activations</span>
-                <span style="color: var(--sky);">High Propensity Window</span>
+                <span>📍 Global Field Activations &amp; Sponsorships</span>
+                <span style="color: var(--sky); font-weight: 600;">Secondary Unit</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- PREDICTIVE OBJECTION FORECASTER -->
-        <div class="panel-card" style="border-color: rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.02);">
+        <!-- CARD 2: COMPETITIVE DISPLACEMENT BATTLECARD -->
+        <div class="panel-card" style="border-color: rgba(245, 158, 11, 0.3);">
           <div class="panel-head">
-            <span class="panel-title" style="color: var(--rose);">🔮 Predictive Objection Forecaster</span>
-            <span class="badge badge-rose">Pre-Call Forecast</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Predicted top objections for this specific account with pre-computed counter-arguments:</p>
-          <div id="predictiveObjectionList" style="display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
-
-        <!-- 5-WHYS EXECUTIVE DISCOVERY QUESTIONS -->
-        <div class="panel-card" style="border-color: rgba(6, 182, 212, 0.3);">
-          <div class="panel-head">
-            <span class="panel-title" style="color: var(--sky);">💡 5-Whys Discovery Diagnostic Questions</span>
-            <button class="btn btn-secondary btn-sm" onclick="copyDiscoveryQuestions()">📋 Copy Questions</button>
-          </div>
-          <div id="discoveryQuestionsList" style="font-size: 13px; line-height: 1.6; color: var(--text-main);">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
-
-        <!-- BUYING COMMITTEE & SINGLE-THREAD RISK CARD -->
-        <div class="panel-card" style="border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.02);">
-          <div class="panel-head">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="panel-title" style="color: var(--amber);">🛡️ Buying Committee &amp; Single-Thread Risk</span>
-            </div>
-            <span class="badge badge-amber" id="singleThreadRiskBadge">⚠️ High Risk (1 Lead Mapped)</span>
-          </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Enterprise deals require multi-threading across Champion, Economic Buyer, and Operations to prevent ghosting.</p>
-
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
-            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-              <div style="font-size: 10.5px; font-weight: 700; color: var(--emerald); text-transform: uppercase;">👑 Champion</div>
-              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeChampion">VP Marketing / Brand</div>
-              <div style="font-size: 11px; color: var(--text-faint); margin-top: 2px;">Focus: Wearer retention</div>
-            </div>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-              <div style="font-size: 10.5px; font-weight: 700; color: var(--sky); text-transform: uppercase;">💰 Economic Buyer</div>
-              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeEconomic">CFO / Finance</div>
-              <div style="font-size: 11px; color: var(--text-faint); margin-top: 2px;">Focus: Hard cost ROI</div>
-            </div>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-              <div style="font-size: 10.5px; font-weight: 700; color: var(--indigo); text-transform: uppercase;">⚙️ Operations</div>
-              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeOps">Director Operations</div>
-              <div style="font-size: 11px; color: var(--text-faint); margin-top: 2px;">Focus: 5-Day delivery</div>
-            </div>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="openMultiThreadingModal()">👥 Launch Coordinated 3-Way Multi-Threading Campaign</button>
-        </div>
-
-        <!-- DYNAMIC ROI CALCULATOR WIDGET -->
-        <div class="panel-card" style="border-color: rgba(99, 102, 241, 0.3);">
-          <div class="panel-head">
-            <span class="panel-title" style="color: var(--indigo);">🧮 Dynamic Value &amp; ROI Engine</span>
-            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="insertRoiBlockToDraft()">⚡ Insert to Draft</button>
-          </div>
-          <div id="roiCalculatorWidget"></div>
-        </div>
-
-        <div class="panel-card">
-          <div class="panel-head">
-            <span class="panel-title">🌐 Live News &amp; Triggers (Gemini / Tavily)</span>
-          </div>
-          <div id="liveNewsContent" style="font-size: 13.5px; line-height: 1.6;"></div>
-        </div>
-
-        <div class="panel-card" style="border-color: rgba(245, 158, 11, 0.25);">
-          <div class="panel-head">
-            <span class="panel-title" style="color: var(--amber);">⚔️ Displacement Battlecard</span>
+            <span class="panel-title" style="color: var(--amber);">⚔️ Displacement Battlecard &amp; Trap Question</span>
             <div style="display: flex; gap: 6px;">
               <button class="btn btn-secondary btn-sm" onclick="openMatrixModal()">📊 Comparison Matrix</button>
-              <button class="btn btn-secondary btn-sm" onclick="copyBattlecard()">📋 Copy Talk Track</button>
+              <button class="btn btn-secondary btn-sm" onclick="copyBattlecard()">📋 Copy</button>
             </div>
           </div>
           <div id="battlecardContent"></div>
         </div>
+
+        <!-- CARD 3: PRE-CALL PLAYBOOK (OBJECTIONS & 5-WHYS TABS) -->
+        <div class="panel-card" style="border-color: rgba(99, 102, 241, 0.3);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--indigo);">🔮 Pre-Call Tactical Playbook</span>
+            <div style="display: flex; gap: 4px; background: rgba(255,255,255,0.05); padding: 2px; border-radius: 6px;">
+              <button class="btn btn-primary btn-sm" id="btnPlaybookObj" style="padding: 2px 8px; font-size: 11px;" onclick="togglePlaybookTab('obj')">Objection Radar</button>
+              <button class="btn btn-secondary btn-sm" id="btnPlaybook5w" style="padding: 2px 8px; font-size: 11px;" onclick="togglePlaybookTab('5w')">5-Whys Diagnostic</button>
+            </div>
+          </div>
+
+          <!-- TAB 1: PREDICTIVE OBJECTIONS -->
+          <div id="playbookViewObj">
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Top predicted objections with pre-computed 1-click counter-arguments:</p>
+            <div id="predictiveObjectionList" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;"></div>
+          </div>
+
+          <!-- TAB 2: 5-WHYS DISCOVERY QUESTIONS -->
+          <div id="playbookView5w" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Discovery diagnostic questions to uncover latent pain in first 3 minutes:</p>
+              <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 10.5px;" onclick="copyDiscoveryQuestions()">📋 Copy</button>
+            </div>
+            <div id="discoveryQuestionsList" style="font-size: 12.5px; line-height: 1.5; color: var(--text-main);"></div>
+          </div>
+        </div>
+
+        <!-- CARD 4: LIVE NEWS & TRIGGERS -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <span class="panel-title">🌐 Live Executive Signals (Gemini / Tavily)</span>
+          </div>
+          <div id="liveNewsContent" style="font-size: 13px; line-height: 1.6;"></div>
+        </div>
+
       </div>
 
-      <!-- RIGHT COLUMN: LIVING STAKEHOLDERS -->
-      <div class="right-col">
-        <div class="panel-card" style="background: transparent; border: none; padding: 0; box-shadow: none;">
-          <div class="panel-head" style="margin-bottom: 16px;">
+      <!-- RIGHT COLUMN: BUYING COMMITTEE & VERIFIED DECISION MAKERS -->
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        
+        <!-- CARD 1: BUYING COMMITTEE & SINGLE-THREAD RISK -->
+        <div class="panel-card" style="border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.02);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--amber);">🛡️ Buying Committee &amp; Single-Thread Risk</span>
+            <span class="badge badge-amber" id="singleThreadRiskBadge">⚠️ Multi-Thread Required</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Multi-threading across Champion, Economic Buyer, and Operations eliminates deal stalling.</p>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; font-weight: 700; color: var(--emerald); text-transform: uppercase;">👑 Champion</div>
+              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeChampion">VP Marketing / Brand</div>
+              <div style="font-size: 10.5px; color: var(--text-faint); margin-top: 2px;">Focus: High retention</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; font-weight: 700; color: var(--sky); text-transform: uppercase;">💰 Economic Buyer</div>
+              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeEconomic">CFO / Finance</div>
+              <div style="font-size: 10.5px; color: var(--text-faint); margin-top: 2px;">Focus: Hard cost ROI</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; font-weight: 700; color: var(--indigo); text-transform: uppercase;">⚙️ Operations</div>
+              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeOps">Director Operations</div>
+              <div style="font-size: 10.5px; color: var(--text-faint); margin-top: 2px;">Focus: 5-Day rush</div>
+            </div>
+          </div>
+
+          <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="openMultiThreadingModal()">👥 Launch 3-Way Multi-Threading Campaign</button>
+        </div>
+
+        <!-- CARD 2: VERIFIED LIVING DECISION MAKERS ORGANIGRAM -->
+        <div class="panel-card">
+          <div class="panel-head" style="margin-bottom: 14px;">
             <span class="panel-title" style="font-size: 15px;">👥 Verified Living Decision Makers</span>
             <span id="stakeholderCount" class="badge badge-sky">0 Contacts Found</span>
           </div>
           <div id="stakeholderCanvas"></div>
         </div>
+
       </div>
+
     </div>
   </div>
 
@@ -3520,6 +3508,20 @@ function stopVoiceAudio() {
   const stopBtn = document.getElementById('btnStopVoice');
   if (wave) wave.classList.remove('audio-playing');
   if (stopBtn) stopBtn.style.display = 'none';
+}
+
+// Pre-Call Tactical Playbook Tab Switcher
+function togglePlaybookTab(tab) {
+  const isObj = tab === 'obj';
+  const vObj = document.getElementById('playbookViewObj');
+  const v5w = document.getElementById('playbookView5w');
+  const bObj = document.getElementById('btnPlaybookObj');
+  const b5w = document.getElementById('btnPlaybook5w');
+
+  if (vObj) vObj.style.display = isObj ? 'block' : 'none';
+  if (v5w) v5w.style.display = isObj ? 'none' : 'block';
+  if (bObj) { bObj.className = isObj ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'; }
+  if (b5w) { b5w.className = isObj ? 'btn btn-secondary btn-sm' : 'btn btn-primary btn-sm'; }
 }
 
 // 1-Click Direct Gmail Compose
