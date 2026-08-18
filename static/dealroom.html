@@ -3,122 +3,854 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Strategic Partnership Proposal | Deal Room</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title id="dealroomPageTitle">Executive Deal Room · Strategic Partnership</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236366F1'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='%23FFFFFF'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0F1219;
-    --text: #F8FAFC;
-    --muted: #94A3B8;
-    --primary: #6366F1;
-    --border: rgba(255,255,255,0.1);
+    --bg-base: #08090D;
+    --bg-surface: #0F1219;
+    --bg-card: #151923;
+    --bg-elevated: #1D2333;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(99, 102, 241, 0.4);
+    --brand-primary: #6366F1;
+    --brand-accent: #E31837;
+    --brand-glow: rgba(99, 102, 241, 0.25);
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-faint: #64748B;
+    --emerald: #10B981;
+    --emerald-glow: rgba(16, 185, 129, 0.2);
+    --amber: #F59E0B;
+    --sky: #0EA5E9;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
   }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    margin: 0; padding: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--bg); color: var(--text);
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    line-height: 1.6;
+    padding-bottom: 120px;
+    -webkit-font-smoothing: antialiased;
   }
-  .header {
-    background: #08090D; padding: 20px 40px; border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
+
+  /* Header */
+  .dealroom-header {
+    background: rgba(15, 18, 25, 0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 14px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-  .card {
-    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px; margin-bottom: 24px;
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
+  .co-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 30px;
+  }
+  .logo-icon {
+    font-weight: 800;
+    font-size: 14px;
+    color: #fff;
+    background: var(--brand-primary);
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+  }
+  .target-badge {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-main);
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--emerald);
+    background: var(--emerald-glow);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 8px var(--emerald);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
   .btn {
-    background: var(--primary); color: white; border: none;
-    padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
+    text-decoration: none;
   }
-  .btn:hover { opacity: 0.9; }
-  .milestone {
-    display: flex; align-items: center; gap: 16px; padding: 12px;
-    background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border);
+  .btn-primary {
+    background: linear-gradient(135deg, var(--brand-primary) 0%, #4F46E5 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px var(--brand-glow);
   }
-  .milestone input[type="checkbox"] { width: 18px; height: 18px; }
-  .roi-input {
-    background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: white;
-    padding: 8px; border-radius: 4px; width: 80px; text-align: center; font-size: 14px;
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(99, 102, 241, 0.4);
   }
-  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  .gallery-img { width: 100%; border-radius: 8px; border: 1px solid var(--border); aspect-ratio: 16/9; background: #1E293B; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--muted); }
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  /* Layout Container */
+  .dealroom-container {
+    max-width: 1120px;
+    margin: 32px auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* Hero Section */
+  .hero-banner {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(227, 24, 55, 0.05) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 36px 40px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--brand-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+  .hero-desc {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .hero-metrics {
+    display: flex;
+    gap: 24px;
+  }
+  .metric-card {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+  }
+  .metric-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+  .metric-label {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* Executive Summary Box */
+  .exec-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Section Cards */
+  .section-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Roadmap / MAP */
+  .roadmap-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .milestone-row {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+  }
+  .milestone-row.completed {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.04);
+  }
+  .milestone-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .milestone-check {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--emerald);
+    cursor: pointer;
+  }
+  .milestone-title {
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+  .milestone-desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .milestone-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+  }
+  .tag-done { background: rgba(16, 185, 129, 0.15); color: var(--emerald); }
+  .tag-pending { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+
+  /* ROI Calculator */
+  .roi-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+  .slider-box {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .input-control {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .input-control label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+  .range-slider {
+    width: 100%;
+    accent-color: var(--brand-primary);
+    cursor: pointer;
+  }
+  .roi-results-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 18, 25, 0.8) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .savings-number {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--emerald);
+    letter-spacing: -0.02em;
+  }
+
+  /* Product Proof Customizer Studio */
+  .studio-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+  }
+  .palette-swatches {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .color-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s ease;
+  }
+  .color-swatch:hover, .color-swatch.active {
+    transform: scale(1.15);
+    border-color: #fff;
+  }
+  .proof-stage {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 32px;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  /* Document Room */
+  .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .doc-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .doc-card:hover {
+    border-color: var(--brand-primary);
+    transform: translateY(-2px);
+  }
+  .doc-icon {
+    font-size: 24px;
+  }
+
+  /* Calendar Booking Bar */
+  .booking-bar {
+    background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .demo-account-switcher {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .demo-account-switcher select {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div style="display: flex; align-items: center; gap: 12px;">
-    <div style="width:40px;height:40px;background:#fff;border-radius:8px;display:grid;place-items:center;color:#000;font-weight:bold;">ACME</div>
+<!-- Header -->
+<header class="dealroom-header">
+  <div class="header-left">
+    <div class="co-brand">
+      <div class="logo-icon" id="vendorLogoIcon">⚡</div>
+      <span style="color: var(--text-faint);">×</span>
+      <span class="target-badge" id="targetCompanyBadge">Lululemon Athletics</span>
+    </div>
+    <div class="status-pill">
+      <div class="pulse-dot"></div>
+      <span>Active Proposal · Stage 2</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="demo-account-switcher">
+      <span>Account:</span>
+      <select id="accountSwitchSelect" onchange="switchDealroomAccount(this.value)">
+        <option value="lululemon">Lululemon</option>
+        <option value="uber">Uber</option>
+        <option value="openai">OpenAI</option>
+        <option value="snowflake">Snowflake</option>
+      </select>
+    </div>
+    <button class="btn btn-secondary" onclick="exportDealPacketPdf()">📥 Download Packet (PDF)</button>
+    <button class="btn btn-primary" onclick="scrollToBooking()">📅 Book Spec Review</button>
+  </div>
+</header>
+
+<!-- Main Container -->
+<div class="dealroom-container">
+
+  <!-- Hero Proposal Banner -->
+  <div class="hero-banner">
     <div>
-      <h1 style="margin:0;font-size:18px;">Strategic Partnership Proposal</h1>
-      <div style="font-size:12px;color:var(--muted);">Prepared for Executive Team</div>
+      <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--brand-primary); margin-bottom: 8px; letter-spacing: 0.05em;">
+        Executive Partnership Proposal
+      </div>
+      <h1 class="hero-title" id="heroProposalTitle">Direct USA Manufacturing &amp; VIP Onboarding Partnership for Lululemon</h1>
+      <p class="hero-desc" id="heroProposalDesc">
+        Eliminate third-party distributor markups, cut production lead times from 4 weeks to 5 days, and elevate event brand retention with USA-knitted custom combed cotton wear.
+      </p>
+      <div class="hero-metrics">
+        <div class="metric-card">
+          <div class="metric-val" id="metricTurnaround">5 Days</div>
+          <div class="metric-label">Guaranteed Delivery</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="metricRetention">95%+</div>
+          <div class="metric-label">Wearable Retention</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="metricMarkup">0%</div>
+          <div class="metric-label">Broker Markup</div>
+        </div>
+      </div>
     </div>
-  </div>
-  <button class="btn">📅 Book 15-Min Spec Review</button>
-</div>
 
-<div class="container">
-  
-  <div class="card">
-    <h2 style="margin-top:0;">🗺️ Mutual Execution Roadmap</h2>
-    <p style="color:var(--muted);font-size:14px;">4-Phase plan to go live by end of Q3.</p>
-    <div class="milestone">
-      <input type="checkbox" checked disabled>
-      <div><strong>Phase 1: Needs Assessment</strong> <span style="color:var(--muted);font-size:12px;">- Completed</span></div>
-    </div>
-    <div class="milestone">
-      <input type="checkbox">
-      <div><strong>Phase 2: Digital Spec Review & Design Approval</strong> <span style="color:var(--muted);font-size:12px;">- Pending Sign-Off</span></div>
-    </div>
-    <div class="milestone">
-      <input type="checkbox">
-      <div><strong>Phase 3: Legal MSA & Procurement Net-30</strong> <span style="color:var(--muted);font-size:12px;">- Assigned to Finance</span></div>
-    </div>
-    <div class="milestone">
-      <input type="checkbox">
-      <div><strong>Phase 4: Global Rollout & Onboarding</strong> <span style="color:var(--muted);font-size:12px;">- Target: Nov 1</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2 style="margin-top:0;">💰 Live ROI & Headcount Savings Calculator</h2>
-    <p style="color:var(--muted);font-size:14px;">Test your own variables to see projected savings.</p>
-    <div style="display:flex; gap: 20px; align-items: center; flex-wrap:wrap;">
+    <!-- Concierge Card -->
+    <div class="exec-card">
       <div>
-        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Employees</label>
-        <input type="number" class="roi-input" id="empCount" value="1000" oninput="calcRoi()">
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; margin-bottom: 6px;">Dedicated Solutions Lead</div>
+        <div style="font-weight: 700; font-size: 15px;">Travis · Enterprise Lead</div>
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Direct USA Mill Solutions</div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 11.5px; color: var(--text-muted);">
+          💬 <em>"We have reserved 5,000 capacity units at our North Carolina mill for your upcoming Q4 rollout."</em>
+        </div>
       </div>
-      <div>
-        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:4px;">Avg Cost/Swag Box ($)</label>
-        <input type="number" class="roi-input" id="swagCost" value="75" oninput="calcRoi()">
+      <button class="btn btn-secondary" style="width: 100%; margin-top: 14px;" onclick="scrollToBooking()">💬 Message AE</button>
+    </div>
+  </div>
+
+  <!-- SECTION 1: MUTUAL ACTION PLAN (ROADMAP) -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-title">
+        <span>🗺️</span>
+        <span>Mutual Execution Roadmap &amp; Milestones</span>
       </div>
-      <div style="margin-left:auto; background:rgba(16,185,129,0.1); padding: 16px; border-radius:8px; border:1px solid rgba(16,185,129,0.3); text-align:center;">
-        <div style="font-size:12px;color:rgba(16,185,129,0.8);font-weight:bold;text-transform:uppercase;">Estimated Annual Savings</div>
-        <div id="savingsResult" style="font-size:24px; font-weight:800; color:#10B981;">$22,500</div>
+      <span style="font-size: 12.5px; color: var(--emerald); font-weight: 600;" id="mapProgressText">Phase 2 of 4 Active</span>
+    </div>
+
+    <div class="roadmap-grid">
+      <div class="milestone-row completed">
+        <div class="milestone-left">
+          <input type="checkbox" class="milestone-check" checked disabled>
+          <div>
+            <div class="milestone-title">Phase 1: Initial Discovery &amp; Territory Assessment</div>
+            <div class="milestone-desc">Stakeholder mapping, incumbent cost audit, and technical requirements gathered.</div>
+          </div>
+        </div>
+        <span class="milestone-tag tag-done">Completed</span>
+      </div>
+
+      <div class="milestone-row" id="milestoneRow2">
+        <div class="milestone-left">
+          <input type="checkbox" class="milestone-check" id="checkPhase2" onchange="toggleMilestone(2)">
+          <div>
+            <div class="milestone-title">Phase 2: Digital Vector Proof &amp; Pantone Colorway Sign-Off</div>
+            <div class="milestone-desc">Review photorealistic 1-hour knit proofs below and approve for initial sample run.</div>
+          </div>
+        </div>
+        <span class="milestone-tag tag-pending" id="tagPhase2">Pending Approval</span>
+      </div>
+
+      <div class="milestone-row" id="milestoneRow3">
+        <div class="milestone-left">
+          <input type="checkbox" class="milestone-check" id="checkPhase3" onchange="toggleMilestone(3)">
+          <div>
+            <div class="milestone-title">Phase 3: Procurement Vendor Setup &amp; Net-30 MSA Terms</div>
+            <div class="milestone-desc">Master Services Agreement execution and vendor portal registration.</div>
+          </div>
+        </div>
+        <span class="milestone-tag tag-pending" id="tagPhase3">Next Step</span>
+      </div>
+
+      <div class="milestone-row" id="milestoneRow4">
+        <div class="milestone-left">
+          <input type="checkbox" class="milestone-check" id="checkPhase4" onchange="toggleMilestone(4)">
+          <div>
+            <div class="milestone-title">Phase 4: North Carolina Mill Production &amp; Venue Delivery</div>
+            <div class="milestone-desc">5-day rapid manufacture and bulk split-shipment directly to global retail venues.</div>
+          </div>
+        </div>
+        <span class="milestone-tag tag-pending" id="tagPhase4">Final Phase</span>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <h2 style="margin-top:0;">🎨 Photorealistic Product Proof Gallery</h2>
-    <div class="gallery">
-      <div class="gallery-img">Executive Knit Sock (Front View)</div>
-      <div class="gallery-img">Premium Packaging Box (Branded)</div>
+  <!-- SECTION 2: INTERACTIVE ROI SAVINGS ENGINE -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-title">
+        <span>💰</span>
+        <span>Interactive Economic Value &amp; ROI Model</span>
+      </div>
+      <span style="font-size: 12px; color: var(--text-muted);">Adjust variables to see custom financial impact</span>
+    </div>
+
+    <div class="roi-layout">
+      <div class="slider-box">
+        <div class="input-control">
+          <label>
+            <span>Annual Corporate Headcount</span>
+            <span id="lblHeadcount" style="color: var(--brand-primary); font-weight: 800;">1,500 employees</span>
+          </label>
+          <input type="range" class="range-slider" id="sliderHeadcount" min="200" max="10000" step="100" value="1500" oninput="updateRoiMath()">
+        </div>
+
+        <div class="input-control">
+          <label>
+            <span>Current Cost per Swag Box / Pack ($)</span>
+            <span id="lblBoxCost" style="color: var(--brand-primary); font-weight: 800;">$65 / box</span>
+          </label>
+          <input type="range" class="range-slider" id="sliderBoxCost" min="20" max="150" step="5" value="65" oninput="updateRoiMath()">
+        </div>
+
+        <div class="input-control">
+          <label>
+            <span>Annual Gifting Events / Batches</span>
+            <span id="lblBatches" style="color: var(--brand-primary); font-weight: 800;">3 per year</span>
+          </label>
+          <input type="range" class="range-slider" id="sliderBatches" min="1" max="12" step="1" value="3" oninput="updateRoiMath()">
+        </div>
+      </div>
+
+      <div class="roi-results-box">
+        <div style="font-size: 12px; font-weight: 700; color: rgba(16,185,129,0.85); text-transform: uppercase; letter-spacing: 0.05em;">Projected Annual Direct Savings</div>
+        <div class="savings-number" id="valAnnualSavings">$73,125</div>
+        <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">
+          By bypassing third-party distributor markups (37.5% average markup) and consolidating to direct North Carolina mill manufacturing.
+        </p>
+        <div style="display: flex; justify-content: space-around; border-top: 1px solid rgba(16,185,129,0.2); padding-top: 12px; margin-top: 4px;">
+          <div>
+            <div style="font-weight: 800; font-size: 16px; color: #fff;" id="valHoursSaved">320 hrs</div>
+            <div style="font-size: 11px; color: var(--text-faint);">Ops Time Saved</div>
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 16px; color: #fff;">18 Days</div>
+            <div style="font-size: 11px; color: var(--text-faint);">Faster Cycle</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: PRODUCT PROOF & BRAND STUDIO -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-title">
+        <span>🎨</span>
+        <span>Photorealistic Brand Proof &amp; Colorway Studio</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="approveProofSpec()">✨ Approve This Spec</button>
+    </div>
+
+    <div class="studio-layout">
+      <div>
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px;">Select Pantone Colorway:</div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Colors matched directly from brand guideline assets.</p>
+        <div class="palette-swatches">
+          <div class="color-swatch active" style="background: #E31837;" onclick="setProofColor('#E31837', 'Crimson Red')" title="Crimson Red"></div>
+          <div class="color-swatch" style="background: #0F172A;" onclick="setProofColor('#0F172A', 'Obsidian Navy')" title="Obsidian Navy"></div>
+          <div class="color-swatch" style="background: #6366F1;" onclick="setProofColor('#6366F1', 'Indigo Spark')" title="Indigo Spark"></div>
+          <div class="color-swatch" style="background: #10B981;" onclick="setProofColor('#10B981', 'Emerald Leaf')" title="Emerald Leaf"></div>
+        </div>
+
+        <div style="margin-top: 24px; background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: var(--radius-md);">
+          <div style="font-size: 11.5px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; margin-bottom: 6px;">Apparel Specs:</div>
+          <ul style="font-size: 12.5px; color: var(--text-muted); padding-left: 16px; line-height: 1.8;">
+            <li>75% US-Grown Combed Cotton</li>
+            <li>True Jacquard Knit-in Design (No Print Fade)</li>
+            <li>Reinforced Double-Rib Heel &amp; Toe</li>
+            <li>Custom Retail Wrap Tag Included</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="proof-stage">
+        <!-- Dynamic Knitwear Vector -->
+        <svg viewBox="0 0 240 320" width="200" height="260" id="proofSvgStage">
+          <path d="M60 20 H160 V180 C160 220 180 250 210 270 C220 280 210 300 190 300 H120 C70 300 50 250 50 200 V20 Z" fill="#1E293B" stroke="#475569" stroke-width="2" />
+          <rect x="58" y="20" width="104" height="34" fill="#E31837" id="svgCuff" rx="4" />
+          <g id="svgPatterns">
+            <line x1="60" y1="80" x2="160" y2="80" stroke="#06B6D4" stroke-width="4" stroke-dasharray="6,4" />
+            <line x1="60" y1="100" x2="160" y2="100" stroke="#06B6D4" stroke-width="6" />
+            <line x1="60" y1="120" x2="160" y2="120" stroke="#06B6D4" stroke-width="4" stroke-dasharray="6,4" />
+          </g>
+          <path d="M120 300 H190 C210 300 220 280 210 270 C180 270 160 290 120 300 Z" fill="#E31837" id="svgToe" />
+          <path d="M50 180 C50 220 70 240 90 240 C90 200 70 180 50 180 Z" fill="#E31837" id="svgHeel" />
+          <text x="110" y="155" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="13" text-anchor="middle" id="svgBrandName">LULULEMON</text>
+          <text x="110" y="170" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="8" text-anchor="middle">USA MILL KNIT</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: DOCUMENT ROOM & COMPLIANCE -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-title">
+        <span>📁</span>
+        <span>Executive Document Room &amp; Compliance Packets</span>
+      </div>
+      <span style="font-size: 12px; color: var(--text-muted);">Verified for procurement compliance</span>
+    </div>
+
+    <div class="docs-grid">
+      <div class="doc-card" onclick="alert('Downloading Master Services Agreement (MSA) Template')">
+        <div class="doc-icon">📄</div>
+        <div>
+          <div style="font-weight: 600; font-size: 13.5px;">Master Services Agreement</div>
+          <div style="font-size: 11.5px; color: var(--text-faint);">Net-30 Enterprise Terms (PDF)</div>
+        </div>
+      </div>
+
+      <div class="doc-card" onclick="alert('Downloading SOC 2 Type II Security Packet')">
+        <div class="doc-icon">🛡️</div>
+        <div>
+          <div style="font-weight: 600; font-size: 13.5px;">SOC 2 Type II Compliance</div>
+          <div style="font-size: 11.5px; color: var(--text-faint);">Security & Data Audit (PDF)</div>
+        </div>
+      </div>
+
+      <div class="doc-card" onclick="alert('Downloading Scope-3 ESG Sustainability Brief')">
+        <div class="doc-icon">🌲</div>
+        <div>
+          <div style="font-weight: 600; font-size: 13.5px;">Scope-3 ESG Certificate</div>
+          <div style="font-size: 11.5px; color: var(--text-faint);">Zero-Landfill US Cotton (PDF)</div>
+        </div>
+      </div>
+
+      <div class="doc-card" onclick="alert('Downloading Pantone Colorway Specifications')">
+        <div class="doc-icon">🎨</div>
+        <div>
+          <div style="font-weight: 600; font-size: 13.5px;">Pantone Production Spec</div>
+          <div style="font-size: 11.5px; color: var(--text-faint);">Vector Artwork (AI/PDF)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: CALENDAR BOOKING BAR -->
+  <div class="booking-bar" id="bookingSection">
+    <div>
+      <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Ready to Confirm Your Q4 Production Slot?</h3>
+      <p style="color: var(--text-muted); font-size: 13.5px;">Select a 15-minute window to review physical yarn swatches and finalize delivery dates.</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-primary" onclick="confirmMeetingSlot()">📅 Confirm 15-Min Spec Review</button>
     </div>
   </div>
 
 </div>
 
 <script>
-  function calcRoi() {
-    const emps = document.getElementById('empCount').value || 0;
-    const cost = document.getElementById('swagCost').value || 0;
-    // Simple mock formula: switching to our product saves 30% of old swag cost.
-    const savings = emps * cost * 0.30;
-    document.getElementById('savingsResult').innerText = '$' + savings.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+  const DEMO_ACCOUNTS = {
+    lululemon: {
+      name: "Lululemon Athletics",
+      title: "Direct USA Manufacturing & VIP Onboarding Partnership for Lululemon",
+      desc: "Eliminate third-party distributor markups, cut production lead times from 4 weeks to 5 days, and elevate event brand retention with USA-knitted custom combed cotton wear.",
+      color: "#E31837",
+      headcount: 1500,
+      cost: 65,
+      brand: "LULULEMON"
+    },
+    uber: {
+      name: "Uber Technologies",
+      title: "Global VIP Driver & Corporate Milestone Gifting for Uber",
+      desc: "Unified fulfillment pipeline with sub-5-day turnaround for global driver milestones and executive onboarding with 95%+ wearable retention.",
+      color: "#000000",
+      headcount: 3200,
+      cost: 50,
+      brand: "UBER"
+    },
+    openai: {
+      name: "OpenAI",
+      title: "DevDay Keynote VIP Gifting & Executive Apparel for OpenAI",
+      desc: "Custom Jacquard knit engineering with Pantone-matched designs, delivered in custom retail packaging with zero overseas broker delays.",
+      color: "#10A37F",
+      headcount: 1200,
+      cost: 85,
+      brand: "OPENAI"
+    },
+    snowflake: {
+      name: "Snowflake Summit",
+      title: "Data Cloud Summit VIP Keynote Swag for Snowflake",
+      desc: "Direct North Carolina manufacturing with guaranteed venue delivery dates for 8,000+ keynote attendees.",
+      color: "#29B5E8",
+      headcount: 4500,
+      cost: 60,
+      brand: "SNOWFLAKE"
+    }
+  };
+
+  function switchDealroomAccount(key) {
+    const acc = DEMO_ACCOUNTS[key];
+    if (!acc) return;
+    document.getElementById('targetCompanyBadge').textContent = acc.name;
+    document.getElementById('heroProposalTitle').textContent = acc.title;
+    document.getElementById('heroProposalDesc').textContent = acc.desc;
+    document.getElementById('svgBrandName').textContent = acc.brand;
+    setProofColor(acc.color, acc.name);
+    document.getElementById('sliderHeadcount').value = acc.headcount;
+    document.getElementById('sliderBoxCost').value = acc.cost;
+    updateRoiMath();
   }
-  calcRoi();
+
+  function setProofColor(hex, label) {
+    document.getElementById('svgCuff').setAttribute('fill', hex);
+    document.getElementById('svgToe').setAttribute('fill', hex);
+    document.getElementById('svgHeel').setAttribute('fill', hex);
+    document.querySelectorAll('.color-swatch').forEach(s => {
+      s.classList.toggle('active', s.style.backgroundColor === hex || s.getAttribute('title') === label);
+    });
+  }
+
+  function updateRoiMath() {
+    const hc = parseInt(document.getElementById('sliderHeadcount').value);
+    const cost = parseInt(document.getElementById('sliderBoxCost').value);
+    const batches = parseInt(document.getElementById('sliderBatches').value);
+
+    document.getElementById('lblHeadcount').textContent = hc.toLocaleString() + ' employees';
+    document.getElementById('lblBoxCost').textContent = '$' + cost + ' / box';
+    document.getElementById('lblBatches').textContent = batches + ' per year';
+
+    // Savings formula: 37.5% broker markup savings
+    const totalOldSpend = hc * cost * batches;
+    const savings = Math.round(totalOldSpend * 0.375);
+    const hours = Math.round(hc * batches * 0.07);
+
+    document.getElementById('valAnnualSavings').textContent = '$' + savings.toLocaleString();
+    document.getElementById('valHoursSaved').textContent = hours.toLocaleString() + ' hrs';
+  }
+
+  function toggleMilestone(num) {
+    const chk = document.getElementById('checkPhase' + num);
+    const row = document.getElementById('milestoneRow' + num);
+    const tag = document.getElementById('tagPhase' + num);
+    if (chk.checked) {
+      row.classList.add('completed');
+      tag.className = 'milestone-tag tag-done';
+      tag.textContent = 'Approved';
+    } else {
+      row.classList.remove('completed');
+      tag.className = 'milestone-tag tag-pending';
+      tag.textContent = 'Pending';
+    }
+  }
+
+  function approveProofSpec() {
+    const chk = document.getElementById('checkPhase2');
+    chk.checked = true;
+    toggleMilestone(2);
+    alert('✅ Phase 2 Approved! Vector artwork spec and Pantone colorways confirmed.');
+  }
+
+  function scrollToBooking() {
+    document.getElementById('bookingSection').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function confirmMeetingSlot() {
+    alert('🎉 Spec Review Meeting Confirmed!\n\nCalendar invite dispatched to your executive email for Thursday at 2:00 PM EST with physical swatch samples.');
+  }
+
+  function exportDealPacketPdf() {
+    alert('📄 Generating Executive Deal Packet PDF with custom ROI calculations and signed roadmap milestones...');
+    window.print();
+  }
+
+  // Init on load
+  updateRoiMath();
 </script>
 </body>
 </html>

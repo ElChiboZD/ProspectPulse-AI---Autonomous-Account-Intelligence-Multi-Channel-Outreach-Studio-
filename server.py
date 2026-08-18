@@ -292,38 +292,18 @@ JOBS_LOCK = threading.Lock()
 DEALROOMS = {}
 
 def generate_dealroom_html(data):
-    company = data.get("company", "Company")
-    color = data.get("brand_color", "#1f9e5f")
-    logo = data.get("logo_url", "")
-    milestones = data.get("map_milestones", ["Discovery", "Proof of Concept", "Security Review", "Contracting"])
-    milestones_html = "".join([f"<li><label><input type='checkbox'> {m}</label></li>" for m in milestones])
-    return f'''<!DOCTYPE html>
-<html>
-<head>
-<title>{company} Deal Room</title>
-<style>
-  body {{ font-family: sans-serif; background: #f9fafb; margin: 0; padding: 20px; }}
-  .header {{ background-color: {color}; padding: 20px; color: white; border-radius: 8px; }}
-  .card {{ background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
-</style>
-</head>
-<body>
-  <div class="header">
-    <h1 style="display:inline;vertical-align:middle;">{company} Deal Room</h1>
-  </div>
-  <div class="card">
-    <h2>Action Plan (Milestones)</h2>
-    <ul>{milestones_html}</ul>
-  </div>
-  <div class="card">
-    <h2>ROI Calculator</h2>
-    <p>Embedded ROI calculator loaded.</p>
-  </div>
-  <div class="card">
-    <button style="background:{color};color:white;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-size:16px;">Book 15-Min Spec Review</button>
-  </div>
-</body>
-</html>'''
+    company = data.get("company", "Target Account")
+    color = data.get("brand_color", "#6366F1")
+    template_path = os.path.join(STATIC, "dealroom.html")
+    if os.path.isfile(template_path):
+        with open(template_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        # Injects initial values
+        html = html.replace("Lululemon Athletics", company)
+        html = html.replace("for Lululemon", f"for {company}")
+        html = html.replace("LULULEMON", company.upper()[:12])
+        return html
+    return f"<!DOCTYPE html><html><head><title>{company} Deal Room</title></head><body><h1>{company} Deal Room</h1></body></html>"
 
 
 
