@@ -3072,12 +3072,12 @@ function parseAndRenderResults(raw) {
 
   // Stakeholders
   const tiers = data.tiers || [];
-  let totalContacts = 0;
+  let renderedContactsCount = 0;
   let html = '';
 
   tiers.forEach((t) => {
     const contacts = t.contacts || [];
-    totalContacts += contacts.length;
+    renderedContactsCount += contacts.length;
     html += `
       <div class="tier-section">
         <div class="tier-header">
@@ -3112,12 +3112,12 @@ function parseAndRenderResults(raw) {
   });
 
   document.getElementById('stakeholderCanvas').innerHTML = html;
-  document.getElementById('stakeholderCount').textContent = `${totalContacts} Current Contacts Verified`;
+  document.getElementById('stakeholderCount').textContent = `${renderedContactsCount} Current Contacts Verified`;
 }
 
 // Drafting
 function draftForContact(name, title) {
-  gotoScreen(3);
+  gotoScreen(4);
   document.getElementById('studioRecipientTitle').textContent = `Outreach Studio — ${name}`;
   document.getElementById('emailToText').textContent = `${name} (${title})`;
   document.getElementById('emailSubjectInput').value = 'Generating personalized pitch...';
