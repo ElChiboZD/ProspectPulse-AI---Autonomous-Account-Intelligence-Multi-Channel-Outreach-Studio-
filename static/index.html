@@ -185,7 +185,73 @@
   .nav-right {
     display: flex;
     align-items: center;
+    gap: 8px;
+  }
+
+  /* Sleek Tools & Intel Dropdown */
+  .tools-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  .tools-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 260px;
+    background: rgba(15, 18, 25, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(99, 102, 241, 0.15);
+    padding: 6px;
+    z-index: 1000;
+  }
+  .tools-dropdown-menu.show {
+    display: block;
+    animation: fadeInDown 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tools-dropdown-item {
+    display: flex;
+    align-items: center;
     gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .tools-dropdown-item:hover {
+    background: rgba(99, 102, 241, 0.16);
+    color: #fff;
+    transform: translateX(2px);
+  }
+  .tools-dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 4px 6px;
+  }
+  .tools-dropdown-category {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    padding: 6px 12px 2px;
+  }
+  .nav-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 2px;
   }
 
   .btn {
@@ -813,33 +879,53 @@
       <span style="color: var(--text-faint);">▾</span>
     </div>
 
-    <!-- MCP Signals -->
-    <div class="mcp-signals">
-      <div class="mcp-pill"><div class="pulse-dot"></div> Gemini 3.6</div>
-      <div class="mcp-pill"><div class="pulse-dot"></div> Tavily AI</div>
-      <div class="mcp-pill"><div class="pulse-dot"></div> Sumble Org</div>
-      <div class="mcp-pill"><div class="pulse-dot" style="background: var(--sky); box-shadow: 0 0 8px var(--sky);"></div> ZoomInfo Active</div>
+    <!-- Compact Engine Indicator -->
+    <div class="mcp-signals" title="Real-time multi-agent intelligence pipeline active: Gemini 3.6, Tavily AI, Sumble Org">
+      <div class="mcp-pill"><div class="pulse-dot"></div> Live Multi-MCP Engine</div>
     </div>
   </div>
 
   <div class="nav-right">
+    <!-- Primary Quick Actions -->
+    <button class="btn btn-secondary btn-sm" onclick="openBulkImporterModal()">📂 Bulk Territory</button>
+    <button class="btn btn-secondary btn-sm" onclick="openRoiCalculatorModal()">💰 ROI Model</button>
+
+    <!-- Sleek Tools & Intelligence Dropdown -->
+    <div class="tools-dropdown-wrapper" id="toolsDropdownWrapper">
+      <button class="btn btn-primary btn-sm" onclick="toggleToolsDropdown()" id="toolsDropdownBtn">
+        <span>🛠️ Tools &amp; Intelligence</span>
+        <span style="font-size: 10px; opacity: 0.85;">▾</span>
+      </button>
+      <div class="tools-dropdown-menu" id="toolsDropdownMenu">
+        <div class="tools-dropdown-category">AI Simulation &amp; Outreach</div>
+        <button class="tools-dropdown-item" onclick="window.openVoiceArenaModal(); closeToolsDropdown();">🎙️ Live Voice Objection Arena</button>
+        <button class="tools-dropdown-item" onclick="window.openWebhookDispatcherModal(); closeToolsDropdown();">📢 CRM &amp; Slack Dispatch Hub</button>
+        <button class="tools-dropdown-item" onclick="openHistoryModal(); closeToolsDropdown();">📜 Saved History &amp; Dossiers</button>
+        <button class="tools-dropdown-item" onclick="window.toggleTimeline(); closeToolsDropdown();">📊 Prospect Activity Timeline</button>
+        
+        <div class="tools-dropdown-divider"></div>
+        <div class="tools-dropdown-category">Strategy &amp; Architecture</div>
+        <button class="tools-dropdown-item" onclick="openDeckModal(); closeToolsDropdown();">📊 Architecture &amp; Pitch Deck</button>
+        <button class="tools-dropdown-item" onclick="openBattlecardsModal(); closeToolsDropdown();">⚔️ Competitor Battlecards</button>
+        <button class="tools-dropdown-item" onclick="openMatrixModal(); closeToolsDropdown();">📊 Pricing &amp; Landmine Matrix</button>
+        <button class="tools-dropdown-item" onclick="window.openBeforeAfterModal(); closeToolsDropdown();">⚡ See the Difference (Before/After)</button>
+        
+        <div class="tools-dropdown-divider"></div>
+        <div class="tools-dropdown-category">Guidance</div>
+        <button class="tools-dropdown-item" onclick="window.startTour(); closeToolsDropdown();">🎓 Guided Onboarding Tour</button>
+      </div>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <!-- Utilities -->
+    <button class="btn btn-secondary btn-sm" onclick="toggleContrastTheme()" id="themeToggleBtn" title="Toggle High-Contrast Screen-Share Theme">🌓</button>
+    <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.35); color: #fca5a5; background: rgba(239, 68, 68, 0.08);" title="Reset console and start a new search">🔄 Reset</button>
+
     <div class="flex-center-gap" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: var(--text-muted);">
       <span>Developed by</span>
       <span style="font-weight: 700; color: #fff;">@ElChibo</span>
     </div>
-    <button class="btn btn-secondary btn-sm" onclick="window.openVoiceArenaModal()">🎙️ Voice Arena</button>
-    <button class="btn btn-secondary btn-sm" onclick="window.openWebhookDispatcherModal()">📢 Dispatch Hub</button>
-    <button class="btn btn-secondary btn-sm" onclick="openBulkImporterModal()">📂 Bulk Territory</button>
-    <button class="btn btn-secondary btn-sm" onclick="openRoiCalculatorModal()">💰 ROI Calculator</button>
-    <button class="btn btn-secondary btn-sm" onclick="window.startTour()">🎓 Tour</button>
-    <button class="btn btn-secondary btn-sm" onclick="window.toggleTimeline()">📊 Timeline</button>
-    <button class="btn btn-secondary btn-sm" onclick="window.openBeforeAfterModal()">⚡ See the Difference</button>
-    <button class="btn btn-secondary btn-sm" onclick="openDeckModal()">📊 Deck</button>
-    <button class="btn btn-secondary btn-sm" onclick="openMatrixModal()">📊 Matrix</button>
-    <button class="btn btn-secondary btn-sm" onclick="openBattlecardsModal()">⚔️ Battlecards</button>
-    <button class="btn btn-secondary btn-sm" onclick="openHistoryModal()">📜 History</button>
-    <button class="btn btn-secondary btn-sm" onclick="toggleContrastTheme()" id="themeToggleBtn" title="Toggle High-Contrast Screen-Share Theme">🌓 Theme</button>
-    <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.35); color: #fca5a5; background: rgba(239, 68, 68, 0.08);" title="Reset console and start a new search">🔄 Reset</button>
   </div>
 </header>
 
@@ -5020,6 +5106,22 @@ function resetEntireProduct() {
 // Initial setup
 updateAllAppComponentsForPreset('sockclub');
 
+// Tools & Intel Dropdown
+function toggleToolsDropdown() {
+  const menu = document.getElementById('toolsDropdownMenu');
+  if (menu) menu.classList.toggle('show');
+}
+function closeToolsDropdown() {
+  const menu = document.getElementById('toolsDropdownMenu');
+  if (menu) menu.classList.remove('show');
+}
+window.addEventListener('click', e => {
+  const wrapper = document.getElementById('toolsDropdownWrapper');
+  if (wrapper && !wrapper.contains(e.target)) {
+    closeToolsDropdown();
+  }
+});
+
 // Shortcuts
 document.addEventListener('keydown', e => {
   if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
@@ -5027,6 +5129,7 @@ document.addEventListener('keydown', e => {
     document.getElementById('omniInput').focus();
   }
   if (e.key === 'Escape') {
+    closeToolsDropdown();
     closeProfileModal();
     closeMultiThreadingModal();
     closeExecutiveBriefModal();
