@@ -16,12 +16,23 @@ import os
 import urllib.parse
 from dulwich import porcelain
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python push_to_github.py <github_repo_url> [github_token]")
-        sys.exit(1)
+DEFAULT_REPO = "https://github.com/ElChiboZD/ProspectPulse-AI---Autonomous-Account-Intelligence-Multi-Channel-Outreach-Studio-.git"
 
-    repo_url = sys.argv[1].strip()
+def load_dotenv():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.isfile(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    k, v = k.strip(), v.strip().strip("'\"")
+                    if k not in os.environ:
+                        os.environ[k] = v
+
+def main():
+    load_dotenv()
+    repo_url = sys.argv[1].strip() if len(sys.argv) > 1 else DEFAULT_REPO
     token = sys.argv[2].strip() if len(sys.argv) > 2 else os.environ.get("GITHUB_TOKEN", "")
 
     # If token is provided, embed token into HTTPS URL
