@@ -29,12 +29,15 @@ import subprocess
 import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(ROOT, "static")
 PROMPTS = os.path.join(ROOT, "prompts")
+
+DOMAIN_INTEL_CACHE = {}
 
 def _load_env():
     env_path = os.path.join(ROOT, ".env")
@@ -752,8 +755,6 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
     sender_name = pdata.get("senderName", "[Your Name] · Enterprise Account Executive at Sock Club")
 
     emit("status", {"phase": "initiating", "kind": kind})
-    import time
-    time.sleep(0.3)
 
     if kind == "prospect":
         target = fields.get("value", "Target Company")
@@ -761,68 +762,59 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
         domain = f"{clean_target.lower()}.com"
 
         emit("tool", {"name": "mcp__commonroom:get_intent_signals", "input": {"domain": domain}})
-        time.sleep(0.3)
         emit("tool", {"name": "mcp__zoominfo:search_contacts", "input": {"companyName": clean_target, "seniority": "Director+"}})
-        time.sleep(0.3)
 
-        # Query live Sumble
-        sumble_data = sumble_enrich_live(domain)
+        # Check Cache for instantaneous 0ms response
+        cached = DOMAIN_INTEL_CACHE.get(domain)
+        if cached:
+            emit("tool", {"name": "mcp__cache:instant_hit", "input": {"domain": domain, "speed": "0ms"}})
+            res_str = f"## {cached.get('company')} — Prospect Summary\n\n{cached.get('summary')}\n\n```json\n{json.dumps(cached, indent=2)}\n```"
+            emit("text", {"text": f"Found verified stakeholders and intelligence for **{cached.get('company')}**."})
+            emit("result", {"result": res_str, "cost_usd": 0.001, "session_id": str(uuid.uuid4()), "is_error": False})
+            emit("done", {})
+            job["state"]["result"] = res_str
+            job["done"] = True
+            return
+
+        # Parallel concurrent execution across all live APIs
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            fut_sumble = executor.submit(sumble_enrich_live, domain)
+            fut_gemini = executor.submit(gemini_search_grounding_live, f"{clean_target} company overview news")
+            fut_tavily = executor.submit(tavily_search_live, f"{clean_target} business overview company news")
+            fut_contacts = executor.submit(discover_real_stakeholders, clean_target, domain, fields.get("seniority"), fields.get("persona"))
+
+            sumble_data = fut_sumble.result() or {}
+            gemini_res = fut_gemini.result()
+            tavily_results = fut_tavily.result()
+            real_contacts = fut_contacts.result() or []
+
         if sumble_data:
             emit("tool", {
                 "name": "mcp__sumble:detect_technologies",
                 "input": {
                     "domain": domain,
                     "employees": sumble_data.get("employee_count"),
-                    "tracked_jobs": sumble_data.get("jobs_count"),
-                    "industry": sumble_data.get("industry"),
-                    "tags": sumble_data.get("tags", [])
+                    "industry": sumble_data.get("industry")
                 }
             })
-        else:
-            emit("tool", {"name": "mcp__sumble:detect_technologies", "input": {"domain": domain}})
-        time.sleep(0.3)
 
-        # Query live Google Gemini Grounding / Google Custom Search / Tavily
         live_news_snippet = ""
         live_summary = f"{clean_target} is scaling marketing and culture initiatives. Their marketing, people, and sales orgs invest in high-impact brand touchpoints, onboarding kits, and VIP client appreciation."
 
-        # 1. Try Google Gemini with Google Search Grounding
-        gemini_res = gemini_search_grounding_live(f"{clean_target} company overview news")
         if gemini_res:
             live_summary = gemini_res.get("summary", live_summary)
             sources = gemini_res.get("sources", [])
             if sources:
                 live_news_snippet = f"Google Grounded News: {sources[0].get('title', '')} ({sources[0].get('url', '')})"
-            emit("tool", {"name": "mcp__google_search:gemini_grounding", "input": {"query": f"{clean_target} business news", "sources_grounded": len(sources)}})
-            time.sleep(0.3)
-        else:
-            # 2. Try Google Custom Search
-            google_res = google_custom_search_live(f"{clean_target} news")
-            if google_res:
-                first_g = google_res[0]
-                live_news_snippet = f"Google Search: {first_g.get('title')} — {first_g.get('snippet', '')[:140]}"
-                emit("tool", {"name": "mcp__google_search:cse_query", "input": {"query": f"{clean_target} news", "results": len(google_res)}})
-                time.sleep(0.3)
-
-        # 3. Try Tavily Search
-        tavily_results = tavily_search_live(f"{clean_target} business overview company news")
-        if tavily_results:
+            emit("tool", {"name": "mcp__google_search:gemini_grounding", "input": {"query": f"{clean_target} business news", "sources": len(sources)}})
+        elif tavily_results:
             first = tavily_results[0]
-            if not live_news_snippet:
-                live_news_snippet = f"Live News: {first.get('title', '')} — {first.get('content', '')[:160]}..."
-            if not gemini_res and len(tavily_results) > 1:
-                live_summary = f"{clean_target}: {tavily_results[1].get('content', '')[:220]}..."
-            emit("tool", {"name": "mcp__tavily:search_news", "input": {"query": f"{clean_target} events conferences hiring", "live_sources": len(tavily_results)}})
-        else:
-            emit("tool", {"name": "mcp__tavily:search_news", "input": {"query": f"{clean_target} events conferences hiring"}})
-        time.sleep(0.3)
+            live_news_snippet = f"Live News: {first.get('title', '')} — {first.get('content', '')[:140]}..."
+            if len(tavily_results) > 1:
+                live_summary = f"{clean_target}: {tavily_results[1].get('content', '')[:200]}..."
+            emit("tool", {"name": "mcp__tavily:search_news", "input": {"query": f"{clean_target} events hiring", "live_sources": len(tavily_results)}})
 
-        hiring_str = f"Actively growing People Operations, Event Marketing, and Strategic Sales teams."
-        if sumble_data.get("jobs_count"):
-            hiring_str = f"Sumble verified: {sumble_data.get('jobs_count')} historical/active job postings in {sumble_data.get('industry', 'Industry')} (~{sumble_data.get('employee_count', 'N/A')} employees)."
-
-        # Real Stakeholder Discovery from live LinkedIn/Web
-        real_contacts = discover_real_stakeholders(clean_target, domain, seniority=fields.get("seniority"), persona=fields.get("persona"))
+        # Real Stakeholder Discovery fallback guarantees 3+ contacts
         if not real_contacts or len(real_contacts) < 3:
             fallback_roles = [
                 ("Sarah Jenkins", f"VP of Brand Experience & Field Marketing at {clean_target}", "C-Level / VP", "SJ", f"sarah.jenkins@{domain}"),
@@ -899,6 +891,8 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
             "tiers": tiers
         }
 
+        DOMAIN_INTEL_CACHE[domain] = result_obj
+
         res_str = f"## {comp_name} — Prospect Summary\n\n{live_summary}\n\n```json\n{json.dumps(result_obj, indent=2)}\n```"
         emit("text", {"text": f"Found verified stakeholders and intelligence for **{comp_name}**."})
         emit("result", {"result": res_str, "cost_usd": 0.003, "session_id": str(uuid.uuid4()), "is_error": False})
@@ -913,9 +907,7 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
         clean_target = re.sub(r'https?://', '', company).split('/')[0].replace(".com", "").capitalize()
 
         emit("tool", {"name": "mcp__zoominfo:enrich_contacts", "input": {"name": contact, "company": clean_target}})
-        time.sleep(0.3)
         emit("tool", {"name": "mcp__tavily:search_research", "input": {"domain": f"{clean_target.lower()}.com", "query": f"{clean_target} {contact} role and triggers"}})
-        time.sleep(0.3)
 
         result_obj = {
             "to": {
