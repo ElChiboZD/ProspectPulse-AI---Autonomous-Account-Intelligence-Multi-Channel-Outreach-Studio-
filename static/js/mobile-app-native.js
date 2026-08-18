@@ -11,14 +11,28 @@
 // Global Mobile State
 window.MobileApp = {
   activeTab: 'radar',
-  userProfile: JSON.parse(localStorage.getItem('prospectpulse_user_profile') || JSON.stringify({
-    name: 'Travis Scott',
-    email: 'travis.scott@enterprise.io',
-    title: 'Enterprise Account Executive',
-    company: 'ProspectPulse AI',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-    isGoogleConnected: true
-  })),
+  userProfile: (function () {
+    const session = window.UserSession && window.UserSession.getSession();
+    if (session) {
+      if (window.UserSession.applyActiveKeys) window.UserSession.applyActiveKeys(session.email);
+      return {
+        name: session.name || '',
+        email: session.email || '',
+        title: session.title || '',
+        company: session.company || '',
+        avatar: session.avatar_url || '',
+        isGoogleConnected: false
+      };
+    }
+    return {
+      name: '',
+      email: '',
+      title: '',
+      company: '',
+      avatar: '',
+      isGoogleConnected: false
+    };
+  })(),
   geminiKey: localStorage.getItem('prospectpulse_gemini_key') || '',
   account: {
     name: 'Lululemon Athletica',
@@ -571,14 +585,14 @@ window.openGoogleAccountModal = function () {
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">Gemini API key (required for live research)</label>
-        <input type="password" id="m3InputGemini" value="${keys.gemini || ''}" placeholder="AIzaSy..." style="width:100%;height:42px;background:#272A2F;border:1px solid var(--md-sys-color-primary);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
-        <div style="font-size:10px;color:var(--md-sys-color-primary);margin-top:4px;">Free key: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--md-sys-color-primary);">aistudio.google.com</a></div>
+        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">xAI key (Grok live account research)</label>
+        <input type="password" id="m3InputXai" value="${keys.xai || ''}" placeholder="xai-..." style="width:100%;height:42px;background:#272A2F;border:1px solid var(--md-sys-color-primary);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
+        <div style="font-size:10px;color:var(--md-sys-color-primary);margin-top:4px;">Get a key: <a href="https://console.x.ai" target="_blank" style="color:var(--md-sys-color-primary);">console.x.ai</a></div>
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">xAI key (optional backup)</label>
-        <input type="password" id="m3InputXai" value="${keys.xai || ''}" placeholder="xai-..." style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
+        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">Gemini key (optional backup)</label>
+        <input type="password" id="m3InputGemini" value="${keys.gemini || ''}" placeholder="AIzaSy..." style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
       </div>
 
       <div style="margin-bottom:16px;">
@@ -589,31 +603,47 @@ window.openGoogleAccountModal = function () {
       <button onclick="saveGoogleSettings()" class="m3-btn-primary">
         Save and stay on this phone
       </button>
+      <button onclick="signOutMobileUser()" style="margin-top:10px;width:100%;height:42px;background:transparent;border:1px solid rgba(242,184,181,0.4);border-radius:12px;color:#F2B8B5;font-weight:600;cursor:pointer;">
+        Sign out
+      </button>
     </div>
   `;
   document.body.appendChild(modal);
 };
 
+window.signOutMobileUser = function () {
+  if (window.UserSession) window.UserSession.signOut();
+  window.MobileApp.userProfile = { name: '', email: '', title: '', company: '', avatar: '', isGoogleConnected: false };
+  document.getElementById('googleModalDialog')?.remove();
+  openMobileLoginModal();
+};
+
 window.saveGoogleSettings = function () {
-  const name = document.getElementById('m3InputName')?.value || 'Travis Scott';
-  const email = document.getElementById('m3InputEmail')?.value || 'travis.scott@enterprise.io';
+  const name = document.getElementById('m3InputName')?.value || '';
+  const email = (document.getElementById('m3InputEmail')?.value || '').trim().toLowerCase();
   const gemini = document.getElementById('m3InputGemini')?.value || '';
   const xai = document.getElementById('m3InputXai')?.value || '';
   const tavily = document.getElementById('m3InputTavily')?.value || '';
-
-  window.MobileApp.userProfile.name = name;
-  window.MobileApp.userProfile.email = email;
-  localStorage.setItem('prospectpulse_user_profile', JSON.stringify(window.MobileApp.userProfile));
-  if (window.StandaloneClientEngine) {
-    window.StandaloneClientEngine.saveKeys({ gemini: gemini.trim(), xai: xai.trim(), tavily: tavily.trim() });
-  } else {
-    localStorage.setItem('prospectpulse_gemini_key', gemini.trim());
+  if (!email || !email.includes('@')) {
+    alert('Enter your own work email.');
+    return;
   }
+
+  if (window.UserSession) {
+    window.UserSession.saveSession({
+      email: email,
+      name: name || email.split('@')[0],
+      title: window.MobileApp.userProfile.title || 'Account Executive',
+      company: window.MobileApp.userProfile.company || ''
+    }, { gemini: gemini.trim(), xai: xai.trim(), tavily: tavily.trim() });
+  }
+  window.MobileApp.userProfile.name = name || email.split('@')[0];
+  window.MobileApp.userProfile.email = email;
 
   document.getElementById('googleModalDialog')?.remove();
   updateStudioContent();
   const banner = document.getElementById('offlineKeyBanner');
-  if (banner && gemini.trim()) banner.remove();
+  if (banner && (xai.trim() || gemini.trim())) banner.remove();
 };
 
 // ----------------------------------------------------
@@ -655,8 +685,8 @@ function renderMobileDOM() {
 
       <div id="offlineKeyBanner" class="m3-card" style="display:none;background:#0F2744;border:1px solid rgba(168,199,250,0.35);margin-bottom:12px;">
         <div style="font-size:13px;font-weight:700;color:#D3E3FD;margin-bottom:4px;">This phone is the app</div>
-        <div style="font-size:12px;color:#94A3B8;line-height:1.4;margin-bottom:10px;">Add a Gemini key once. Research uses this device's internet. No desktop or server to start.</div>
-        <button class="m3-btn-primary" onclick="openGoogleAccountModal()">Add API key</button>
+        <div style="font-size:12px;color:#94A3B8;line-height:1.4;margin-bottom:10px;">Add an xAI key once. Grok researches accounts over this device's internet. No desktop or server to start.</div>
+        <button class="m3-btn-primary" onclick="openGoogleAccountModal()">Add xAI key</button>
       </div>
 
       <div class="m3-section-title">
@@ -961,12 +991,134 @@ ${p.title} | ${p.company}</div>
 
 function bootMobileApp() {
   renderMobileDOM();
-  const hasKey = window.StandaloneClientEngine
-    ? window.StandaloneClientEngine.hasAnyLiveKey()
-    : !!(localStorage.getItem('prospectpulse_gemini_key'));
+  const session = window.UserSession ? window.UserSession.getSession() : null;
+  if (!session) {
+    openMobileLoginModal();
+    return;
+  }
+  const workspace = window.UserSession ? window.UserSession.getWorkspace() : {};
+  const hasKey = (window.StandaloneClientEngine && window.StandaloneClientEngine.hasAnyLiveKey())
+    || !!(localStorage.getItem('prospectpulse_gemini_key') || localStorage.getItem('prospectpulse_xai_key'))
+    || (workspace && workspace.has_xai);
   const banner = document.getElementById('offlineKeyBanner');
   if (banner && !hasKey) banner.style.display = 'block';
 }
+
+window.openMobileLoginModal = function () {
+  const existing = document.getElementById('mobileLoginModal');
+  if (existing) existing.remove();
+  const session = window.UserSession ? window.UserSession.getSession() : null;
+  const keys = session && window.UserSession ? window.UserSession.loadKeys(session.email) : { xai: '', gemini: '', tavily: '' };
+  const accounts = window.UserSession ? window.UserSession.listAccounts() : [];
+  const switcher = accounts.map(function (acc) {
+    return `<button onclick="switchMobileAccount('${acc.email.replace(/'/g, '')}')" style="width:100%;text-align:left;margin:0 0 8px;padding:10px 12px;background:#272A2F;border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#fff;font-size:13px;">${acc.name || acc.email}<div style="font-size:11px;color:#94A3B8;">${acc.email}</div></button>`;
+  }).join('');
+  const modal = document.createElement('div');
+  modal.id = 'mobileLoginModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(5,7,12,0.96);z-index:100000;overflow:auto;padding:24px 16px;';
+  modal.innerHTML = `
+    <div style="max-width:400px;margin:24px auto;background:#1D2024;border-radius:24px;padding:22px;border:1px solid rgba(255,255,255,0.08);">
+      <h2 style="color:#fff;font-size:22px;margin:0 0 8px 0;">Sign in as yourself</h2>
+      <p style="color:#94A3B8;font-size:13px;line-height:1.45;margin:0 0 16px 0;">Google or email identifies you. Your xAI key bills to you. Nothing uses another person's login.</p>
+      <div id="gsiMobileButton" style="min-height:44px;display:flex;justify-content:center;margin-bottom:14px;"></div>
+      <label style="font-size:11px;color:#94A3B8;">Work email</label>
+      <input id="mLoginEmail" type="email" value="${session ? session.email : ''}" placeholder="you@company.com" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
+      <label style="font-size:11px;color:#94A3B8;">Your name</label>
+      <input id="mLoginName" type="text" value="${session ? session.name : ''}" placeholder="Alex Rivera" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
+      <label style="font-size:11px;color:#94A3B8;">Company</label>
+      <input id="mLoginCompany" type="text" value="${session ? session.company : ''}" placeholder="Acme" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
+      <label style="font-size:11px;color:#94A3B8;">Your xAI key</label>
+      <input id="mLoginXai" type="password" value="${keys.xai || ''}" placeholder="xai-..." style="width:100%;height:42px;background:#272A2F;border:1px solid var(--md-sys-color-primary);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
+      <label style="display:flex;align-items:center;gap:8px;color:#94A3B8;font-size:12px;margin:0 0 14px;">
+        <input type="checkbox" id="mLoginWorkspace" />
+        Also save as this phone's workspace key
+      </label>
+      <button class="m3-btn-primary" onclick="saveMobileLogin()">Save my login</button>
+      ${switcher ? '<div style="margin-top:18px;font-size:11px;font-weight:700;color:#64748B;margin-bottom:8px;">ON THIS PHONE</div>' + switcher : ''}
+    </div>
+  `;
+  document.body.appendChild(modal);
+  if (window.GoogleIdentity) {
+    window.GoogleIdentity.loadConfig().then(function () {
+      window.GoogleIdentity.renderButton('gsiMobileButton', function (profile) {
+        const emailEl = document.getElementById('mLoginEmail');
+        const nameEl = document.getElementById('mLoginName');
+        if (emailEl) emailEl.value = profile.email;
+        if (nameEl) nameEl.value = profile.name;
+        const existing = window.UserSession ? window.UserSession.loadKeys(profile.email) : {};
+        if (existing.xai || profile.gemini_oauth) {
+          if (existing.xai) document.getElementById('mLoginXai').value = existing.xai;
+          saveMobileLogin();
+        }
+      });
+    });
+  }
+};
+
+window.switchMobileAccount = function (email) {
+  try {
+    const saved = window.UserSession.switchAccount(email);
+    window.MobileApp.userProfile = {
+      name: saved.name,
+      email: saved.email,
+      title: saved.title,
+      company: saved.company,
+      avatar: saved.avatar_url,
+      isGoogleConnected: false
+    };
+    document.getElementById('mobileLoginModal')?.remove();
+    renderMobileDOM();
+  } catch (err) {
+    alert(err.message || 'Could not switch account');
+  }
+};
+
+window.saveMobileLogin = function () {
+  const email = (document.getElementById('mLoginEmail')?.value || '').trim().toLowerCase();
+  const name = (document.getElementById('mLoginName')?.value || '').trim();
+  const company = (document.getElementById('mLoginCompany')?.value || '').trim();
+  const xai = (document.getElementById('mLoginXai')?.value || '').trim();
+  if (!email || !email.includes('@')) {
+    alert('Enter your own work email.');
+    return;
+  }
+  if (window.UserSession && window.UserSession.DEMO_EMAILS[email]) {
+    alert('Use your real email, not a demo account.');
+    return;
+  }
+  try {
+    const shareWorkspace = document.getElementById('mLoginWorkspace') && document.getElementById('mLoginWorkspace').checked;
+    if (shareWorkspace && xai) {
+      fetch('/api/auth/workspace', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ xai_key: xai, enabled: true })
+      }).then(function () {
+        if (window.UserSession) window.UserSession.setWorkspaceMeta({ enabled: true, has_xai: true });
+      }).catch(function () {});
+    }
+    const saved = window.UserSession.saveSession({
+      email: email,
+      name: name || email.split('@')[0],
+      company: company,
+      title: 'Account Executive'
+    }, { xai: xai, gemini: '', tavily: '' });
+    window.MobileApp.userProfile = {
+      name: saved.name,
+      email: saved.email,
+      title: saved.title,
+      company: saved.company,
+      avatar: saved.avatar_url,
+      isGoogleConnected: false
+    };
+    document.getElementById('mobileLoginModal')?.remove();
+    renderMobileDOM();
+    const banner = document.getElementById('offlineKeyBanner');
+    if (banner && xai) banner.style.display = 'none';
+  } catch (err) {
+    alert(err.message || 'Could not save login');
+  }
+};
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bootMobileApp);

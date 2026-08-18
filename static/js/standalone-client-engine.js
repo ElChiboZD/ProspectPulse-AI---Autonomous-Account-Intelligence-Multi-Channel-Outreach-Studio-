@@ -1,7 +1,7 @@
 /**
  * ProspectPulse — on-device research engine.
  * Runs inside the Android app and the desktop window.
- * Talks to Gemini / xAI / Wikipedia / Tavily over the device internet.
+ * Talks to xAI Grok first (live web search), then Gemini / Wikipedia / Tavily.
  * No local Python server is required on mobile.
  */
 (function () {
@@ -17,6 +17,8 @@
     'gemini-3.6-flash',
     'gemini-1.5-flash'
   ];
+
+  const XAI_MODELS = ['grok-4.6', 'grok-4.5'];
 
   function readKey(name) {
     try {
@@ -37,8 +39,22 @@
     return !!(window.Capacitor || window.ProspectPulseNative);
   }
 
+  function googleAccessToken() {
+    try {
+      if (typeof window.getGoogleAccessToken === 'function') {
+        return window.getGoogleAccessToken() || '';
+      }
+      const token = localStorage.getItem('prospectpulse_google_access_token') || '';
+      const exp = Number(localStorage.getItem('prospectpulse_google_token_exp') || 0);
+      if (!token || !exp || Date.now() > exp - 15000) return '';
+      return token;
+    } catch (e) {
+      return '';
+    }
+  }
+
   function hasAnyLiveKey() {
-    return !!(readKey(KEYS.gemini) || readKey(KEYS.xai) || readKey(KEYS.tavily));
+    return !!(readKey(KEYS.gemini) || readKey(KEYS.xai) || readKey(KEYS.tavily) || googleAccessToken());
   }
 
   function parseDomain(raw) {
@@ -103,7 +119,8 @@
 
   async function callGemini(prompt, { jsonMode } = {}) {
     const apiKey = readKey(KEYS.gemini);
-    if (!apiKey) return null;
+    const oauth = googleAccessToken();
+    if (!apiKey && !oauth) return null;
 
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
@@ -114,47 +131,111 @@
 
     let lastErr = null;
     for (const model of GEMINI_MODELS) {
-      const url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
-        model + ':generateContent?key=' + encodeURIComponent(apiKey);
-      try {
-        const json = await httpJson(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+      const base = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent';
+      const attempts = [];
+      if (oauth) {
+        attempts.push({
+          url: base,
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + oauth }
         });
-        const text = (((json.candidates || [])[0] || {}).content || {}).parts
-          ? json.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('')
-          : '';
-        if (!text) continue;
-        return jsonMode ? safeJson(text) : text;
-      } catch (err) {
-        lastErr = err;
+      }
+      if (apiKey) {
+        attempts.push({
+          url: base + '?key=' + encodeURIComponent(apiKey),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      for (const attempt of attempts) {
+        try {
+          const json = await httpJson(attempt.url, {
+            method: 'POST',
+            headers: attempt.headers,
+            body: JSON.stringify(payload)
+          });
+          const text = (((json.candidates || [])[0] || {}).content || {}).parts
+            ? json.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('')
+            : '';
+          if (!text) continue;
+          return jsonMode ? safeJson(text) : text;
+        } catch (err) {
+          lastErr = err;
+        }
       }
     }
     if (lastErr) throw lastErr;
     return null;
   }
 
-  async function callXai(prompt, { jsonMode } = {}) {
+  function extractXaiText(payload) {
+    if (!payload || typeof payload !== 'object') return '';
+    if (payload.output_text) return String(payload.output_text);
+    const chunks = [];
+    (payload.output || []).forEach(function (item) {
+      if (!item) return;
+      if (item.type === 'message') {
+        (item.content || []).forEach(function (part) {
+          if (part && part.text) chunks.push(part.text);
+        });
+      }
+    });
+    if (chunks.length) return chunks.join('\n');
+    const choice = (payload.choices || [])[0];
+    return (choice && choice.message && choice.message.content) || '';
+  }
+
+  async function callXai(prompt, { jsonMode, liveSearch } = {}) {
     const apiKey = readKey(KEYS.xai);
     if (!apiKey) return null;
-    const json = await httpJson('https://api.x.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + apiKey
-      },
-      body: JSON.stringify({
-        model: 'grok-4.5',
-        temperature: 0.4,
-        messages: [
-          { role: 'system', content: jsonMode ? 'Return only valid JSON. No markdown.' : 'Be concise and specific.' },
-          { role: 'user', content: prompt }
-        ]
-      })
-    });
-    const text = (((json.choices || [])[0] || {}).message || {}).content || '';
-    return jsonMode ? safeJson(text) : text;
+
+    let lastErr = null;
+    for (const model of XAI_MODELS) {
+      if (liveSearch) {
+        try {
+          const json = await httpJson('https://api.x.ai/v1/responses', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + apiKey
+            },
+            body: JSON.stringify({
+              model: model,
+              input: [{ role: 'user', content: prompt }],
+              tools: [{ type: 'web_search' }]
+            })
+          });
+          const text = extractXaiText(json);
+          if (text) return jsonMode ? safeJson(text) : text;
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+
+      try {
+        const body = {
+          model: model,
+          temperature: 0.4,
+          messages: [
+            { role: 'system', content: jsonMode ? 'Return only valid JSON. No markdown. Use live public facts.' : 'Be concise and specific.' },
+            { role: 'user', content: prompt }
+          ]
+        };
+        if (liveSearch) body.search_parameters = { mode: 'auto', return_citations: true };
+        const json = await httpJson('https://api.x.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + apiKey
+          },
+          body: JSON.stringify(body)
+        });
+        const text = extractXaiText(json);
+        if (text) return jsonMode ? safeJson(text) : text;
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    if (lastErr) throw lastErr;
+    return null;
   }
 
   async function callTavily(query, maxResults) {
@@ -229,7 +310,7 @@
 
     const intelPrompt =
       'You are an enterprise B2B sales intelligence engine. Research "' + company +
-      '" (' + domain + '). Use current public knowledge.\n' +
+      '" (' + domain + '). Use live web search and current public knowledge.\n' +
       (base.description ? 'Known facts: ' + base.description + '\n' : '') +
       (base.tavilyContext ? 'Recent search snippets:\n' + base.tavilyContext + '\n' : '') +
       'Return ONLY JSON with this schema:\n' +
@@ -253,17 +334,17 @@
 
     let ai = null;
     try {
-      ai = await callGemini(intelPrompt, { jsonMode: true });
-      if (ai) base.source = 'Gemini + device internet';
+      ai = await callXai(intelPrompt, { jsonMode: true, liveSearch: true });
+      if (ai) base.source = 'xAI Grok + live web search';
     } catch (err) {
-      console.warn('[StandaloneEngine] Gemini skipped:', err.message);
+      console.warn('[StandaloneEngine] xAI skipped:', err.message);
     }
     if (!ai) {
       try {
-        ai = await callXai(intelPrompt, { jsonMode: true });
-        if (ai) base.source = 'xAI + device internet';
+        ai = await callGemini(intelPrompt, { jsonMode: true });
+        if (ai) base.source = 'Gemini + device internet';
       } catch (err) {
-        console.warn('[StandaloneEngine] xAI skipped:', err.message);
+        console.warn('[StandaloneEngine] Gemini skipped:', err.message);
       }
     }
 
@@ -315,11 +396,11 @@
       'Pain: ' + (acc.painPoints || '') + '\n' +
       'Return ONLY JSON: {"subject":"...","body":"..."}';
     try {
-      const out = await callGemini(prompt, { jsonMode: true });
+      const out = await callXai(prompt, { jsonMode: true });
       if (out && out.body) return out;
     } catch (e) {}
     try {
-      const out = await callXai(prompt, { jsonMode: true });
+      const out = await callGemini(prompt, { jsonMode: true });
       if (out && out.body) return out;
     } catch (e) {}
     return null;
@@ -335,11 +416,11 @@
       'Seller asked: "' + question + '"\n' +
       'Give a tight 3-5 sentence coaching answer they can use in the next 30 seconds.';
     try {
-      const text = await callGemini(prompt, { jsonMode: false });
+      const text = await callXai(prompt, { jsonMode: false });
       if (text) return text;
     } catch (e) {}
     try {
-      const text = await callXai(prompt, { jsonMode: false });
+      const text = await callGemini(prompt, { jsonMode: false });
       if (text) return text;
     } catch (e) {}
     return 'For ' + (acc.name || 'this account') + ', lead with the ' +

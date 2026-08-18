@@ -12,6 +12,7 @@
       "https://en.wikipedia.org/*",
       "https://logo.clearbit.com/*",
       "https://aistudio.google.com/*",
+      "https://accounts.google.com/*",
       "https://console.x.ai/*",
       "https://wa.me/*",
       "https://www.linkedin.com/*",
@@ -21,6 +22,12 @@
   "android": {
     "allowMixedContent": false,
     "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "preferredContentMode": "mobile",
+    "scheme": "Prospect Pulse AI",
+    "limitsNavigationsToAppBoundDomains": false
   },
   "plugins": {
     "CapacitorHttp": {

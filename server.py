@@ -37,8 +37,11 @@ import dns.resolver
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, urlencode
 import functools
+import hashlib
+import base64
+import secrets
 import requests
 from cachetools import LRUCache
 import db
@@ -98,39 +101,126 @@ def _user_data_dir():
         path = EXE_DIR
     return path
 
-def persist_api_keys(**kwargs):
-    """Write API keys to the user data folder so the standalone exe keeps them."""
-    path = os.path.join(_user_data_dir(), "keys.json")
-    existing = {}
-    if os.path.isfile(path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                existing = json.load(f) or {}
-        except Exception:
-            existing = {}
+RUNTIME_KEY_NAMES = (
+    "GEMINI_API_KEY", "GOOGLE_API_KEY", "TAVILY_API_KEY", "XAI_API_KEY", "SUMBLE_API_KEY",
+    "GOOGLE_ACCESS_TOKEN", "GOOGLE_REFRESH_TOKEN", "GOOGLE_TOKEN_EXP",
+)
+GOOGLE_OAUTH_SCOPES = (
+    "openid email profile "
+    "https://www.googleapis.com/auth/generative-language "
+    "https://www.googleapis.com/auth/generative-language.retriever"
+)
+OAUTH_STATES = {}
+CURRENT_USER_EMAIL = None
+
+def _safe_email(email):
+    return re.sub(r"[^a-zA-Z0-9._@-]+", "_", (email or "local").strip().lower())[:120]
+
+def _session_path():
+    return os.path.join(_user_data_dir(), "session.json")
+
+def _user_keys_path(email):
+    folder = os.path.join(_user_data_dir(), "users", _safe_email(email))
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except Exception:
+        pass
+    return os.path.join(folder, "keys.json")
+
+def clear_runtime_keys():
+    for k in RUNTIME_KEY_NAMES:
+        os.environ.pop(k, None)
+
+def _read_json_file(path):
+    if not path or not os.path.isfile(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f) or {}
+    except Exception:
+        return {}
+
+def _write_json_file(path, data):
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+        return True
+    except Exception as e:
+        log.warning(f"Could not write {path}: {e}")
+        return False
+
+def _workspace_keys_path():
+    return os.path.join(_user_data_dir(), "workspace", "keys.json")
+
+def apply_workspace_keys():
+    """Fill any missing keys from this computer's shared workspace."""
+    keys = _read_json_file(_workspace_keys_path())
+    for k, v in keys.items():
+        if v and not os.environ.get(k):
+            os.environ[k] = str(v)
+    return keys
+
+def persist_workspace_keys(**kwargs):
+    path = _workspace_keys_path()
+    existing = _read_json_file(path)
     for k, v in kwargs.items():
         if v:
             existing[k] = str(v).strip()
+            if not os.environ.get(k):
+                os.environ[k] = str(v).strip()
+    _write_json_file(path, existing)
+    return existing
+
+def switch_user_keys(email):
+    """Load only this person's keys into the process. Never reuse the previous login."""
+    global CURRENT_USER_EMAIL
+    clear_runtime_keys()
+    CURRENT_USER_EMAIL = (email or "").strip().lower() or None
+    if CURRENT_USER_EMAIL:
+        _write_json_file(_session_path(), {"email": CURRENT_USER_EMAIL})
+        keys = _read_json_file(_user_keys_path(CURRENT_USER_EMAIL))
+        for k, v in keys.items():
+            if v:
+                os.environ[k] = str(v)
+    else:
+        try:
+            if os.path.isfile(_session_path()):
+                os.remove(_session_path())
+        except Exception:
+            pass
+        return CURRENT_USER_EMAIL
+    apply_workspace_keys()
+    return CURRENT_USER_EMAIL
+
+def persist_api_keys(**kwargs):
+    """Write API keys for the signed-in user only."""
+    email = CURRENT_USER_EMAIL or kwargs.pop("email", None)
+    if email:
+        switch_user_keys(email)
+    path = _user_keys_path(email) if email else os.path.join(_user_data_dir(), "keys.json")
+    existing = _read_json_file(path)
+    for k, v in kwargs.items():
+        if k == "email":
+            continue
+        if v:
+            existing[k] = str(v).strip()
             os.environ[k] = str(v).strip()
-    try:
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(existing, f)
-    except Exception as e:
-        log.warning(f"Could not persist API keys: {e}")
+    _write_json_file(path, existing)
     return existing
 
 def _load_persisted_keys():
-    path = os.path.join(_user_data_dir(), "keys.json")
-    if not os.path.isfile(path):
+    session = _read_json_file(_session_path())
+    email = (session.get("email") or "").strip().lower()
+    if email:
+        switch_user_keys(email)
         return
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            keys = json.load(f) or {}
-        for k, v in keys.items():
-            if v and not os.environ.get(k):
-                os.environ[k] = str(v)
-    except Exception:
-        pass
+    # Legacy single-user file, only if nobody is signed in
+    path = os.path.join(_user_data_dir(), "keys.json")
+    keys = _read_json_file(path)
+    for k, v in keys.items():
+        if v and not os.environ.get(k):
+            os.environ[k] = str(v)
 
 DOMAIN_INTEL_CACHE = LRUCache(maxsize=500)
 SESSION = requests.Session()
@@ -152,11 +242,12 @@ def _run_tts_loop():
 threading.Thread(target=_run_tts_loop, daemon=True).start()
 
 def _load_env():
-    env_candidates = [
-        os.path.join(ROOT, ".env"),
-        os.path.join(EXE_DIR, ".env"),
-        os.path.join(_user_data_dir(), ".env"),
-    ]
+    # Distributed builds must not pick up the developer's .env.
+    # Only a local source checkout may load a project .env.
+    env_candidates = []
+    if not getattr(sys, "frozen", False):
+        env_candidates.append(os.path.join(ROOT, ".env"))
+    env_candidates.append(os.path.join(_user_data_dir(), ".env"))
     for env_path in env_candidates:
         if not env_path or not os.path.isfile(env_path):
             continue
@@ -430,12 +521,251 @@ def sumble_enrich_live(domain):
     return {}
 
 
-def gemini_search_grounding_live(query):
-    """Execute live Google Search grounding via Google Gemini Flash API."""
+XAI_MODELS = ["grok-4.6", "grok-4.5"]
+
+
+def _parse_json_blob(text):
+    if not text:
+        return None
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        try:
+            return json.loads(text[start:end + 1])
+        except Exception:
+            return None
+    return None
+
+
+def _extract_xai_text(payload):
+    if not isinstance(payload, dict):
+        return ""
+    if payload.get("output_text"):
+        return str(payload.get("output_text") or "")
+    chunks = []
+    for item in payload.get("output") or []:
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "message":
+            for part in item.get("content") or []:
+                if isinstance(part, dict) and part.get("text"):
+                    chunks.append(part["text"])
+        elif item.get("content") and isinstance(item.get("content"), str):
+            chunks.append(item["content"])
+    if chunks:
+        return "\n".join(chunks)
+    choices = payload.get("choices") or []
+    if choices:
+        msg = choices[0].get("message") or {}
+        return msg.get("content") or ""
+    return ""
+
+
+def _xai_headers():
+    api_key = os.environ.get("XAI_API_KEY") or ""
+    if not api_key or "your_" in api_key.lower():
+        return None
+    return {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+
+
+def xai_account_intel_live(company, domain):
+    """Live company research via xAI Grok + web search. Primary account-intel path."""
+    headers = _xai_headers()
+    if not headers:
+        return None
+    prompt = (
+        f'You are an enterprise B2B sales intelligence engine. Research "{company}" ({domain}) '
+        "using live web search. Prefer current public facts: official site, recent news, filings, LinkedIn.\n"
+        "Return ONLY valid JSON with this exact schema:\n"
+        "{\n"
+        f'  "name": "Official company name",\n'
+        f'  "domain": "{domain}",\n'
+        '  "industry": "Industry",\n'
+        '  "headcount": "Employee count like 12,400",\n'
+        '  "revenue": "Revenue like $4.2B",\n'
+        '  "headquarters": "City, Country",\n'
+        '  "description": "2-3 sentence current company overview",\n'
+        '  "news_headline": "Most relevant recent news trigger",\n'
+        '  "news_url": "https://...",\n'
+        '  "incumbent": "Likely merch/swag/gifting or CRM incumbent",\n'
+        '  "wedge": "One-line displacement wedge",\n'
+        '  "pain_points": ["pain 1", "pain 2", "pain 3"],\n'
+        '  "buying_signals": ["signal 1", "signal 2"],\n'
+        '  "economic_buyer": {"name": "Full Name", "title": "Title"},\n'
+        '  "champion": {"name": "Full Name", "title": "Title"},\n'
+        '  "evaluator": {"name": "Full Name", "title": "Title"}\n'
+        "}"
+    )
+    start_time = time.time()
+    for model in XAI_MODELS:
+        try:
+            resp = SESSION.post(
+                "https://api.x.ai/v1/responses",
+                json={
+                    "model": model,
+                    "input": [{"role": "user", "content": prompt}],
+                    "tools": [{"type": "web_search"}],
+                },
+                headers=headers,
+                timeout=28,
+            )
+            resp.raise_for_status()
+            parsed = _parse_json_blob(_extract_xai_text(resp.json()))
+            if parsed:
+                parsed["_source"] = f"xAI {model} + web search"
+                log.info(f"xAI account intel ({model} responses) took {time.time() - start_time:.2f}s")
+                return parsed
+        except requests.exceptions.RequestException as e:
+            log.warning(f"xAI responses {model} failed: {e}")
+
+        try:
+            resp = SESSION.post(
+                "https://api.x.ai/v1/chat/completions",
+                json={
+                    "model": model,
+                    "temperature": 0.3,
+                    "messages": [
+                        {"role": "system", "content": "Return only valid JSON. Use live public facts."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "search_parameters": {"mode": "auto", "return_citations": True},
+                },
+                headers=headers,
+                timeout=28,
+            )
+            resp.raise_for_status()
+            parsed = _parse_json_blob(_extract_xai_text(resp.json()))
+            if parsed:
+                parsed["_source"] = f"xAI {model} live search"
+                log.info(f"xAI account intel ({model} chat) took {time.time() - start_time:.2f}s")
+                return parsed
+        except requests.exceptions.RequestException as e:
+            log.warning(f"xAI chat {model} failed: {e}")
+    return None
+
+
+def xai_roleplay_turn(messages, sys_instruction):
+    headers = _xai_headers()
+    if not headers:
+        return None
+    chat_msgs = [{"role": "system", "content": sys_instruction}]
+    for m in messages or []:
+        role = "user" if m.get("role") == "user" else "assistant"
+        chat_msgs.append({"role": role, "content": m.get("text", "")})
+    for model in XAI_MODELS:
+        try:
+            resp = SESSION.post(
+                "https://api.x.ai/v1/chat/completions",
+                json={"model": model, "temperature": 0.7, "messages": chat_msgs},
+                headers=headers,
+                timeout=12,
+            )
+            resp.raise_for_status()
+            text = _extract_xai_text(resp.json()).strip()
+            if text:
+                return {
+                    "reply": text,
+                    "score": 90,
+                    "coach_tip": "Stay on the incumbent weakness, then offer a free 1-hour proof.",
+                    "source": f"xAI {model}",
+                }
+        except requests.exceptions.RequestException as e:
+            log.warning(f"xAI roleplay {model} failed: {e}")
+    return None
+
+
+def _contact_from_xai_person(person, company, domain, tier, tags):
+    if not isinstance(person, dict):
+        return None
+    name = (person.get("name") or "").strip()
+    title = (person.get("title") or "").strip() or "Executive"
+    if not name or len(name.split()) < 2:
+        return None
+    initials = "".join(p[0] for p in name.split()[:2]).upper()
+    email = name.lower().replace(" ", ".") + "@" + domain
+    return {
+        "name": name,
+        "title": f"{title} at {company}",
+        "tier": tier,
+        "initials": initials,
+        "email": email,
+        "emailVerified": False,
+        "emailSource": "xAI live research",
+        "sources": ["xAI", "Web Search"],
+        "tags": tags,
+        "notes": f"xAI-sourced stakeholder for {company}.",
+        "zoomInfoUrl": f"https://app.zoominfo.com/#/apps/profile/company/{company.lower()}",
+        "linkedInUrl": f"https://www.linkedin.com/search/results/people/?keywords={company}+{title.replace(' ', '+')}",
+    }
+
+
+def refresh_google_access_token():
+    refresh = os.environ.get("GOOGLE_REFRESH_TOKEN")
+    client_id = os.environ.get("GOOGLE_CLIENT_ID")
+    if not refresh or not client_id:
+        return None
+    data = {
+        "client_id": client_id,
+        "refresh_token": refresh,
+        "grant_type": "refresh_token",
+    }
+    secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+    if secret:
+        data["client_secret"] = secret
+    try:
+        resp = SESSION.post("https://oauth2.googleapis.com/token", data=data, timeout=12)
+        resp.raise_for_status()
+        payload = resp.json()
+        token = payload.get("access_token")
+        if not token:
+            return None
+        exp = time.time() + int(payload.get("expires_in") or 3600)
+        persist_api_keys(GOOGLE_ACCESS_TOKEN=token, GOOGLE_TOKEN_EXP=str(int(exp)))
+        return token
+    except requests.exceptions.RequestException as e:
+        log.warning(f"Google token refresh failed: {e}")
+        return None
+
+
+def gemini_http(url, payload, timeout=12):
+    """Call Gemini with the signed-in Google token first, then a pasted API key."""
+    headers = {"Content-Type": "application/json"}
+    token = os.environ.get("GOOGLE_ACCESS_TOKEN") or ""
+    exp = float(os.environ.get("GOOGLE_TOKEN_EXP") or 0)
+    if token and exp and time.time() > exp - 60:
+        token = refresh_google_access_token() or ""
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+        try:
+            resp = SESSION.post(url.split("?", 1)[0], json=payload, headers=headers, timeout=timeout)
+            if resp.status_code != 401:
+                return resp
+        except requests.exceptions.RequestException:
+            pass
+        token = refresh_google_access_token() or ""
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+            try:
+                return SESSION.post(url.split("?", 1)[0], json=payload, headers=headers, timeout=timeout)
+            except requests.exceptions.RequestException:
+                pass
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         return None
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
+    sep = "&" if "?" in url else "?"
+    return SESSION.post(url + sep + "key=" + api_key, json=payload, headers={"Content-Type": "application/json"}, timeout=timeout)
+
+
+def gemini_search_grounding_live(query):
+    """Execute live Google Search grounding via Gemini, using Google login or API key."""
+    if not (os.environ.get("GOOGLE_ACCESS_TOKEN") or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")):
+        return None
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
     payload = {
         "contents": [
             {
@@ -449,12 +779,9 @@ def gemini_search_grounding_live(query):
     start_time = time.time()
     for attempt in range(2):
         try:
-            resp = SESSION.post(
-                url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=10
-            )
+            resp = gemini_http(url, payload, timeout=12)
+            if resp is None:
+                return None
             resp.raise_for_status()
             log.info(f"Gemini grounding took {time.time() - start_time:.2f}s")
             cands = resp.json().get("candidates", [])
@@ -493,10 +820,13 @@ def execute_roleplay_turn(messages, persona="skeptical_vp", profile_data=None):
 
     sys_instruction = persona_prompts.get(persona, persona_prompts["skeptical_vp"]) + f"\nThe salesperson is pitching {seller_co} ({prod}). Their differentiator is: {diff}."
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if api_key:
+    xai_turn = xai_roleplay_turn(messages, sys_instruction)
+    if xai_turn:
+        return xai_turn
+
+    if os.environ.get("GOOGLE_ACCESS_TOKEN") or os.environ.get("GEMINI_API_KEY"):
         try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
+            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
 
             gemini_contents = []
             for m in messages:
@@ -508,12 +838,9 @@ def execute_roleplay_turn(messages, persona="skeptical_vp", profile_data=None):
                 "contents": gemini_contents,
                 "generationConfig": {"temperature": 0.7, "maxOutputTokens": 300}
             }
-            resp = SESSION.post(
-                url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=8
-            )
+            resp = gemini_http(url, payload, timeout=8)
+            if resp is None:
+                raise requests.exceptions.RequestException("no Gemini auth")
             resp.raise_for_status()
             cands = resp.json().get("candidates", [])
             if cands:
@@ -667,9 +994,10 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
         sumble_key = os.environ.get("SUMBLE_API_KEY", "")
         gemini_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
         xai_key = os.environ.get("XAI_API_KEY", "")
+        google_token = os.environ.get("GOOGLE_ACCESS_TOKEN", "")
         def _usable(val):
             return bool(val) and "your_" not in val.lower() and "changeme" not in val.lower()
-        has_keys = _usable(gemini_key) or _usable(tavily_key) or _usable(sumble_key) or _usable(xai_key)
+        has_keys = _usable(gemini_key) or _usable(tavily_key) or _usable(sumble_key) or _usable(xai_key) or _usable(google_token)
         
         if not has_keys:
             if domain in demo_data.DEMO_DATA:
@@ -706,12 +1034,14 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
             return
 
         # Parallel concurrent execution across all live APIs
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            fut_xai = executor.submit(xai_account_intel_live, clean_target, domain)
             fut_sumble = executor.submit(sumble_enrich_live, domain)
             fut_gemini = executor.submit(gemini_search_grounding_live, f"{clean_target} company overview news")
             fut_tavily = executor.submit(tavily_search_live, f"{clean_target} business overview company news")
             fut_contacts = executor.submit(discover_real_stakeholders, clean_target, domain, fields.get("seniority"), fields.get("persona"))
 
+            xai_res = fut_xai.result() or {}
             sumble_data = fut_sumble.result() or {}
             gemini_res = fut_gemini.result()
             tavily_results = fut_tavily.result()
@@ -760,7 +1090,20 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
         live_news_snippet = ""
         live_summary = f"{clean_target} is scaling marketing and culture initiatives. Their marketing, people, and sales orgs invest in high-impact brand touchpoints, onboarding kits, and VIP client appreciation."
 
-        if gemini_res:
+        if xai_res:
+            live_summary = xai_res.get("description") or live_summary
+            if xai_res.get("news_headline"):
+                live_news_snippet = f"xAI Live News: {xai_res.get('news_headline')} ({xai_res.get('news_url') or ''})"
+            emit("tool", {"name": "mcp__xai:account_intel", "input": {"company": clean_target, "source": xai_res.get("_source", "xAI")}})
+            for person, tier, tags in (
+                (xai_res.get("economic_buyer"), "C-Level / VP", ["Economic Buyer", "xAI"]),
+                (xai_res.get("champion"), "VP / Director", ["Champion", "xAI"]),
+                (xai_res.get("evaluator"), "VP / Director", ["Evaluator", "xAI"]),
+            ):
+                contact = _contact_from_xai_person(person, xai_res.get("name") or clean_target, domain, tier, tags)
+                if contact and contact["name"] not in {c.get("name") for c in real_contacts}:
+                    real_contacts.insert(0, contact)
+        elif gemini_res:
             live_summary = gemini_res.get("summary", live_summary)
             sources = gemini_res.get("sources", [])
             if sources:
@@ -809,13 +1152,21 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
         if not tiers:
             tiers.append({"name": "Verified Key Stakeholders", "contacts": real_contacts})
 
-        comp_name = sumble_data.get("name") or clean_target
+        comp_name = (xai_res.get("name") if xai_res else None) or sumble_data.get("name") or clean_target
+        why_now = f"Scaling key marketing, HR, and brand initiatives in {sumble_data.get('industry', 'their industry')} with ~{sumble_data.get('employee_count', 'N/A')} employees."
+        if xai_res:
+            signals = xai_res.get("buying_signals") or []
+            if signals:
+                why_now = signals[0]
+            elif xai_res.get("news_headline"):
+                why_now = xai_res.get("news_headline")
         result_obj = {
             "company": comp_name,
             "companyZoomInfoUrl": f"https://app.zoominfo.com/#/apps/profile/company/{clean_target.lower()}",
-            "whyNow": f"Scaling key marketing, HR, and brand initiatives in {sumble_data.get('industry', 'their industry')} with ~{sumble_data.get('employee_count', 'N/A')} employees.",
+            "whyNow": why_now,
             "accountClass": "net-new",
             "summary": live_summary,
+            "intel_source": (xai_res.get("_source") if xai_res else None) or "multi-source",
             "detected_tech": detected_tech,
             "industry_intel": industry_intel,
             "news": [
@@ -851,6 +1202,21 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
             },
             "tiers": tiers
         }
+        if xai_res:
+            if xai_res.get("incumbent"):
+                result_obj["competitor"]["detected"] = [xai_res["incumbent"]]
+                result_obj["competitor"]["source"] = xai_res.get("_source", "xAI")
+            if xai_res.get("wedge"):
+                result_obj["competitor"]["angle"] = xai_res["wedge"]
+            if xai_res.get("industry"):
+                result_obj["industry"] = xai_res["industry"]
+            if xai_res.get("headcount"):
+                result_obj["headcount"] = xai_res["headcount"]
+            if xai_res.get("revenue"):
+                result_obj["revenue"] = xai_res["revenue"]
+            if xai_res.get("news_url"):
+                result_obj["news"][0]["url"] = xai_res["news_url"]
+                result_obj["news"][0]["headline"] = xai_res.get("news_headline") or result_obj["news"][0]["headline"]
 
         DOMAIN_INTEL_CACHE[domain] = result_obj
         db.save_search(domain, comp_name, result_obj, pdata.get("companyName", "generic"))
@@ -996,6 +1362,122 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _request_origin(self):
+        host = self.headers.get("Host") or "127.0.0.1:8765"
+        return "http://" + host
+
+    def _google_oauth_start(self):
+        qs = parse_qs(urlparse(self.path).query)
+        client_id = (qs.get("client_id") or [None])[0] or os.environ.get("GOOGLE_CLIENT_ID") or ""
+        if not client_id:
+            return self._send(400, "text/plain", b"GOOGLE_CLIENT_ID is missing")
+        os.environ["GOOGLE_CLIENT_ID"] = client_id
+        origin = self._request_origin()
+        redirect = origin + "/api/auth/google/callback"
+        verifier = secrets.token_urlsafe(64)
+        challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode("utf-8")).digest()).rstrip(b"=").decode("ascii")
+        state = secrets.token_urlsafe(24)
+        OAUTH_STATES[state] = {"verifier": verifier, "redirect": redirect, "created": time.time(), "client_id": client_id}
+        params = {
+            "client_id": client_id,
+            "redirect_uri": redirect,
+            "response_type": "code",
+            "scope": GOOGLE_OAUTH_SCOPES,
+            "state": state,
+            "code_challenge": challenge,
+            "code_challenge_method": "S256",
+            "access_type": "offline",
+            "prompt": "consent",
+            "include_granted_scopes": "true",
+        }
+        loc = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
+        self.send_response(302)
+        self.send_header("Location", loc)
+        self.end_headers()
+
+    def _google_oauth_callback(self):
+        qs = parse_qs(urlparse(self.path).query)
+        err = (qs.get("error") or [None])[0]
+        if err:
+            return self._send(400, "text/html; charset=utf-8", f"<h3>Google sign-in cancelled: {err}</h3>".encode())
+        state = (qs.get("state") or [None])[0]
+        code = (qs.get("code") or [None])[0]
+        saved = OAUTH_STATES.pop(state, None) if state else None
+        if not saved or not code:
+            return self._send(400, "text/plain", b"Invalid Google sign-in state")
+        data = {
+            "client_id": saved.get("client_id") or os.environ.get("GOOGLE_CLIENT_ID"),
+            "code": code,
+            "code_verifier": saved["verifier"],
+            "grant_type": "authorization_code",
+            "redirect_uri": saved["redirect"],
+        }
+        secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+        if secret:
+            data["client_secret"] = secret
+        try:
+            token_resp = SESSION.post("https://oauth2.googleapis.com/token", data=data, timeout=15)
+            token_resp.raise_for_status()
+            tokens = token_resp.json()
+        except requests.exceptions.RequestException as e:
+            return self._send(400, "text/plain", f"Google token exchange failed: {e}".encode())
+
+        access = tokens.get("access_token") or ""
+        refresh = tokens.get("refresh_token") or ""
+        id_token = tokens.get("id_token") or ""
+        expires_in = int(tokens.get("expires_in") or 3600)
+        email = ""
+        name = ""
+        picture = ""
+        if id_token and id_token.count(".") >= 2:
+            try:
+                payload = id_token.split(".")[1]
+                payload += "=" * (-len(payload) % 4)
+                claims = json.loads(base64.urlsafe_b64decode(payload.encode("ascii")))
+                email = (claims.get("email") or "").lower()
+                name = claims.get("name") or ""
+                picture = claims.get("picture") or ""
+            except Exception:
+                pass
+        if access and not email:
+            try:
+                info = SESSION.get(
+                    "https://openidconnect.googleapis.com/v1/userinfo",
+                    headers={"Authorization": f"Bearer {access}"},
+                    timeout=10,
+                )
+                info.raise_for_status()
+                user = info.json()
+                email = (user.get("email") or "").lower()
+                name = user.get("name") or name
+                picture = user.get("picture") or picture
+            except requests.exceptions.RequestException:
+                pass
+        if not email:
+            return self._send(400, "text/plain", b"Google did not return an email")
+
+        switch_user_keys(email)
+        db.save_user_profile(email, name or email.split("@")[0], "Account Executive", "", "sockclub", "", picture)
+        persist_api_keys(
+            email=email,
+            GOOGLE_ACCESS_TOKEN=access,
+            GOOGLE_REFRESH_TOKEN=refresh,
+            GOOGLE_TOKEN_EXP=str(int(time.time() + expires_in)),
+            GOOGLE_CLIENT_ID=saved.get("client_id") or os.environ.get("GOOGLE_CLIENT_ID") or "",
+        )
+        html = (
+            "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Signed in</title></head><body>"
+            "<script>localStorage.setItem('prospectpulse_google_access_token'," + json.dumps(access) + ");"
+            "localStorage.setItem('prospectpulse_google_token_exp', String(Date.now()+" + str(expires_in * 1000) + "));"
+            "localStorage.setItem('prospectpulse_session'," + json.dumps(json.dumps({
+                "email": email, "name": name or email.split("@")[0], "title": "Account Executive",
+                "company": "", "preset": "sockclub", "avatar_url": picture
+            })) + ");"
+            "location.replace('/');</script>"
+            "<p>Signed in with Google. Returning to ProspectPulse…</p></body></html>"
+        )
+        return self._send(200, "text/html; charset=utf-8", html.encode("utf-8"))
+
     def do_GET(self):
         path = urlparse(self.path).path
 
@@ -1020,6 +1502,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(404, "text/plain", b"Deal room not found")
             html_content = generate_dealroom_html(DEALROOMS[dr_id])
             return self._send(200, "text/html; charset=utf-8", html_content.encode("utf-8"))
+
+        if path == "/api/auth/google/start":
+            return self._google_oauth_start()
+        if path == "/api/auth/google/callback":
+            return self._google_oauth_callback()
 
         if path.startswith("/api/stream/"):
             return self._stream(path.rsplit("/", 1)[-1])
@@ -1050,8 +1537,37 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json", json.dumps(stats).encode())
 
         if path == "/api/auth/profile":
-            prof = db.get_user_profile()
-            return self._send(200, "application/json", json.dumps({"profile": prof}).encode())
+            email = CURRENT_USER_EMAIL
+            prof = db.get_user_profile(email) if email else None
+            ws = _read_json_file(_workspace_keys_path())
+            return self._send(200, "application/json", json.dumps({
+                "profile": prof,
+                "email": email,
+                "workspace": {
+                    "enabled": bool(ws.get("XAI_API_KEY") or ws.get("GEMINI_API_KEY")),
+                    "has_xai": bool(ws.get("XAI_API_KEY")),
+                    "has_gemini": bool(ws.get("GEMINI_API_KEY")),
+                },
+            }).encode())
+
+        if path == "/api/auth/config":
+            return self._send(200, "application/json", json.dumps({
+                "google_client_id": os.environ.get("GOOGLE_CLIENT_ID", ""),
+                "auth_mode": "personal",
+            }).encode())
+
+        if path == "/api/auth/accounts":
+            profiles = []
+            try:
+                users_dir = os.path.join(_user_data_dir(), "users")
+                if os.path.isdir(users_dir):
+                    for name in os.listdir(users_dir):
+                        prof = db.get_user_profile(name) if "@" in name else None
+                        if prof:
+                            profiles.append({"email": prof.get("email"), "name": prof.get("name")})
+            except Exception:
+                pass
+            return self._send(200, "application/json", json.dumps({"accounts": profiles}).encode())
 
         if path == "/api/feedback":
             try:
@@ -1225,12 +1741,14 @@ class Handler(BaseHTTPRequestHandler):
                     return _map_to_bulk_result(domain, cached)
                     
                 try:
-                    with ThreadPoolExecutor(max_workers=4) as ex:
+                    with ThreadPoolExecutor(max_workers=5) as ex:
+                        fut_x = ex.submit(xai_account_intel_live, clean_target, domain)
                         fut_s = ex.submit(sumble_enrich_live, domain)
                         fut_g = ex.submit(gemini_search_grounding_live, f"{clean_target} company overview news")
                         fut_t = ex.submit(tavily_search_live, f"{clean_target} business overview company news")
                         fut_c = ex.submit(discover_real_stakeholders, clean_target, domain, "Director+", None)
                         
+                        xai_res = fut_x.result() or {}
                         sumble_data = fut_s.result() or {}
                         gemini_res = fut_g.result()
                         tavily_res = fut_t.result()
@@ -1243,8 +1761,12 @@ class Handler(BaseHTTPRequestHandler):
                         elif "zendesk" in t.lower(): detected_tech.append("Zendesk")
                         
                     live_summary = f"{clean_target} is scaling marketing and culture initiatives."
-                    if gemini_res: live_summary = gemini_res.get("summary", live_summary)
-                    elif tavily_res: live_summary = f"{clean_target}: {tavily_res[0].get('content', '')[:200]}..."
+                    if xai_res.get("description"):
+                        live_summary = xai_res.get("description")
+                    elif gemini_res:
+                        live_summary = gemini_res.get("summary", live_summary)
+                    elif tavily_res:
+                        live_summary = f"{clean_target}: {tavily_res[0].get('content', '')[:200]}..."
                     
                     if not real_contacts:
                         real_contacts = [{"name": "Sarah Jenkins", "title": f"VP of Brand Experience at {clean_target}", "email": f"sarah.jenkins@{domain}"}]
@@ -1529,17 +2051,21 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json", json.dumps(resp_data).encode())
 
         if path == "/api/auth/save-profile":
-            email = data.get("email", "user@workspace.com")
+            email = (data.get("email") or "").strip().lower()
+            if not email or "@" not in email:
+                return self._send(400, "application/json", b'{"error":"a real email is required"}')
             name = data.get("name", "Sales Representative")
             title = data.get("title", "Enterprise Account Executive")
-            company = data.get("company", "Sock Club")
+            company = data.get("company", "")
             preset = data.get("preset", "sockclub")
             api_key = data.get("api_key", "")
             tavily_key = data.get("tavily_key", "")
             xai_key = data.get("xai_key", "")
             avatar_url = data.get("avatar_url", "")
+            switch_user_keys(email)
             db.save_user_profile(email, name, title, company, preset, api_key, avatar_url)
             persist_api_keys(
+                email=email,
                 GEMINI_API_KEY=api_key,
                 TAVILY_API_KEY=tavily_key,
                 XAI_API_KEY=xai_key,
@@ -1547,7 +2073,53 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json", json.dumps({"status": "saved", "profile": {"email": email, "name": name, "title": title, "company": company, "preset": preset, "avatar_url": avatar_url}}).encode())
 
         if path == "/api/auth/logout":
+            switch_user_keys(None)
             return self._send(200, "application/json", b'{"status":"logged_out"}')
+
+        if path == "/api/auth/switch":
+            email = (data.get("email") or "").strip().lower()
+            if not email or "@" not in email:
+                return self._send(400, "application/json", b'{"error":"email required"}')
+            switch_user_keys(email)
+            prof = db.get_user_profile(email)
+            return self._send(200, "application/json", json.dumps({"status": "switched", "profile": prof, "email": email}).encode())
+
+        if path == "/api/auth/google/session":
+            email = (data.get("email") or CURRENT_USER_EMAIL or "").strip().lower()
+            name = data.get("name") or email
+            token = data.get("access_token") or ""
+            expires_in = int(data.get("expires_in") or 3600)
+            if email and "@" in email:
+                switch_user_keys(email)
+                if not db.get_user_profile(email):
+                    db.save_user_profile(email, name, "Account Executive", "", "sockclub", "", "")
+            persist_api_keys(
+                email=email,
+                GOOGLE_ACCESS_TOKEN=token,
+                GOOGLE_TOKEN_EXP=str(int(time.time() + expires_in)),
+            )
+            return self._send(200, "application/json", json.dumps({
+                "status": "connected",
+                "email": email,
+                "gemini_oauth": bool(token),
+            }).encode())
+
+        if path == "/api/auth/workspace":
+            persist_workspace_keys(
+                XAI_API_KEY=data.get("xai_key") or data.get("XAI_API_KEY") or "",
+                GEMINI_API_KEY=data.get("gemini_key") or data.get("GEMINI_API_KEY") or "",
+                TAVILY_API_KEY=data.get("tavily_key") or data.get("TAVILY_API_KEY") or "",
+            )
+            apply_workspace_keys()
+            ws = _read_json_file(_workspace_keys_path())
+            return self._send(200, "application/json", json.dumps({
+                "status": "saved",
+                "workspace": {
+                    "enabled": bool(ws.get("XAI_API_KEY") or ws.get("GEMINI_API_KEY")),
+                    "has_xai": bool(ws.get("XAI_API_KEY")),
+                    "has_gemini": bool(ws.get("GEMINI_API_KEY")),
+                },
+            }).encode())
 
         return self._send(404, "application/json", b'{"error":"no route"}')
 

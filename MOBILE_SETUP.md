@@ -51,7 +51,16 @@ Use this option to generate a standalone Android build that can be distributed m
 
 ---
 
-## Option C: Compile Native iOS (.IPA / Xcode)
+## Option C: iPhone install from this Windows PC (Home Screen app)
+
+Apple will not let Windows compile a signed `.ipa`. Use this tonight:
+
+1. Double-click `Install-On-iPhone.bat` on this PC.
+2. On the iPhone (same Wi-Fi), open the printed URL in **Safari**.
+3. Tap **Share** → **Add to Home Screen**.
+4. Launch **ProspectPulse** from the home screen. It runs full-screen with its own icon.
+
+## Option D: Native iOS project (Xcode / TestFlight)
 
 Use this option to create an iOS build for TestFlight beta testing or App Store distribution.
 
