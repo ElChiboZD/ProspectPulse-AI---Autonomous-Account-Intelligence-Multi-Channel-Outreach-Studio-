@@ -29,15 +29,67 @@ import subprocess
 import threading
 import time
 import uuid
+import logging
+import sqlite3
+import dns.resolver
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
+import functools
+import requests
+from cachetools import LRUCache
+import db
+import demo_data
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+log = logging.getLogger('prospectpulse')
+
+class RateLimiter:
+    def __init__(self, rate, per):
+        self.rate = rate
+        self.per = per
+        self.allowance = defaultdict(lambda: rate)
+        self.last_check = defaultdict(time.time)
+
+    def allow(self, key):
+        current = time.time()
+        time_passed = current - self.last_check[key]
+        self.last_check[key] = current
+        self.allowance[key] += time_passed * (self.rate / self.per)
+        if self.allowance[key] > self.rate:
+            self.allowance[key] = self.rate
+        if self.allowance[key] < 1.0:
+            return False
+        else:
+            self.allowance[key] -= 1.0
+            return True
+
+api_run_limiter = RateLimiter(10, 60)
+api_tts_limiter = RateLimiter(5, 60)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(ROOT, "static")
 PROMPTS = os.path.join(ROOT, "prompts")
 
-DOMAIN_INTEL_CACHE = {}
+DOMAIN_INTEL_CACHE = LRUCache(maxsize=500)
+SESSION = requests.Session()
+
+INDUSTRY_HOOKS = {
+    'healthcare': {'angle': 'HIPAA compliance & patient experience', 'kpi': 'patient satisfaction scores', 'pain': 'regulatory audit overhead'},
+    'financial_services': {'angle': 'regulatory compliance & audit trails', 'kpi': 'transaction processing time', 'pain': 'compliance reporting burden'},
+    'technology': {'angle': 'developer velocity & platform scalability', 'kpi': 'deployment frequency', 'pain': 'technical debt accumulation'},
+    'retail': {'angle': 'customer experience & omnichannel', 'kpi': 'cart abandonment rate', 'pain': 'channel fragmentation'},
+    'manufacturing': {'angle': 'supply chain optimization', 'kpi': 'lead time reduction', 'pain': 'inventory carrying costs'},
+    'education': {'angle': 'student engagement & retention', 'kpi': 'enrollment conversion rate', 'pain': 'administrative overhead'},
+}
+
+import asyncio
+_tts_loop = asyncio.new_event_loop()
+def _run_tts_loop():
+    asyncio.set_event_loop(_tts_loop)
+    _tts_loop.run_forever()
+threading.Thread(target=_run_tts_loop, daemon=True).start()
 
 def _load_env():
     env_path = os.path.join(ROOT, ".env")
@@ -141,6 +193,7 @@ PROFILE_FILES = {
 }
 
 
+@functools.lru_cache(maxsize=None)
 def load_template(name):
     """Load a markdown prompt template from the prompts/ directory."""
     fname = f"{name}.md" if not name.endswith(".md") else name
@@ -167,8 +220,7 @@ def system_prompt_for(profile, custom_profile=None):
                 "DIFFERENTIATOR": custom_profile.get("differentiator", "Direct manufacturer, knit-in designs (no fading print), free design mockups in under an hour"),
                 "SENDER_NAME": custom_profile.get("senderName", "[Your Name] · Sock Club"),
             }
-            for k, v in repl.items():
-                tpl = tpl.replace("{{" + k + "}}", str(v))
+            tpl = re.sub(r'\{\{([^}]+)\}\}', lambda m: str(repl.get(m.group(1), m.group(0))), tpl)
             return tpl + IDENTITY_GUARD
 
     fname = PROFILE_FILES.get(profile)
@@ -236,238 +288,7 @@ JOBS = {}
 JOBS_LOCK = threading.Lock()
 
 
-def build_command(kind, prompt, resume_session=None, profile="generic", custom_profile=None):
-    """Construct the claude CLI invocation for a given step.
 
-    POC hardening:
-      --setting-sources ""  -> ignore user/project/local settings
-      --system-prompt       -> replace the default (identity-bearing) prompt with the
-                               selected profile (generic or custom product context)
-      no skills, no memory  -> via the clean CLAUDE_CONFIG_DIR set in the env
-    """
-    cmd = [
-        CLAUDE_BIN, "-p",
-        "--output-format", "stream-json",
-        "--include-partial-messages",
-        "--verbose",
-        "--disable-slash-commands",   # skill templates name the operator — keep off
-    ]
-
-    if ENABLE_TOOLS:
-        # Live research: reuse user MCP OAuth tokens, but ONLY the four research
-        # servers, and run from the neutral cwd so no project memory loads.
-        cmd += [
-            "--setting-sources", "user",
-            "--strict-mcp-config",
-            "--mcp-config", MCP_CONFIG,
-            "--permission-mode", "acceptEdits",
-            "--allowedTools", " ".join(ALLOWED_TOOLS),
-        ]
-    else:
-        # Fully locked down: no settings, no tools.
-        cmd += ["--setting-sources", "", "--permission-mode", "default"]
-
-    if resume_session:
-        cmd += ["--resume", resume_session]
-    else:
-        # Only set the system prompt on a fresh turn; --resume keeps the original.
-        cmd += ["--system-prompt", system_prompt_for(profile, custom_profile)]
-    cmd += ["--", prompt]
-    return cmd
-
-
-def compose_prompt(kind, fields, profile_data=None):
-    """Fill a generic template with structured, vendor-neutral or profile-specific form fields."""
-    tpl = load_template(kind)
-    if not tpl:
-        return ""
-    
-    pdata = profile_data or {}
-    seller_company = pdata.get("companyName", "Sock Club")
-    product_name = pdata.get("productName", "Custom-Knit Branded Socks & Corporate Gifting")
-    value_prop = pdata.get("valueProp", "Custom-knit socks in USA with free 1-hour digital proofs, 5-day rush turnaround, and 95%+ keep rate")
-    differentiator = pdata.get("differentiator", "Direct manufacturer, knit-in designs (no fading print), free design mockups in under an hour")
-    target_icp = pdata.get("targetIcp", "VP of Event Marketing, Head of People/HR, VP of Sales")
-    sender_name = pdata.get("senderName", "[Your Name] · Sock Club")
-
-    if kind == "reply":
-        # Reply handler: standalone, fill placeholders and return (no competitor block).
-        repl = {
-            "WHO": fields.get("who", "") or "(unknown — infer from the reply if possible)",
-            "INTENT": fields.get("intent", "interested"),
-            "TONE": fields.get("tone", "professional"),
-            "GOAL": fields.get("goal", "book a 15-min meeting"),
-            "NOTES": fields.get("notes", "") or "(none)",
-            "REPLY_TEXT": fields.get("replyText", ""),
-            "SELLER_COMPANY": seller_company,
-            "PRODUCT_NAME": product_name,
-            "VALUE_PROP": value_prop,
-            "SENDER_NAME": sender_name,
-        }
-        for k, v in repl.items():
-            tpl = tpl.replace("{{" + k + "}}", str(v))
-        return tpl
-    if kind == "prospect":
-        repl = {
-            "SOURCE_MODE": fields.get("mode", "company"),
-            "SOURCE_VALUE": fields.get("value", ""),
-            "SENIORITY": fields.get("seniority", "Director and above"),
-            "LIMIT": str(fields.get("limit", 5)),
-            "EXCLUDE": fields.get("exclude", "Customer Success and entry-level reps"),
-            "SELLER_COMPANY": seller_company,
-            "PRODUCT_NAME": product_name,
-            "VALUE_PROP": value_prop,
-            "DIFFERENTIATOR": differentiator,
-            "TARGET_ICP": target_icp,
-            "SENDER_NAME": sender_name,
-        }
-    else:  # outreach
-        o = fields.get("options") or {}
-        repl = {
-            "COMPANY": fields.get("company", ""),
-            "CONTACT": fields.get("contact", "") or "AUTO_SELECT (no specific person chosen — you may pick the best-fit stakeholder)",
-            "GOAL": fields.get("goal", "meeting"),
-            "TONE": o.get("tone") or fields.get("tone", "professional"),
-            "MODE": fields.get("mode", "draft"),
-            "SELLER_COMPANY": seller_company,
-            "PRODUCT_NAME": product_name,
-            "VALUE_PROP": value_prop,
-            "DIFFERENTIATOR": differentiator,
-            "TARGET_ICP": target_icp,
-            "SENDER_NAME": sender_name,
-        }
-    for k, v in repl.items():
-        tpl = tpl.replace("{{" + k + "}}", str(v))
-
-    # Outreach email options (type, tone, humor, length, CTA, hook, toggles, notes).
-    if kind == "outreach":
-        o = fields.get("options") or {}
-        if o:
-            lines = ["\n\n## Email options (follow these)"]
-            if o.get("type"):   lines.append(f"- Email type: {o['type']}")
-            if o.get("tone"):   lines.append(f"- Tone: {o['tone']}")
-            if o.get("humor") and o["humor"] != "none":
-                lines.append(f"- Humor: {o['humor']} — a light touch in the opener, then pivot to value. Never forced or unprofessional.")
-            else:
-                lines.append("- Humor: none — keep it straight.")
-            if o.get("length"): lines.append(f"- Length: {o['length']} — respect this tightly.")
-            if o.get("cta"):    lines.append(f"- Call to action: {o['cta']}")
-            if o.get("hook"):   lines.append(f"- Open with: {o['hook']}")
-            lines.append(f"- {'INCLUDE' if o.get('proof') else 'Do not force'} a concrete proof point / metric (use a real one from your product context if relevant).")
-            if o.get("personalize"):
-                lines.append("- Personalize heavily from the research: cite a specific, real signal (recent news, hiring, the verified incumbent tool, an intent signal). No generic filler.")
-            if o.get("subjects"):
-                lines.append("- Provide 3 subject-line options (put the best one in `subject`, list all 3 at the top of `body` as 'Subject options:' then the email).")
-            cad = (o.get("cadence") or "none").lower()
-            CADENCE = {
-                "light": "LIGHT (3 touches over ~10 days)",
-                "balanced": "BALANCED (5 touches over ~2 weeks)",
-                "aggressive": "AGGRESSIVE (7 touches over ~2 weeks)",
-            }
-            if cad in CADENCE:
-                lines.append(
-                    f"- Follow-up cadence: {CADENCE[cad]}. In addition to the first email, "
-                    "build a full multi-touch follow-up sequence to THIS SAME recipient and "
-                    "populate the `sequence` array in the JSON (see its rules below). Day 0 must "
-                    "fire the initial email AND a LinkedIn connection request together; later "
-                    "touches alternate phone (with a short voicemail script) and email, and the "
-                    "final touch is an email 'break-up'. Add a LinkedIn message touch only at the "
-                    "aggressive level."
-                )
-            else:
-                lines.append("- Follow-up cadence: NONE — return an empty `sequence` array `[]`.")
-            if o.get("notes"):
-                lines.append(f"- Specific instruction from the rep (honor it): {o['notes']}")
-            tpl += "\n".join(lines)
-
-        # Use ALL available data for the best possible email.
-        tpl += (
-            "\n\n## Use ALL available data\n"
-            "Before drafting, pull together everything you can to make this the strongest "
-            "possible email: verify the recipient and their role (ZoomInfo/CommonRoom), get "
-            "the best email available, confirm the incumbent tool (Sumble/web), and find a "
-            "timely hook (Tavily news, hiring, intent). Ground every claim in something real; "
-            "if a data source is blocked or empty, note it in `flags` rather than inventing. "
-            "Prefer the most specific, verifiable detail over generic value props."
-        )
-
-    # Competitor / incumbent tool: ALWAYS detect; verify & CORRECT a user's pick.
-    comp = (fields.get("competitor") or "").strip()
-    user_pick = (fields.get("competitorUserPick") or "").strip()
-    verified = (fields.get("competitorVerified") or "").strip()
-    block = "\n\n## Incumbent / competitor (ALWAYS investigate)\n"
-
-    if kind == "outreach" and comp:
-        # Outreach: carry the verified finding from the prospect step.
-        block += (
-            f"From verified research, the prospect's actual incumbent CX/helpdesk stack is: "
-            f"**{comp}**" + (f" (status: {verified})" if verified else "") + ".\n"
-        )
-        if user_pick and user_pick.lower() not in comp.lower():
-            block += (
-                f"- NOTE: the rep originally guessed **{user_pick}**, which the data did NOT "
-                f"confirm. Use the verified incumbent ({comp}) for positioning, not the guess.\n"
-            )
-        block += (
-            "- Build the displacement/layering angle in the draft around this verified "
-            "incumbent, using your product context (faster time-to-value, no-code, "
-            "helpdesk-agnostic, outcome-based pricing). Treat an existing-customer tool "
-            "as expansion, not a rip-out.\n"
-            "- Briefly RE-CONFIRM the incumbent with a quick Sumble/web check before drafting "
-            "if you have any doubt; correct it if the data now disagrees.\n"
-        )
-        intel = competitor_intel(comp) or competitor_intel(user_pick)
-        if intel:
-            block += (
-                "\n### Competitive battlecard intel (use this specific angle in the email)\n"
-                "From our researched battlecards, the sharpest HONEST way to position against "
-                "this incumbent:\n" + intel + "\n"
-                "- Weave ONE crisp version of this into the email as the wedge — never bash the "
-                "competitor; tie it to a real pain the prospect feels. Keep our own claims honest "
-                "(don't over-promise deflection %). If the prospect explicitly mentioned their "
-                "tool, acknowledge it respectfully, then pivot to this angle.\n"
-            )
-        return tpl + block
-
-    # Prospect mode (and outreach with no carried competitor).
-    if comp:
-        block += (
-            f"The user believes the prospect currently uses: **{comp}**.\n"
-            "- VERIFY this against the live tech stack via Sumble (resolve slugs with "
-            "SearchTechnologies, then FindMatchAndEnrichOrganizations) and web/Tavily.\n"
-            "- If CONFIRMED → status 'verified'. If you CANNOT confirm → 'unverified'. "
-            "If the data shows a DIFFERENT tool → status 'contradicted', put the real "
-            "tool(s) in `competitor.detected`, and state plainly in the summary that the "
-            "user's guess appears wrong and what the actual incumbent is (CORRECT them).\n"
-            "- If it says 'already a customer', treat it as expansion, not a rip-out.\n"
-        )
-    else:
-        block += (
-            "The user did NOT specify an incumbent — DETECT it yourself. Use Sumble "
-            "(SearchTechnologies → FindMatchAndEnrichOrganizations) and web/Tavily to "
-            "identify the CX/helpdesk/AI-agent tools actually in their stack. Set "
-            "`competitor.status` to 'verified' if you find one with evidence, else 'none-specified'.\n"
-        )
-    block += (
-        "- Always populate the JSON `competitor` object (detected, userClaim, status, "
-        "source, angle).\n"
-        "- Frame positioning against the detected incumbent using your product context "
-        "(e.g. faster time-to-value, no-code, helpdesk-agnostic, outcome-based pricing).\n"
-        "- prospect mode: competitive angle in summary + competitor object. "
-        "outreach mode: make the displacement/layering angle a hook in the draft."
-    )
-    # If the rep named a tool, seed the researched angle (and tell the model to also
-    # apply it to whatever it actually detects).
-    intel = competitor_intel(comp)
-    if intel:
-        block += (
-            "\n\n### Competitive battlecard intel (researched)\n"
-            "If this incumbent is confirmed, position with this specific HONEST angle:\n"
-            + intel +
-            "\n- If you DETECT a different incumbent, use that tool's known weaknesses instead, "
-            "and keep all claims honest (don't over-promise deflection)."
-        )
-    return tpl + block
 
 
 def tavily_search_live(query, max_results=3):
@@ -475,18 +296,23 @@ def tavily_search_live(query, max_results=3):
     api_key = os.environ.get("TAVILY_API_KEY")
     if not api_key:
         return []
-    try:
-        import urllib.request
-        req = urllib.request.Request(
-            "https://api.tavily.com/search",
-            data=json.dumps({"query": query, "max_results": max_results}).encode("utf-8"),
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=6) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            return data.get("results", [])
-    except Exception:
-        return []
+    start_time = time.time()
+    for attempt in range(2):
+        try:
+            resp = SESSION.post(
+                "https://api.tavily.com/search",
+                json={"query": query, "max_results": max_results},
+                headers={"Authorization": f"Bearer {api_key}"},
+                timeout=6
+            )
+            resp.raise_for_status()
+            log.info(f"Tavily search took {time.time() - start_time:.2f}s")
+            return resp.json().get("results", [])
+        except requests.exceptions.RequestException as e:
+            log.warning(f"tavily_search_live failed (attempt {attempt+1}): {e}")
+            if attempt == 0:
+                time.sleep(1)
+    return []
 
 
 def sumble_enrich_live(domain):
@@ -494,26 +320,30 @@ def sumble_enrich_live(domain):
     token = os.environ.get("SUMBLE_API_KEY")
     if not token:
         return {}
-    try:
-        import urllib.request
-        body = json.dumps({
-            "organizations": [{"url": domain}],
-            "select": {
-                "attributes": ["name", "url", "industry", "employee_count", "jobs_count", "headquarters_country", "sumble_url", "tags"]
-            }
-        }).encode("utf-8")
-        req = urllib.request.Request(
-            "https://api.sumble.com/v9/organizations",
-            data=body,
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "Accept": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=6) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            orgs = data.get("organizations", [])
+    start_time = time.time()
+    for attempt in range(2):
+        try:
+            resp = SESSION.post(
+                "https://api.sumble.com/v9/organizations",
+                json={
+                    "organizations": [{"url": domain}],
+                    "select": {
+                        "attributes": ["name", "url", "industry", "employee_count", "jobs_count", "headquarters_country", "sumble_url", "tags", "technologies"]
+                    }
+                },
+                headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
+                timeout=6
+            )
+            resp.raise_for_status()
+            log.info(f"Sumble enrich took {time.time() - start_time:.2f}s")
+            orgs = resp.json().get("organizations", [])
             if orgs:
                 return orgs[0].get("attributes", {})
-    except Exception:
-        pass
+            return {}
+        except requests.exceptions.RequestException as e:
+            log.warning(f"sumble_enrich_live failed (attempt {attempt+1}): {e}")
+            if attempt == 0:
+                time.sleep(1)
     return {}
 
 
@@ -522,27 +352,29 @@ def gemini_search_grounding_live(query):
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         return None
-    try:
-        import urllib.request
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
-        payload = {
-            "contents": [
-                {
-                    "parts": [{"text": f"Search Google for current business overview, latest news triggers, and executive events for: {query}. Keep the summary under 3 sentences."}]
-                }
-            ],
-            "tools": [
-                {"google_search": {}}
-            ]
-        }
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            cands = data.get("candidates", [])
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
+    payload = {
+        "contents": [
+            {
+                "parts": [{"text": f"Search Google for current business overview, latest news triggers, and executive events for: {query}. Keep the summary under 3 sentences."}]
+            }
+        ],
+        "tools": [
+            {"google_search": {}}
+        ]
+    }
+    start_time = time.time()
+    for attempt in range(2):
+        try:
+            resp = SESSION.post(
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            resp.raise_for_status()
+            log.info(f"Gemini grounding took {time.time() - start_time:.2f}s")
+            cands = resp.json().get("candidates", [])
             if cands:
                 first = cands[0]
                 text = ""
@@ -555,8 +387,11 @@ def gemini_search_grounding_live(query):
                     if web:
                         sources.append({"title": web.get("title", ""), "url": web.get("uri", "")})
                 return {"summary": text.strip(), "sources": sources}
-    except Exception:
-        pass
+            return None
+        except requests.exceptions.RequestException as e:
+            log.warning(f"gemini_search_grounding_live failed (attempt {attempt+1}): {e}")
+            if attempt == 0:
+                time.sleep(1)
     return None
 
 
@@ -578,7 +413,6 @@ def execute_roleplay_turn(messages, persona="skeptical_vp", profile_data=None):
     api_key = os.environ.get("GEMINI_API_KEY")
     if api_key:
         try:
-            import urllib.request
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={api_key}"
 
             gemini_contents = []
@@ -591,24 +425,24 @@ def execute_roleplay_turn(messages, persona="skeptical_vp", profile_data=None):
                 "contents": gemini_contents,
                 "generationConfig": {"temperature": 0.7, "maxOutputTokens": 300}
             }
-            req = urllib.request.Request(
+            resp = SESSION.post(
                 url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=8
             )
-            with urllib.request.urlopen(req, timeout=8) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                cands = data.get("candidates", [])
-                if cands:
-                    text = ""
-                    for p in cands[0].get("content", {}).get("parts", []):
-                        text += p.get("text", "")
-                    return {
-                        "reply": text.strip(),
-                        "score": 90,
-                        "coach_tip": "Good persistence. Propose the free 1-hour design proof or reference direct USA mill turnaround!"
-                    }
-        except Exception:
+            resp.raise_for_status()
+            cands = resp.json().get("candidates", [])
+            if cands:
+                text = ""
+                for p in cands[0].get("content", {}).get("parts", []):
+                    text += p.get("text", "")
+                return {
+                    "reply": text.strip(),
+                    "score": 90,
+                    "coach_tip": "Good persistence. Propose the free 1-hour design proof or reference direct USA mill turnaround!"
+                }
+        except requests.exceptions.RequestException:
             pass
 
     user_last = (messages[-1].get("text", "") if messages else "").lower()
@@ -633,57 +467,40 @@ def execute_roleplay_turn(messages, persona="skeptical_vp", profile_data=None):
 
 
 
-def google_custom_search_live(query, max_results=3):
-    """Execute live Google Custom Search via Programmable Search Engine API."""
-    api_key = os.environ.get("GOOGLE_SEARCH_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    cx = os.environ.get("GOOGLE_CSE_ID")
-    if not api_key or not cx:
-        return []
-    try:
-        import urllib.request
-        import urllib.parse
-        q_enc = urllib.parse.quote(query)
-        url = f"https://www.googleapis.com/customsearch/v1?key={api_key}&cx={cx}&q={q_enc}&num={max_results}"
-        req = urllib.request.Request(url, headers={"Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=6) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            items = data.get("items", [])
-            return [{"title": it.get("title"), "url": it.get("link"), "snippet": it.get("snippet")} for it in items]
-    except Exception:
-        pass
-    return []
-
 
 def discover_real_stakeholders(company_name, domain, seniority="Director+", persona=None):
     """Discover real living executives, titles, and LinkedIn profiles for the target company with strict current-employment verification."""
     tavily_key = os.environ.get("TAVILY_API_KEY")
     if not tavily_key:
         return []
-    try:
-        import urllib.request
-        sen_filter = '("Director" OR "Vice President" OR "VP" OR "Chief" OR "Head" OR "Lead")'
-        if seniority:
-            s_low = str(seniority).lower()
-            if "c-level" in s_low or "c-suite" in s_low or "cxo" in s_low:
-                sen_filter = '("Chief" OR "CMO" OR "CEO" OR "COO" OR "CRO" OR "President")'
-            elif "vp" in s_low or "vice president" in s_low:
-                sen_filter = '("Vice President" OR "VP" OR "SVP" OR "EVP")'
-            elif "director" in s_low:
-                sen_filter = '("Director" OR "Head" OR "Lead")'
+    sen_filter = '("Director" OR "Vice President" OR "VP" OR "Chief" OR "Head" OR "Lead")'
+    if seniority:
+        s_low = str(seniority).lower()
+        if "c-level" in s_low or "c-suite" in s_low or "cxo" in s_low:
+            sen_filter = '("Chief" OR "CMO" OR "CEO" OR "COO" OR "CRO" OR "President")'
+        elif "vp" in s_low or "vice president" in s_low:
+            sen_filter = '("Vice President" OR "VP" OR "SVP" OR "EVP")'
+        elif "director" in s_low:
+            sen_filter = '("Director" OR "Head" OR "Lead")'
 
-        role_filter = '("Marketing" OR "Brand" OR "People" OR "Talent" OR "Operations" OR "Events" OR "Culture")'
-        if persona:
-            role_filter = f'("{persona}")'
+    role_filter = '("Marketing" OR "Brand" OR "People" OR "Talent" OR "Operations" OR "Events" OR "Culture")'
+    if persona:
+        role_filter = f'("{persona}")'
 
-        # Strict query targeting 'at Company' in current role
-        query = f'site:linkedin.com/in "at {company_name}" {sen_filter} {role_filter}'
-        req = urllib.request.Request(
-            "https://api.tavily.com/search",
-            data=json.dumps({"query": query, "max_results": 8}).encode("utf-8"),
-            headers={"Authorization": f"Bearer {tavily_key}", "Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(req, timeout=6) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+    # Strict query targeting 'at Company' in current role
+    query = f'site:linkedin.com/in "at {company_name}" {sen_filter} {role_filter}'
+    start_time = time.time()
+    for attempt in range(2):
+        try:
+            resp = SESSION.post(
+                "https://api.tavily.com/search",
+                json={"query": query, "max_results": 8},
+                headers={"Authorization": f"Bearer {tavily_key}"},
+                timeout=6
+            )
+            resp.raise_for_status()
+            log.info(f"Stakeholder discovery took {time.time() - start_time:.2f}s")
+            data = resp.json()
             contacts = []
             seen = set()
             for r in data.get("results", []):
@@ -734,8 +551,10 @@ def discover_real_stakeholders(company_name, domain, seniority="Director+", pers
                     "linkedInUrl": url
                 })
             return contacts
-    except Exception:
-        pass
+        except requests.exceptions.RequestException as e:
+            log.warning(f"discover_real_stakeholders failed (attempt {attempt+1}): {e}")
+            if attempt == 0:
+                time.sleep(1)
     return []
 
 
@@ -760,6 +579,30 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
         target = fields.get("value", "Target Company")
         clean_target = re.sub(r'https?://', '', target).split('/')[0].replace(".com", "").capitalize()
         domain = f"{clean_target.lower()}.com"
+
+        tavily_key = os.environ.get("TAVILY_API_KEY", "")
+        sumble_key = os.environ.get("SUMBLE_API_KEY", "")
+        gemini_key = os.environ.get("GEMINI_API_KEY", "")
+        has_keys = bool(tavily_key and sumble_key and gemini_key and "your_" not in tavily_key.lower())
+        
+        if not has_keys:
+            if domain in demo_data.DEMO_DATA:
+                emit("tool", {"name": "mcp__demo:cached_mode", "input": {"domain": domain}})
+                cached = demo_data.DEMO_DATA[domain]
+                res_str = f"## {cached.get('company')} — Prospect Summary\n\n{cached.get('summary')}\n\n```json\n{json.dumps(cached, indent=2)}\n```"
+                emit("text", {"text": f"Found verified stakeholders and intelligence for **{cached.get('company')}**."})
+                emit("result", {"result": res_str, "cost_usd": 0.0, "session_id": str(uuid.uuid4()), "is_error": False})
+                emit("done", {})
+                job["state"]["result"] = res_str
+                job["done"] = True
+                db.save_search(domain, cached.get('company'), cached, pdata.get("companyName", "generic"))
+                return
+            else:
+                emit("text", {"text": f"Error: API keys are missing and domain {domain} is not in demo data."})
+                emit("result", {"result": "API keys missing.", "cost_usd": 0.0, "session_id": str(uuid.uuid4()), "is_error": True})
+                emit("done", {})
+                job["done"] = True
+                return
 
         emit("tool", {"name": "mcp__commonroom:get_intent_signals", "input": {"domain": domain}})
         emit("tool", {"name": "mcp__zoominfo:search_contacts", "input": {"companyName": clean_target, "seniority": "Director+"}})
@@ -788,6 +631,8 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
             tavily_results = fut_tavily.result()
             real_contacts = fut_contacts.result() or []
 
+        detected_tech = []
+        industry_intel = {}
         if sumble_data:
             emit("tool", {
                 "name": "mcp__sumble:detect_technologies",
@@ -797,6 +642,34 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
                     "industry": sumble_data.get("industry")
                 }
             })
+            
+            # Tech stack detection
+            techs = sumble_data.get("technologies", [])
+            detected_competitors = []
+            suggested_cards = []
+            for t in techs:
+                t_low = t.lower()
+                if "salesforce" in t_low:
+                    detected_competitors.append("Salesforce")
+                    suggested_cards.append("Zendesk battlecard")
+                elif "intercom" in t_low:
+                    detected_competitors.append("Intercom")
+                    suggested_cards.append("Intercom displacement card")
+                elif "zendesk" in t_low:
+                    detected_competitors.append("Zendesk")
+                    suggested_cards.append("Existing customer")
+                elif "apollo" in t_low or "zoominfo" in t_low:
+                    detected_competitors.append("Apollo/ZoomInfo")
+                    suggested_cards.append("ProspectPulse displacement card")
+            
+            if detected_competitors:
+                emit("tool", {"name": "mcp__techstack:detect", "input": {"technologies": detected_competitors, "suggestions": suggested_cards}})
+                detected_tech = detected_competitors
+            
+            industry = sumble_data.get("industry", "").lower().replace(" ", "_")
+            if industry in INDUSTRY_HOOKS:
+                industry_intel = INDUSTRY_HOOKS[industry]
+                emit("tool", {"name": "mcp__industry:classify", "input": {"industry": industry, "hook": industry_intel}})
 
         live_news_snippet = ""
         live_summary = f"{clean_target} is scaling marketing and culture initiatives. Their marketing, people, and sales orgs invest in high-impact brand touchpoints, onboarding kits, and VIP client appreciation."
@@ -857,6 +730,8 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
             "whyNow": f"Scaling key marketing, HR, and brand initiatives in {sumble_data.get('industry', 'their industry')} with ~{sumble_data.get('employee_count', 'N/A')} employees.",
             "accountClass": "net-new",
             "summary": live_summary,
+            "detected_tech": detected_tech,
+            "industry_intel": industry_intel,
             "news": [
                 {
                     "headline": live_news_snippet or f"{clean_target} expands strategic initiatives and hiring in {sumble_data.get('industry', 'tech')}.",
@@ -892,6 +767,7 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
         }
 
         DOMAIN_INTEL_CACHE[domain] = result_obj
+        db.save_search(domain, comp_name, result_obj, pdata.get("companyName", "generic"))
 
         res_str = f"## {comp_name} — Prospect Summary\n\n{live_summary}\n\n```json\n{json.dumps(result_obj, indent=2)}\n```"
         emit("text", {"text": f"Found verified stakeholders and intelligence for **{comp_name}**."})
@@ -1043,6 +919,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._serve_static("index.html", "text/html; charset=utf-8")
         if path.startswith("/static/"):
             return self._serve_static(path[len("/static/"):], self._guess(path))
+        if path.startswith("/data/") or path.startswith("/js/") or path.startswith("/css/") or path.startswith("/proofs/"):
+            return self._serve_static(path.lstrip("/"), self._guess(path))
 
         if path.startswith("/api/stream/"):
             return self._stream(path.rsplit("/", 1)[-1])
@@ -1055,11 +933,37 @@ class Handler(BaseHTTPRequestHandler):
             payload["done"] = job["done"]
             payload["session_id"] = job.get("session_id")
             return self._send(200, "application/json", json.dumps(payload).encode())
+            
+        if path == "/api/history":
+            history = db.get_history()
+            return self._send(200, "application/json", json.dumps(history).encode())
+            
+        if path.startswith("/api/history/"):
+            history_id = path.rsplit("/", 1)[-1]
+            history = db.get_history()
+            for h in history:
+                if str(h.get('id')) == history_id:
+                    return self._send(200, "application/json", json.dumps(h).encode())
+            return self._send(404, "application/json", b'{"error":"not found"}')
+            
+        if path == "/api/stats":
+            stats = db.get_stats()
+            return self._send(200, "application/json", json.dumps(stats).encode())
 
         return self._send(404, "text/plain", b"not found")
 
     def do_POST(self):
         path = urlparse(self.path).path
+        client_ip = self.client_address[0]
+
+        if path == "/api/run":
+            if not api_run_limiter.allow(client_ip):
+                return self._send(429, "application/json", b'{"error":"Rate limit exceeded for /api/run"}')
+
+        if path == "/api/tts":
+            if not api_tts_limiter.allow(client_ip):
+                return self._send(429, "application/json", b'{"error":"Rate limit exceeded for /api/tts"}')
+
         length = int(self.headers.get("Content-Length", 0))
         raw = self.rfile.read(length) if length else b"{}"
         try:
@@ -1074,13 +978,7 @@ class Handler(BaseHTTPRequestHandler):
             resume = data.get("resume_session")
             fields = data.get("fields", {})
 
-            if resume:
-                prompt = (data.get("prompt") or "").strip()
-            else:
-                prompt = compose_prompt(kind, fields, custom_profile)
-
-            if not prompt and (CLAUDE_BIN and os.path.exists(CLAUDE_BIN)):
-                return self._send(400, "application/json", b'{"error":"empty prompt"}')
+            prompt = (data.get("prompt") or "").strip()
 
             job_id = uuid.uuid4().hex
             JOBS[job_id] = {
@@ -1105,7 +1003,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, "application/json", b'{"error":"empty text"}')
             
             try:
-                import asyncio
                 import edge_tts
                 
                 async def _gen():
@@ -1116,7 +1013,7 @@ class Handler(BaseHTTPRequestHandler):
                             audio_bytes.extend(chunk["data"])
                     return bytes(audio_bytes)
                 
-                audio_data = asyncio.run(_gen())
+                audio_data = asyncio.run_coroutine_threadsafe(_gen(), _tts_loop).result()
                 self.send_response(200)
                 self.send_header("Content-Type", "audio/mpeg")
                 self.send_header("Content-Length", str(len(audio_data)))
@@ -1125,7 +1022,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(audio_data)
                 return
             except Exception as e:
-                print(f"[TTS ERROR] {e}")
+                log.error(f"[TTS ERROR] {e}")
                 return self._send(500, "application/json", json.dumps({"error": str(e)}).encode())
 
         if path == "/api/roleplay":
@@ -1136,6 +1033,40 @@ class Handler(BaseHTTPRequestHandler):
             
             resp_data = execute_roleplay_turn(messages, persona, profile_data)
             return self._send(200, "application/json", json.dumps(resp_data).encode())
+
+        if path == "/api/history/save":
+            domain = data.get("domain")
+            company_name = data.get("company_name")
+            result_json = data.get("result_json")
+            preset = data.get("preset", "generic")
+            if not domain or not company_name:
+                return self._send(400, "application/json", b'{"error":"missing domain or company_name"}')
+            sid = db.save_search(domain, company_name, result_json, preset)
+            return self._send(200, "application/json", json.dumps({"id": sid}).encode())
+
+        if path == "/api/outreach/save":
+            search_id = data.get("search_id")
+            channel = data.get("channel")
+            contact_name = data.get("contact_name")
+            contact_email = data.get("contact_email")
+            subject = data.get("subject")
+            body = data.get("body")
+            if not search_id or not contact_email:
+                return self._send(400, "application/json", b'{"error":"missing fields"}')
+            oid = db.save_outreach(search_id, channel, contact_name, contact_email, subject, body)
+            return self._send(200, "application/json", json.dumps({"id": oid}).encode())
+
+        if path == "/api/verify-email":
+            email = data.get("email")
+            if not email or "@" not in email:
+                return self._send(200, "application/json", json.dumps({"email": email, "deliverable": False, "mx_records": [], "risk": "high"}).encode())
+            domain = email.split("@")[1]
+            try:
+                answers = dns.resolver.resolve(domain, 'MX')
+                records = [str(r.exchange) for r in answers]
+                return self._send(200, "application/json", json.dumps({"email": email, "deliverable": True, "mx_records": records, "risk": "low"}).encode())
+            except Exception as e:
+                return self._send(200, "application/json", json.dumps({"email": email, "deliverable": False, "mx_records": [], "risk": "high"}).encode())
 
         if path == "/api/feedback":
             # Append tester feedback to a local file (POC — no DB).
@@ -1203,10 +1134,19 @@ class Handler(BaseHTTPRequestHandler):
             return "application/javascript"
         if path.endswith(".html"):
             return "text/html; charset=utf-8"
+        if path.endswith(".svg"):
+            return "image/svg+xml"
+        if path.endswith(".png"):
+            return "image/png"
+        if path.endswith(".jpg") or path.endswith(".jpeg"):
+            return "image/jpeg"
+        if path.endswith(".json"):
+            return "application/json"
         return "application/octet-stream"
 
 
 def main():
+    db.init_db()
     port = int(os.environ.get("PORT", "8765"))
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     print(f"\n  Prospect & Outreach Console (Universal Interview Edition)")

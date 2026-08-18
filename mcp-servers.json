@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "tavily": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.tavily.com/mcp/?tavilyApiKey=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"
+      ]
+    },
+    "sumble": {
+      "type": "http",
+      "url": "https://mcp.sumble.com"
+    },
+    "zoominfo": {
+      "type": "http",
+      "url": "https://mcp.zoominfo.com/mcp"
+    },
+    "commonroom": {
+      "type": "http",
+      "url": "https://mcp.commonroom.io/mcp"
+    }
+  }
+}

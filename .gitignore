@@ -33,6 +33,14 @@ wheels/
 *.log
 scratch/
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Runtime
+.clean-config/
+
 # OS / Editor
 .DS_Store
 Thumbs.db

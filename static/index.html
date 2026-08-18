@@ -9,6 +9,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.min.js"></script>
+<script src="data/presets.js" defer></script>
+<script src="data/battlecards.js" defer></script>
+<link rel="stylesheet" href="css/skeletons.css">
+<script src="js/skeletons.js" defer></script>
+<script src="js/shortcuts.js" defer></script>
+<script src="js/onboarding.js" defer></script>
+<script src="js/followups.js" defer></script>
+<script src="js/ab-testing.js" defer></script>
+<script src="js/timeline.js" defer></script>
+<script src="js/share.js" defer></script>
+<script src="js/before-after.js" defer></script>
+<script src="js/history-ui.js" defer></script>
 
 <style>
   :root {
@@ -750,17 +762,37 @@
       padding: 20px;
     }
   }
+
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .flex-center-gap { display: flex; align-items: center; gap: 6px; }
+  .flex-wrap-gap { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
 
 <body>
+<template id="sockSvgTemplate">
+  <svg id="liveSockSvg" width="200" height="270" viewBox="0 0 220 320" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 12px 24px rgba(0,0,0,0.7)); margin: 8px 0;">
+    <path d="M60 20 H160 V180 C160 220 180 250 210 270 C220 280 210 300 190 300 H120 C70 300 50 250 50 200 V20 Z" fill="#1E293B" stroke="#475569" stroke-width="2" id="sockBaseSvg" />
+    <rect x="58" y="20" width="104" height="36" fill="#6366F1" rx="4" id="sockCuffSvg" />
+    <g id="sockPatternGroup">
+      <line x1="60" y1="80" x2="160" y2="80" stroke="#06B6D4" stroke-width="4" stroke-dasharray="6,4" id="sockPattern1" />
+      <line x1="60" y1="100" x2="160" y2="100" stroke="#06B6D4" stroke-width="6" id="sockPattern2" />
+      <line x1="60" y1="120" x2="160" y2="120" stroke="#06B6D4" stroke-width="4" stroke-dasharray="6,4" id="sockPattern3" />
+    </g>
+    <path d="M120 300 H190 C210 300 220 280 210 270 C180 270 160 290 120 300 Z" fill="#6366F1" id="sockToeSvg" />
+    <path d="M50 180 C50 220 70 240 90 240 C90 200 70 180 50 180 Z" fill="#6366F1" id="sockHeelSvg" />
+    <text x="110" y="155" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="13" text-anchor="middle" id="sockBrandText">BRAND_PLACEHOLDER</text>
+    <text x="110" y="170" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="8" text-anchor="middle">USA MILL KNIT</text>
+  </svg>
+</template>
+
 
 <!-- Header -->
 <header class="nav-header">
   <div class="nav-left">
     <div class="logo-box" onclick="gotoScreen(1)">
       <div class="logo-symbol">⚡</div>
-      <div style="display: flex; align-items: center; gap: 6px;">
+      <div class="flex-center-gap">
         <span style="font-weight: 800; letter-spacing: -0.02em;">ProspectPulse</span>
         <span style="font-weight: 700; font-size: 11px; color: var(--indigo); background: var(--indigo-glow); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(99,102,241,0.3);">AI</span>
       </div>
@@ -783,10 +815,13 @@
   </div>
 
   <div class="nav-right">
-    <div style="display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: var(--text-muted);">
+    <div class="flex-center-gap" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: var(--text-muted);">
       <span>Developed by</span>
       <span style="font-weight: 700; color: #fff;">@ElChibo</span>
     </div>
+    <button class="btn btn-secondary btn-sm" onclick="window.startTour()">🎓 Tour</button>
+    <button class="btn btn-secondary btn-sm" onclick="window.toggleTimeline()">📊 Timeline</button>
+    <button class="btn btn-secondary btn-sm" onclick="window.openBeforeAfterModal()">⚡ See the Difference</button>
     <button class="btn btn-secondary btn-sm" onclick="openDeckModal()">📊 Deck</button>
     <button class="btn btn-secondary btn-sm" onclick="openMatrixModal()">📊 Matrix</button>
     <button class="btn btn-secondary btn-sm" onclick="openBattlecardsModal()">⚔️ Battlecards</button>
@@ -847,14 +882,14 @@
       <div id="batchSearchSection" style="display: none;">
         <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Paste Multiple Domains (Comma or Line Separated) or Upload CSV</label>
         <textarea id="batchDomainsInput" rows="4" style="margin-top: 6px; font-family: 'JetBrains Mono', monospace;" placeholder="lululemon.com, vitacoco.com, stripe.com, figma.com, glossier.com"></textarea>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <div class="flex-between" style="margin-top: 10px;">
           <input type="file" id="csvFileInput" accept=".csv,.txt" onchange="handleCsvUpload(event)" style="display: none;">
           <button class="btn btn-secondary btn-sm" onclick="document.getElementById('csvFileInput').click()">📁 Upload .CSV List</button>
           <button class="btn btn-primary" onclick="runBatchEnrichment()">⚡ Run Batch Research on All Accounts</button>
         </div>
 
         <div id="batchResultsTableContainer" style="margin-top: 20px; display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div class="flex-between" style="margin-bottom: 10px;">
             <strong style="font-size: 14px;">Batch Processing Results</strong>
             <button class="btn btn-secondary btn-sm" onclick="exportBatchCsv()">📥 Export Territory CSV</button>
           </div>
@@ -902,7 +937,7 @@
     
     <!-- EXECUTIVE ACCOUNT HERO HEADER BAR -->
     <div style="background: rgba(15,23,42,0.85); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div class="flex-between" style="flex-wrap: wrap; gap: 16px;">
         <!-- Left: Account & Logo -->
         <div id="s2AccountTitle" style="font-size: 20px; font-weight: 800;">
           <span>Account Intelligence</span>
@@ -934,8 +969,9 @@
         </div>
 
         <!-- Right: Actions -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <div class="flex-wrap-gap">
           <button class="btn btn-secondary btn-sm" onclick="exportFullDossier('pdf')">📄 Export PDF</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.copyReportLink()">🔗 Share Report</button>
           <button class="btn btn-secondary btn-sm" onclick="openMultiThreadingModal()">👥 Multi-Thread</button>
           <button class="btn btn-primary btn-sm" onclick="gotoScreen(3)">Next: Deal Autopsy →</button>
         </div>
@@ -963,7 +999,7 @@
 
           <!-- ACCOUNT HIERARCHY & SUBSIDIARY TREE -->
           <div class="hierarchy-tree-card" id="accountHierarchyCard" style="margin-top: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div class="flex-between" style="margin-bottom: 8px;">
               <strong style="color: var(--indigo); font-size: 11.5px; text-transform: uppercase;">🏢 Account Hierarchy &amp; Buying Centers</strong>
               <span class="badge badge-indigo" id="hierarchyUnitCount">3 Units Mapped</span>
             </div>
@@ -1014,7 +1050,7 @@
 
           <!-- TAB 2: 5-WHYS DISCOVERY QUESTIONS -->
           <div id="playbookView5w" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div class="flex-between" style="margin-bottom: 8px;">
               <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Discovery diagnostic questions to uncover latent pain in first 3 minutes:</p>
               <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 10.5px;" onclick="copyDiscoveryQuestions()">📋 Copy</button>
             </div>
@@ -1254,7 +1290,7 @@
 
           <!-- A/B SUBJECT LINE VARIANT GENERATOR -->
           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div class="flex-between" style="margin-bottom: 8px;">
               <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🎲 A/B Testing Subject Lines (Click to Apply):</span>
               <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="generateAbVariants()">Regenerate 🎲</button>
             </div>
@@ -1313,7 +1349,7 @@
 
         <!-- TAB 2: LINKEDIN INMAIL -->
         <div id="channelViewLinkedin" class="panel-card" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div class="flex-between" style="margin-bottom: 14px;">
             <span class="panel-title" style="color: var(--sky);">💬 LinkedIn 300-Character InMail / Connection Note</span>
             <span id="linkedinCharCount" class="badge badge-sky">0 / 300</span>
           </div>
@@ -1345,7 +1381,7 @@
 
             <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
               <!-- Voice Persona Selector -->
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted);">
+              <div class="flex-center-gap" style="font-size: 11.5px; color: var(--text-muted);">
                 <span>Voice:</span>
                 <select id="voicePersonaSelect" style="width: auto; padding: 3px 8px; font-size: 11.5px; background: rgba(0,0,0,0.4); border-color: rgba(99,102,241,0.4); color: #fff;">
                   <option value="warm_male" selected>🤵 Travis (Austin AE · Warm &amp; Consultative)</option>
@@ -1366,7 +1402,7 @@
               </div>
 
               <!-- Playback Speed Knob -->
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted);">
+              <div class="flex-center-gap" style="font-size: 11.5px; color: var(--text-muted);">
                 <span>Speed:</span>
                 <select id="voiceSpeedSelect" style="width: auto; padding: 2px 8px; font-size: 11px;">
                   <option value="0.95">0.95x (Deliberate)</option>
@@ -1383,7 +1419,7 @@
           </div>
 
           <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Live Objection Tree (Click to Reveal Rebuttal)</label>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 14px;">
+          <div class="flex-wrap-gap" style="margin: 8px 0 14px;">
             <button class="btn btn-secondary btn-sm" onclick="showObjection('vendor')">"We already have a vendor"</button>
             <button class="btn btn-secondary btn-sm" onclick="showObjection('budget')">"No budget right now"</button>
             <button class="btn btn-secondary btn-sm" onclick="showObjection('email')">"Just send me an email"</button>
@@ -1458,7 +1494,7 @@
                 <div style="font-size: 11.5px; color: var(--text-faint); margin-top: 8px;">Embeds high-retention video thumbnail directly into the prospect's email client.</div>
               </div>
 
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+              <div class="flex-wrap-gap" style="margin-top: 12px;">
                 <button class="btn btn-primary btn-sm" id="btnToggleWebcam" onclick="toggleWebcamFeed()">🎥 Enable Webcam</button>
                 <button class="btn btn-secondary btn-sm" onclick="embedVideoLinkToEmail()">📎 Embed Video in Email</button>
                 <button class="btn btn-secondary btn-sm" onclick="openTeleprompterModal()">📜 Open Teleprompter</button>
@@ -1473,7 +1509,7 @@
       <div>
         <!-- 📱 LIVE MOBILE IPHONE LOCKSCREEN & NOTIFICATION SIMULATOR -->
         <div class="phone-simulator-card" style="margin-bottom: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="flex-between" style="margin-bottom: 12px;">
             <strong style="font-size: 13px; color: #fff;">📱 Mobile Preview (iOS 18)</strong>
             <div style="display: flex; gap: 4px;">
               <button class="btn btn-secondary btn-sm" id="btnPhoneLock" style="padding: 2px 8px; font-size: 10.5px;" onclick="setPhoneView('lock')">📲 Lock Screen</button>
@@ -1490,7 +1526,7 @@
                 <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">Tuesday, August 18</div>
 
                 <div class="phone-notification-banner">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 11px; color: #94A3B8;">
+                  <div class="flex-between" style="margin-bottom: 4px; font-size: 11px; color: #94A3B8;">
                     <div style="display: flex; align-items: center; gap: 4px;">
                       <span style="font-size: 13px;">✉️</span> <strong style="color: #fff;">Mail</strong>
                     </div>
@@ -1556,7 +1592,7 @@
           <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
             <!-- PHASE 1 -->
             <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 14px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="flex-between">
                 <div style="display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 18px;">✅</span>
                   <div>
@@ -1571,7 +1607,7 @@
 
             <!-- PHASE 2 -->
             <div style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.3); border-radius: 10px; padding: 14px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="flex-between">
                 <div style="display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 18px;">🔄</span>
                   <div>
@@ -1586,7 +1622,7 @@
 
             <!-- PHASE 3 -->
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="flex-between">
                 <div style="display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 18px;">⏳</span>
                   <div>
@@ -1601,7 +1637,7 @@
 
             <!-- PHASE 4 -->
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="flex-between">
                 <div style="display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 18px;">🚀</span>
                   <div>
@@ -1690,7 +1726,7 @@
 
         <!-- MODE 2: LIVE VOICE CALL SIMULATOR -->
         <div id="roleplayVoiceView" style="display: none; background: #000; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div class="flex-between" style="margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="pulse-dot" style="background: var(--emerald);" id="voiceCallPulse"></span>
               <strong style="font-size: 13px; color: #fff;" id="voiceCallStatusTitle">🟢 Live Discovery Call Connected</strong>
@@ -1717,7 +1753,7 @@
 
         <!-- LIVE CALL WHISPERER HUD -->
         <div style="background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div class="flex-between" style="margin-bottom: 6px;">
             <strong style="color: var(--indigo); font-size: 11.5px; text-transform: uppercase;">🎙️ Real-Time Call Whisperer (HUD)</strong>
             <span class="badge badge-indigo">Instant Cue</span>
           </div>
@@ -1774,7 +1810,7 @@
       <span>·</span>
       <span>Autonomous Account Intelligence &amp; Multi-Channel Outreach Studio</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 6px;">
+    <div class="flex-center-gap">
       <span>Engineered with precision by</span>
       <span style="color: var(--indigo); font-weight: 700; background: var(--indigo-glow); padding: 3px 10px; border-radius: 14px; border: 1px solid rgba(99,102,241,0.35);">@ElChibo</span>
     </div>
@@ -1787,7 +1823,7 @@
 <!-- 1-PAGE EXECUTIVE ACCOUNT BRIEF MODAL -->
 <div class="modal-overlay" id="briefModal" onclick="if(event.target===this)closeExecutiveBriefModal()">
   <div class="modal-content" style="max-width: 900px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+    <div class="flex-between" style="margin-bottom: 14px;">
       <h2 style="font-size: 20px;">📄 1-Page Executive Account Brief &amp; Call Cheat Sheet</h2>
       <div style="display: flex; gap: 8px;">
         <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Print / Save PDF</button>
@@ -1804,7 +1840,7 @@
 <!-- PROFILE MODAL WITH PRESETS -->
 <div class="modal-overlay" id="profileModal" onclick="if(event.target===this)closeProfileModal()">
   <div class="modal-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <div class="flex-between" style="margin-bottom: 12px;">
       <h2 style="font-size: 20px;">Universal Pitch &amp; ROI Configuration</h2>
       <button class="btn btn-secondary btn-sm" onclick="closeProfileModal()">✕ Close</button>
     </div>
@@ -1813,7 +1849,7 @@
     <!-- Quick Preset Switcher -->
     <div style="margin-bottom: 18px;">
       <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Select Pitch Preset</label>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+      <div class="flex-wrap-gap" style="margin-top: 6px;">
         <button class="btn btn-secondary btn-sm" onclick="selectPreset('sockclub')">🧦 Sock Club (Direct Swag Mill)</button>
         <button class="btn btn-secondary btn-sm" onclick="selectPreset('zendesk')">🎧 Zendesk (Enterprise CX &amp; AI)</button>
         <button class="btn btn-secondary btn-sm" onclick="selectPreset('stripe')">💳 Stripe (Fintech &amp; Payments)</button>
@@ -1857,7 +1893,7 @@
 <!-- MULTI-THREADING CAMPAIGN MODAL -->
 <div class="modal-overlay" id="multiThreadModal" onclick="if(event.target===this)closeMultiThreadingModal()">
   <div class="modal-content" style="max-width: 920px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+    <div class="flex-between" style="margin-bottom: 14px;">
       <h2 style="font-size: 20px;">👥 1-Click Multi-Threading Campaign Generator</h2>
       <button class="btn btn-secondary btn-sm" onclick="closeMultiThreadingModal()">✕ Close</button>
     </div>
@@ -1875,12 +1911,12 @@
 <!-- ARCHITECTURE DECK MODAL -->
 <div class="modal-overlay" id="deckModal" onclick="if(event.target===this)closeDeckModal()">
   <div class="modal-content" style="max-width: 960px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <div class="flex-between" style="margin-bottom: 16px;">
       <h2 style="font-size: 20px;">Executive Portfolio Architecture Deck</h2>
       <button class="btn btn-secondary btn-sm" onclick="closeDeckModal()">✕ Close</button>
     </div>
     <div id="deckSlideContent" style="min-height: 380px;"></div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);">
+    <div class="flex-between" style="margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);">
       <button class="btn btn-secondary btn-sm" onclick="prevSlide()">← Previous</button>
       <span id="deckSlideNumber" style="font-size: 13px; color: var(--text-muted);">Slide 1 of 8</span>
       <button class="btn btn-primary btn-sm" onclick="nextSlide()">Next →</button>
@@ -1891,7 +1927,7 @@
 <!-- BATTLECARDS LIBRARY MODAL -->
 <div class="modal-overlay" id="battlecardsModal" onclick="if(event.target===this)closeBattlecardsModal()">
   <div class="modal-content" style="max-width: 900px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <div class="flex-between" style="margin-bottom: 16px;">
       <h2 style="font-size: 20px;" id="battlecardsModalHeader">⚔️ Competitor Battlecards Library</h2>
       <button class="btn btn-secondary btn-sm" onclick="closeBattlecardsModal()">✕ Close</button>
     </div>
@@ -1902,7 +1938,7 @@
 <!-- HISTORY MODAL -->
 <div class="modal-overlay" id="historyModal" onclick="if(event.target===this)closeHistoryModal()">
   <div class="modal-content" style="max-width: 700px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <div class="flex-between" style="margin-bottom: 16px;">
       <h2 style="font-size: 20px;">📜 Saved Outreach History</h2>
       <button class="btn btn-secondary btn-sm" onclick="closeHistoryModal()">✕ Close</button>
     </div>
@@ -1913,7 +1949,7 @@
 <!-- COMPETITOR COMPARISON MATRIX & PRICING SLIDER MODAL -->
 <div class="modal-overlay" id="matrixModal" onclick="if(event.target===this)closeMatrixModal()">
   <div class="modal-content" style="max-width: 960px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+    <div class="flex-between" style="margin-bottom: 14px;">
       <h2 style="font-size: 20px;" id="matrixModalHeader">📊 2026 Competitive Landscape &amp; Unit Pricing Matrix</h2>
       <div style="display: flex; gap: 8px;">
         <button class="btn btn-secondary btn-sm" onclick="copyMatrixTable()">📋 Copy Table</button>
@@ -1924,7 +1960,7 @@
 
     <!-- LIVE PRICING & SAVINGS SIMULATOR SLIDER -->
     <div style="background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 14px; margin-bottom: 18px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div class="flex-between" style="margin-bottom: 8px;">
         <span style="font-size: 12.5px; font-weight: 700; color: #fff;">Order Volume Scenario: <strong id="matrixSliderUnitsVal" style="color: var(--indigo);">500</strong> units</span>
         <span class="badge badge-emerald" id="matrixCalculatedSavingsBadge">⚡ Net Savings: $3,250 vs SwagUp</span>
       </div>
@@ -1955,7 +1991,7 @@
 <!-- 1-CLICK CRM AUTO-PILOT & WEBHOOK DISPATCHER MODAL -->
 <div class="modal-overlay" id="crmSyncModal" onclick="if(event.target===this)closeCrmSyncModal()">
   <div class="modal-content" style="max-width: 820px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+    <div class="flex-between" style="margin-bottom: 14px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span class="pulse-dot" style="background: var(--emerald);"></span>
         <h2 style="font-size: 20px;">⚡ 1-Click CRM Auto-Pilot &amp; Sequence Dispatcher</h2>
@@ -1986,7 +2022,7 @@
 
     <!-- Live Payload Inspector -->
     <div style="margin-bottom: 14px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <div class="flex-between" style="margin-bottom: 6px;">
         <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Outgoing Webhook JSON Payload:</span>
         <span class="badge badge-sky" style="font-size: 10px;">🟢 Live Webhook Ready (200 OK)</span>
       </div>
@@ -2008,7 +2044,7 @@
 <!-- 45-SECOND VIDEO PITCH TELEPROMPTER MODAL -->
 <div class="modal-overlay" id="teleprompterModal" onclick="if(event.target===this)closeTeleprompterModal()">
   <div class="modal-content" style="max-width: 800px; background: #05070D; border: 1px solid rgba(99,102,241,0.4);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+    <div class="flex-between" style="margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span class="pulse-dot" style="background: var(--rose); box-shadow: 0 0 8px var(--rose);"></span>
         <h2 style="font-size: 19px;">📹 45-Second Loom / Video Pitch Teleprompter</h2>
@@ -2020,7 +2056,7 @@
     </div>
 
     <!-- Teleprompter Controls Bar -->
-    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px;">
+    <div class="flex-between" style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px;">
       <div style="display: flex; gap: 8px; align-items: center;">
         <button class="btn btn-primary btn-sm" id="btnTeleScroll" onclick="toggleTeleprompterScroll()">▶️ Start Auto-Scroll</button>
         <button class="btn btn-secondary btn-sm" onclick="resetTeleprompterScroll()">🔄 Reset</button>
@@ -2061,265 +2097,12 @@ let activeProfileData = {
 
 let currentAccountData = null;
 let currentDraftData = null;
+let activeEventSource = null;
 let currentSlideIndex = 0;
 let batchResults = [];
 let roleplayMessages = [];
 
-// Presets Dictionary
-const PROFILE_PRESETS = {
-  sockclub: {
-    type: 'swag',
-    companyName: "Sock Club",
-    productName: "Custom-Knit Branded Socks & Corporate Gifting",
-    valueProp: "USA-knitted socks with free 1-hour digital proofs, 5-day turnaround, and 95%+ wearable retention",
-    differentiator: "Direct USA manufacturer, knit-in woven designs (no fading print), free mockups in 1 hour",
-    senderName: "Travis · Enterprise Account Executive at Sock Club",
-    badge: "🧦 Sock Club (Direct USA Mill)"
-  },
-  zendesk: {
-    type: 'cx',
-    companyName: "Zendesk",
-    productName: "Zendesk Premier CX & Autonomous AI Agents",
-    valueProp: "Unified omnichannel support platform with pre-trained AI agents deflecting 45%+ of volume",
-    differentiator: "Days-to-weeks rollout vs Salesforce 9-month consultant overhead; native voice & WhatsApp included",
-    senderName: "Travis · Enterprise Account Executive at Zendesk",
-    badge: "🎧 Zendesk (Enterprise CX & AI)"
-  },
-  stripe: {
-    type: 'saas',
-    companyName: "Stripe",
-    productName: "Stripe Global Payments & Billing Engine",
-    valueProp: "Global financial infrastructure increasing authorization rates by 3.8% with automated revenue recovery",
-    differentiator: "Adaptive Acceptance AI algorithms, unified global tax compliance, 99.999% uptime",
-    senderName: "Travis · Strategic Account Executive at Stripe",
-    badge: "💳 Stripe (Global Fintech Platform)"
-  },
-  saas: {
-    type: 'saas',
-    companyName: "Autonomous AI Engine",
-    productName: "Enterprise AI Sales & Intelligence Cloud",
-    valueProp: "Reclaim 40 hours/rep/month with multi-agent research and verified live decision-maker mapping",
-    differentiator: "Real-time MCP pipeline connecting Gemini Search Grounding, Sumble, and ZoomInfo",
-    senderName: "Travis · Solutions Architect & Lead AE",
-    badge: "🤖 Enterprise AI Cloud"
-  }
-};
-
-// Target Chips by Preset
-const PROFILE_TARGETS = {
-  sockclub: [
-    { label: "🧦 Sock Club", domain: "sockclub.com" },
-    { label: "🥥 Vita Coco", domain: "vitacoco.com" },
-    { label: "🧘 Lululemon", domain: "lululemon.com" },
-    { label: "💄 Glossier", domain: "glossier.com" },
-    { label: "👓 Warby Parker", domain: "warbyparker.com" },
-    { label: "🚗 CarGurus", domain: "cargurus.com" }
-  ],
-  zendesk: [
-    { label: "🚗 Uber", domain: "uber.com" },
-    { label: "🏡 Airbnb", domain: "airbnb.com" },
-    { label: "🛒 Instacart", domain: "instacart.com" },
-    { label: "🍔 DoorDash", domain: "doordash.com" },
-    { label: "🛍️ Shopify", domain: "shopify.com" }
-  ],
-  stripe: [
-    { label: "🤖 OpenAI", domain: "openai.com" },
-    { label: "🎨 Figma", domain: "figma.com" },
-    { label: "🧠 Anthropic", domain: "anthropic.com" },
-    { label: "📝 Notion", domain: "notion.so" },
-    { label: "📰 Substack", domain: "substack.com" }
-  ],
-  saas: [
-    { label: "❄️ Snowflake", domain: "snowflake.com" },
-    { label: "🐶 Datadog", domain: "datadog.com" },
-    { label: "🍃 MongoDB", domain: "mongodb.com" },
-    { label: "🛡️ CrowdStrike", domain: "crowdstrike.com" }
-  ]
-};
-
-// Complete Battlecards Library by Preset
-const BATTLECARDS_BY_PRESET = {
-  sockclub: [
-    {
-      name: 'SwagUp / Swag Brokers & Distributors',
-      tag: 'Merchandise · Swag Distributor / Broker',
-      pitch: 'Pitches bundled swag boxes and warehousing catalogs, acting as a middleman broker between buyers and overseas factories.',
-      them: [
-        "Broker markup adds 30–50% extra cost to every item in the catalog.",
-        "3 to 6-week turnaround times; rush production is heavily penalized.",
-        "Generic disposable items (cheap pens, tote bags) with <10% retention.",
-        "Design mockups take 2–4 business days with upfront commitment."
-      ],
-      us: [
-        "Direct USA manufacturer (Austin HQ & North Carolina mill) — zero broker markup.",
-        "Free 1-hour digital design proofs delivered in pixel-perfect vector format.",
-        "5-day rapid turnaround with guaranteed event delivery dates.",
-        "Custom-knit combed cotton with 95%+ wearable retention — worn for years.",
-        "Low 30-pair minimum order quantity (MOQ)."
-      ],
-      trap: "What percentage of the swag items you sent last quarter are still being used today, and how much are you paying in broker markups for items that end up in landfills?",
-      land: "SwagUp is convenient for bundling 10 different generic trinkets into one box. For high-impact standalone hero gifts that people genuinely wear and love, Sock Club wins on quality, speed, and direct mill pricing."
-    },
-    {
-      name: '4imprint / Mass Promo Catalogs',
-      tag: 'Merchandise · Generic Catalog Reseller',
-      pitch: 'Massive 10,000+ item catalog reseller pitching high-volume cheap promotional items.',
-      them: [
-        "Overseas mass catalog reselling with zero proprietary knitting machines.",
-        "Printed / sublimated socks that stretch, crack, and fade after 2 washes.",
-        "Cheap disposable feel that dilutes premium brand equity at executive events.",
-        "Complex setup fees, screen charges, and surprise freight costs."
-      ],
-      us: [
-        "True Jacquard knit-in designs: pattern is woven directly into combed cotton threads.",
-        "High-grade US-grown cotton spun in North Carolina with 50+ wash durability.",
-        "Transparent all-inclusive pricing with free design iterations and no setup fees.",
-        "Dedicated account team and in-house apparel designers."
-      ],
-      trap: "When you hand out printed promotional items at trade shows, does it represent your brand as a premium leader, or does it look like disposable giveaway clutter?",
-      land: "4imprint is great when you need 5,000 $0.50 plastic pens for a festival. For corporate client gifting and VIP onboarding, premium custom-knit socks deliver 10x higher brand impressions."
-    },
-    {
-      name: 'Custom Ink / Online Screenprinters',
-      tag: 'Merchandise · Online Apparel & Screenprinting',
-      pitch: 'Pitches online self-service design tools for custom t-shirts, hoodies, and basic apparel.',
-      them: [
-        "T-shirt and screenprinting focus; socks are outsourced third-party catalog addons.",
-        "Limited custom knit capabilities (mostly printed blanks or basic stock colors).",
-        "Slow design turnaround for complex corporate brand guidelines.",
-        "High per-unit costs on non-apparel items."
-      ],
-      us: [
-        "Specialized custom knitwear manufacturer with proprietary knitting machines.",
-        "In-house design team creates pantone-matched proofs in under 60 minutes.",
-        "Seamless turn-key delivery directly to event venues or employee homes."
-      ],
-      trap: "Is your team spending hours fiddling with online canvas tools, or would you rather have professional designers deliver ready-to-order custom knit concepts in under an hour?",
-      land: "Custom Ink is king of screenprinted t-shirts. For specialized, high-retention corporate gifts, Sock Club's custom knit engineering is unmatched."
-    },
-    {
-      name: 'Printful / Print-on-Demand (POD)',
-      tag: 'Merchandise · Print on Demand Dropshipper',
-      pitch: 'Pitches on-demand fulfillment for e-commerce stores with zero upfront inventory.',
-      them: [
-        "Heavy synthetic polyester sublimation: white lines appear when stretched.",
-        "Expensive $16–$22+ single pair baseline costs.",
-        "Slow individual production with unpredictable international shipping."
-      ],
-      us: [
-        "Breathable 75% US-grown combed cotton with nylon and spandex blend.",
-        "Volume tiering from $6.50–$12/pair with custom retail packaging included.",
-        "Guaranteed 5-day rush production from North Carolina mill."
-      ],
-      trap: "Are your recipients experiencing stretched, faded polyester prints, or breathable combed cotton they actually wear every week?",
-      land: "Printful is useful for zero-inventory single-item dropshipping. For corporate batches of 30–5,000+ pairs, Sock Club provides far superior retail quality and direct pricing."
-    }
-  ],
-  zendesk: [
-    {
-      name: 'Salesforce Service Cloud',
-      tag: 'Enterprise CRM / Platform Suite',
-      pitch: 'Pitches Salesforce Customer 360 data unification as the all-in-one suite for sales, marketing, and customer support.',
-      them: [
-        "Total cost of ownership often reaches $300–$600/agent/mo once Digital Engagement, Voice, and Data Cloud licenses are added.",
-        "Rollout takes 6–9+ months requiring expensive third-party implementation consultants ($50k–$150k+).",
-        "Requires 2+ dedicated Salesforce administrators for ongoing workflow changes."
-      ],
-      us: [
-        "Days-to-weeks rapid time-to-value with intuitive modern agent workspace.",
-        "Transparent, predictable pricing with native omnichannel (Voice, WhatsApp, Chat, Email) included.",
-        "Pre-trained autonomous AI agents that deflect 45%+ of volume on day one."
-      ],
-      trap: "Walk me through your full per-agent cost once Digital Engagement, Voice, Data Cloud, and dedicated admin headcount are factored in — and how many months until agents are fully ramped?",
-      land: "If an enterprise is already 100% standardized on Sales Cloud and needs deep custom object customization, Salesforce is legitimate. For high-volume agile support teams, Zendesk delivers 3x faster time-to-value at half the TCO."
-    },
-    {
-      name: 'Intercom (Fin AI)',
-      tag: 'Conversational Support & Outcome AI',
-      pitch: 'Pitches Fin AI agent charging $0.99 per resolution as the modern pay-per-outcome conversational support bot.',
-      them: [
-        "Cost scales WITH success: more deflection means an exponentially higher monthly invoice (~$5,000+ extra at 5k resolutions).",
-        "Hybrid seat pricing + $0.99 resolution meter creates unpredictable billing volatility.",
-        "Weaker high-volume complex multi-touch ticketing and SLA routing."
-      ],
-      us: [
-        "Predictable, transparent platform licensing so your cost does not balloon as automation improves.",
-        "Mature enterprise routing, SLA management, and multi-brand support for complex operations.",
-        "Full AI agent suite included without punitive per-outcome meter spikes."
-      ],
-      trap: "At your monthly ticket volume, what does $0.99 per resolution total as deflection climbs from 30% to 60%, and how are you budgeting for that billing unpredictability?",
-      land: "Fin is strong for low-volume, high-margin SaaS looking for instant turnkey chat bots. For high-volume omnichannel teams, Zendesk provides enterprise governance and cost predictability."
-    }
-  ],
-  stripe: [
-    {
-      name: 'Adyen',
-      tag: 'Global Enterprise Merchant Acquirer',
-      pitch: 'Pitches single unified global acquiring platform for omnichannel point-of-sale and online payments for massive enterprises.',
-      them: [
-        "Strict merchant underwriting with high volume minimums ($500k+/mo); excludes fast-growing innovators.",
-        "Complex legacy developer integration requiring bespoke implementation engineers.",
-        "Limited built-in billing, subscription logic, and automated revenue recovery compared to Stripe Billing."
-      ],
-      us: [
-        "Unmatched developer velocity with pre-built UI components (Stripe Elements & Link 1-click checkout).",
-        "Adaptive Acceptance & AI Fraud Prevention (Radar) boosting card authorization rates by 3.8%+.",
-        "Unified billing, invoicing, tax, and payouts in a single frictionless dashboard."
-      ],
-      trap: "How many developer hours are spent maintaining custom payment integrations and managing recurring billing logic vs leveraging automated AI authorization optimizations?",
-      land: "Adyen is strong for massive global retailers with heavy physical in-store POS footprint. For modern online-first and platform businesses, Stripe delivers significantly higher conversion."
-    }
-  ],
-  saas: [
-    {
-      name: 'Legacy Sales Databases (Apollo / ZoomInfo Alone)',
-      tag: 'Static Sales Contact Repositories',
-      pitch: 'Pitches access to massive databases of 200M+ contacts with email search and basic sequencing.',
-      them: [
-        "High data decay: 30%+ of static database records are outdated or departed employees within 6 months.",
-        "Lacks real-time web intelligence, hiring surges, and recent event sponsorship radar.",
-        "Encourages generic spray-and-pray outbound blasts with low 1-2% reply rates."
-      ],
-      us: [
-        "Live real-time MCP pipeline: Gemini Search Grounding + Tavily live LinkedIn X-Ray queries active current employees right now.",
-        "Dynamic multi-channel synthesis: generates role-tailored emails, LinkedIn InMail, and cold call phone scripts in < 5 seconds.",
-        "Direct ROI value calculators embedded into every draft to prove economic urgency."
-      ],
-      trap: "How many hours per week do your reps waste verifying bounced emails from static databases and writing one-off personalized hooks from scratch?",
-      land: "ZoomInfo and Apollo have great foundational data tables. ProspectPulse acts as the intelligent orchestration layer that verifies live current roles and writes tailored multi-channel sequences."
-    }
-  ]
-};
-
-// Deck Slides Data
-const DECK_SLIDES = [
-  {
-    title: "1. Problem: Outbound Research is High-Latency & Generic",
-    bullets: [
-      "Enterprise sales reps waste 40+ minutes per account manually toggling between LinkedIn, Google News, ZoomInfo, and CRM tabs.",
-      "Outreach is generic: 90% of cold emails lack recent triggers, competitor awareness, and role-tailored value props.",
-      "Solution: Unified Agentic Architecture connecting live MCPs to generate verified stakeholder maps and personalized cadences in < 5 seconds."
-    ]
-  },
-  {
-    title: "2. Architecture: Multi-Source Agentic Pipeline",
-    bullets: [
-      "Gemini 3.6 Flash: Live Google Search Grounding for real-time news, leadership changes, and executive triggers.",
-      "Sumble v9 Org API: Verified headcount, industry taxonomy, tracked job postings, and tech stack detection.",
-      "Tavily AI Engine: Real-time web crawling and targeted LinkedIn X-Ray persona discovery with strict current-role verification.",
-      "ZoomInfo / CommonRoom: Tiered stakeholder mapping with verified email and direct dials."
-    ]
-  },
-  {
-    title: "3. Universal Pitch & ROI Adaptability",
-    bullets: [
-      "Instant Portability: Reconfigures live battlecards, firmographics, and value propositions for any target org.",
-      "Embedded ROI Engine: Calculates quantitative cost savings and efficiency gains directly inside the email canvas.",
-      "Immediate ROI: Reclaims ~40 min/account, equating to $1,800+ in rep productivity value every week."
-    ]
-  }
-];
-
+// Screen Navigation
 // Screen Navigation
 function gotoScreen(num) {
   currentScreen = num;
@@ -2572,7 +2355,7 @@ function updateProductStudioCanvas(key) {
 
           <!-- REAL-TIME LIVE CONTROLS -->
           <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 14px; width: 100%; max-width: 380px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div class="flex-between" style="margin-bottom: 10px;">
               <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🎨 Real-Time Knit Palette:</span>
               <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10.5px;" onclick="autoMatchBrandColors()">⚡ Auto-Match Brand</button>
             </div>
@@ -2692,17 +2475,21 @@ function updateProductStudioCanvas(key) {
   }
 }
 
-function toggleProofMode(mode) {
-  const isPhoto = mode === 'photo';
-  const photoView = document.getElementById('proofPhotoView');
-  const vectorView = document.getElementById('proofVectorView');
-  const btnPhoto = document.getElementById('btnProofPhoto');
-  const btnVector = document.getElementById('btnProofVector');
+function toggleTabs(activeId, inactiveId, activeBtnClass, inactiveBtnClass, displayType = 'block') {
+  const v1 = document.getElementById(activeId);
+  const v2 = document.getElementById(inactiveId);
+  const b1 = document.getElementById(activeBtnClass);
+  const b2 = document.getElementById(inactiveBtnClass);
 
-  if (photoView) photoView.style.display = isPhoto ? 'flex' : 'none';
-  if (vectorView) vectorView.style.display = isPhoto ? 'none' : 'flex';
-  if (btnPhoto) btnPhoto.className = isPhoto ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
-  if (btnVector) btnVector.className = isPhoto ? 'btn btn-secondary btn-sm' : 'btn btn-primary btn-sm';
+  if (v1) v1.style.display = displayType;
+  if (v2) v2.style.display = 'none';
+  if (b1) b1.className = 'btn btn-primary btn-sm';
+  if (b2) b2.className = 'btn btn-secondary btn-sm';
+}
+
+function toggleProofMode(mode) {
+  if (mode === 'photo') toggleTabs('proofPhotoView', 'proofVectorView', 'btnProofPhoto', 'btnProofVector', 'flex');
+  else toggleTabs('proofVectorView', 'proofPhotoView', 'btnProofVector', 'btnProofPhoto', 'flex');
 }
 
 function attachProofToEmail() {
@@ -2744,7 +2531,7 @@ function renderBattlecardsModalList() {
   document.getElementById('battlecardsModalHeader').textContent = `⚔️ ${p.companyName} Competitor Battlecards`;
   document.getElementById('battlecardsList').innerHTML = cards.map(b => `
     <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div class="flex-between" style="margin-bottom: 8px;">
         <h3 style="font-size: 16px; color: var(--amber);">${b.name}</h3>
         <span class="badge badge-amber">${b.tag}</span>
       </div>
@@ -2833,7 +2620,7 @@ function generateAbVariants() {
 
   const container = document.getElementById('abVariantsContainer');
   container.innerHTML = variants.map(v => `
-    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; cursor: pointer;" onclick="applySubjectVariant('${v.text.replace(/'/g, "\\'")}')">
+    <div class="flex-between" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; cursor: pointer;" onclick="applySubjectVariant('${v.text.replace(/'/g, "\\'")}')">
       <div style="font-size: 12.5px;"><strong>${v.type}:</strong> <span style="color: var(--text-muted);">${v.text}</span></div>
       <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 11px;">Apply</button>
     </div>
@@ -2874,7 +2661,9 @@ function runProspectSearch() {
   })
   .then(res => res.json())
   .then(({ job_id }) => {
+    if (activeEventSource) activeEventSource.close();
     const es = new EventSource('/api/stream/' + job_id);
+    activeEventSource = es;
     es.addEventListener('result', e => {
       try {
         const d = JSON.parse(e.data);
@@ -2926,7 +2715,7 @@ function renderRoiWidget() {
     if (box) {
       box.innerHTML = `
         <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Order Volume: <strong id="roiUnitsVal">500</strong> pairs</div>
-        <input type="range" min="50" max="2500" step="50" value="500" oninput="calculateSwagRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+        <input type="range" min="50" max="2500" step="50" value="500" oninput="calculateRoi(this.value, 'swag')" style="width: 100%; margin-bottom: 12px;">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
           <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); padding: 8px; border-radius: 6px;">
@@ -2962,7 +2751,7 @@ function renderRoiWidget() {
     if (box) {
       box.innerHTML = `
         <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Support Headcount: <strong id="roiUnitsVal">50</strong> agents</div>
-        <input type="range" min="10" max="300" step="5" value="50" oninput="calculateCxRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+        <input type="range" min="10" max="300" step="5" value="50" oninput="calculateRoi(this.value, 'cx')" style="width: 100%; margin-bottom: 12px;">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
           <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
@@ -2981,7 +2770,7 @@ function renderRoiWidget() {
     if (box) {
       box.innerHTML = `
         <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Sales/Eng Team: <strong id="roiUnitsVal">25</strong> users</div>
-        <input type="range" min="5" max="150" step="5" value="25" oninput="calculateSaasRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+        <input type="range" min="5" max="150" step="5" value="25" oninput="calculateRoi(this.value, 'saas')" style="width: 100%; margin-bottom: 12px;">
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
           <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
@@ -2999,31 +2788,24 @@ function renderRoiWidget() {
   }
 }
 
-function calculateSwagRoi(val) {
+function calculateRoi(val, type) {
   const u = document.getElementById('roiUnitsVal');
   if (u) u.textContent = val;
-  const waste = Math.round(val * 10 * 0.9);
-  const keep = Math.round(val * 0.95);
   const wEl = document.getElementById('roiWasteVal');
   const kEl = document.getElementById('roiKeepVal');
-  if (wEl) wEl.textContent = `$${waste.toLocaleString()} (90% trash)`;
-  if (kEl) kEl.textContent = `${keep.toLocaleString()} Active Wearers (95%)`;
-}
-
-function calculateCxRoi(val) {
-  const u = document.getElementById('roiUnitsVal');
-  if (u) u.textContent = val;
-  const saved = Math.round(val * 360);
-  const wEl = document.getElementById('roiWasteVal');
-  if (wEl) wEl.textContent = `$${saved.toLocaleString()} / mo saved`;
-}
-
-function calculateSaasRoi(val) {
-  const u = document.getElementById('roiUnitsVal');
-  if (u) u.textContent = val;
-  const hours = Math.round(val * 40);
-  const wEl = document.getElementById('roiWasteVal');
-  if (wEl) wEl.textContent = `${hours.toLocaleString()} hrs / month`;
+  
+  if (type === 'swag') {
+    const waste = Math.round(val * 10 * 0.9);
+    const keep = Math.round(val * 0.95);
+    if (wEl) wEl.textContent = `$${waste.toLocaleString()} (90% trash)`;
+    if (kEl) kEl.textContent = `${keep.toLocaleString()} Active Wearers (95%)`;
+  } else if (type === 'cx') {
+    const saved = Math.round(val * 360);
+    if (wEl) wEl.textContent = `$${saved.toLocaleString()} / mo saved`;
+  } else if (type === 'saas') {
+    const hours = Math.round(val * 40);
+    if (wEl) wEl.textContent = `${hours.toLocaleString()} hrs / month`;
+  }
 }
 
 function insertRoiBlockToDraft() {
@@ -3113,7 +2895,7 @@ function parseAndRenderResults(raw) {
     const compName = (data.competitor && data.competitor.name) || 'Incumbent Vendor';
     objListEl.innerHTML = `
       <div style="background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--rose); cursor: pointer;" onclick="toggleObjectionDetail('vendor')">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="flex-between">
           <strong style="color: #fff; font-size: 12.5px;">1. "We already use ${compName}" (88% Likelihood)</strong>
           <span class="badge badge-rose" style="font-size: 10px;">⚡ View Counter</span>
         </div>
@@ -3130,7 +2912,7 @@ function parseAndRenderResults(raw) {
       </div>
 
       <div style="background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--amber); cursor: pointer;" onclick="toggleObjectionDetail('budget')">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="flex-between">
           <strong style="color: #fff; font-size: 12.5px;">2. "Budgets are frozen right now" (65% Likelihood)</strong>
           <span class="badge badge-amber" style="font-size: 10px;">⚡ View Counter</span>
         </div>
@@ -3147,7 +2929,7 @@ function parseAndRenderResults(raw) {
       </div>
 
       <div style="background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; border-left: 3px solid var(--sky); cursor: pointer;" onclick="toggleObjectionDetail('email')">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="flex-between">
           <strong style="color: #fff; font-size: 12.5px;">3. "Just email me a catalog/PDF" (72% Likelihood)</strong>
           <span class="badge badge-sky" style="font-size: 10px;">⚡ View Counter</span>
         </div>
@@ -3340,7 +3122,9 @@ function draftForContact(name, title) {
   })
   .then(res => res.json())
   .then(({ job_id }) => {
+    if (activeEventSource) activeEventSource.close();
     const es = new EventSource('/api/stream/' + job_id);
+    activeEventSource = es;
     es.addEventListener('result', e => {
       try {
         const d = JSON.parse(e.data);
@@ -3446,7 +3230,7 @@ function openExecutiveBriefModal() {
 
     <!-- DISPLACEMENT BATTLECARD -->
     <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <div class="flex-between" style="margin-bottom: 6px;">
         <strong style="color: var(--amber); text-transform: uppercase; font-size: 11.5px;">⚔️ Incumbent Displacement Talk Track</strong>
         <span class="badge badge-amber">Trap Question Ready</span>
       </div>
@@ -3548,7 +3332,7 @@ function openMultiThreadingModal() {
   if (currentActivePreset === 'sockclub') {
     container.innerHTML = `
       <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div class="flex-between" style="margin-bottom: 8px;">
           <span class="badge badge-sky">🎪 Persona 1: Field &amp; Event Marketing</span>
           <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt1')">📋 Copy Email</button>
         </div>
@@ -3559,7 +3343,7 @@ Hi [Event Lead],\n\nNoticed ${co} is driving event booth activations. Generic ca
       </div>
 
       <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div class="flex-between" style="margin-bottom: 8px;">
           <span class="badge badge-emerald">🎁 Persona 2: People Ops &amp; Culture</span>
           <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt2')">📋 Copy Email</button>
         </div>
@@ -3570,7 +3354,7 @@ Hi [People Ops Lead],\n\nFor ${co}'s upcoming employee onboarding and culture mi
       </div>
 
       <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div class="flex-between" style="margin-bottom: 8px;">
           <span class="badge badge-indigo">💎 Persona 3: CMO &amp; Brand Leadership</span>
           <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt3')">📋 Copy Email</button>
         </div>
@@ -3583,7 +3367,7 @@ Hi [Brand VP],\n\nUnlike middleman swag brokers who mark up generic overseas ite
   } else {
     container.innerHTML = `
       <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div class="flex-between" style="margin-bottom: 8px;">
           <span class="badge badge-sky">⚡ Persona 1: Operations &amp; Strategy</span>
           <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt1')">📋 Copy Email</button>
         </div>
@@ -3594,7 +3378,7 @@ Hi [Ops Director],\n\nNoticed ${co} is scaling operations. We provide modern uni
       </div>
 
       <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div class="flex-between" style="margin-bottom: 8px;">
           <span class="badge badge-emerald">💼 Persona 2: Technology &amp; Engineering Lead</span>
           <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt2')">📋 Copy Email</button>
         </div>
@@ -3605,7 +3389,7 @@ Hi [Engineering Lead],\n\nRather than dealing with legacy brittle integrations, 
       </div>
 
       <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div class="flex-between" style="margin-bottom: 8px;">
           <span class="badge badge-indigo">💎 Persona 3: C-Level Executive Sponsor</span>
           <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt3')">📋 Copy Email</button>
         </div>
@@ -3716,16 +3500,8 @@ function stopVoiceAudio() {
 
 // Pre-Call Tactical Playbook Tab Switcher
 function togglePlaybookTab(tab) {
-  const isObj = tab === 'obj';
-  const vObj = document.getElementById('playbookViewObj');
-  const v5w = document.getElementById('playbookView5w');
-  const bObj = document.getElementById('btnPlaybookObj');
-  const b5w = document.getElementById('btnPlaybook5w');
-
-  if (vObj) vObj.style.display = isObj ? 'block' : 'none';
-  if (v5w) v5w.style.display = isObj ? 'none' : 'block';
-  if (bObj) { bObj.className = isObj ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'; }
-  if (b5w) { b5w.className = isObj ? 'btn btn-secondary btn-sm' : 'btn btn-primary btn-sm'; }
+  if (tab === 'obj') toggleTabs('playbookViewObj', 'playbookView5w', 'btnPlaybookObj', 'btnPlaybook5w', 'block');
+  else toggleTabs('playbookView5w', 'playbookViewObj', 'btnPlaybook5w', 'btnPlaybookObj', 'block');
 }
 
 // 1-Click Direct Gmail Compose
@@ -3789,7 +3565,7 @@ function exportFullDossier(format = 'pdf') {
     const phone = document.getElementById('callOpenerText') ? document.getElementById('callOpenerText').textContent : '';
 
     area.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #6366F1; padding-bottom: 12px; margin-bottom: 18px;">
+      <div class="flex-between" style="border-bottom: 3px solid #6366F1; padding-bottom: 12px; margin-bottom: 18px;">
         <div>
           <h1 style="font-size: 26px; color: #1E293B; margin: 0; font-weight: 800;">${co} — Executive Account Dossier</h1>
           <div style="font-size: 13px; color: #64748B; margin-top: 4px;">Prepared by: ${p.senderName} (${p.companyName}) · Developed by @ElChibo</div>
@@ -4327,7 +4103,9 @@ function generateReplyTriage() {
   })
   .then(res => res.json())
   .then(({ job_id }) => {
+    if (activeEventSource) activeEventSource.close();
     const es = new EventSource('/api/stream/' + job_id);
+    activeEventSource = es;
     es.addEventListener('result', e => {
       try {
         const d = JSON.parse(e.data);
@@ -4596,8 +4374,15 @@ function renderMatrixTable() {
 function toggleContrastTheme() {
   document.body.classList.toggle('high-contrast');
   const isHc = document.body.classList.contains('high-contrast');
+  localStorage.setItem('pp-theme', isHc ? 'high-contrast' : 'dark');
   showToast(isHc ? '🌓 High-Contrast Screen-Share Mode Activated' : '🌒 Obsidian Dark Mode Activated');
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('pp-theme') === 'high-contrast') {
+    document.body.classList.add('high-contrast');
+  }
+});
 
 // Copy Discovery Questions
 function copyDiscoveryQuestions() {
@@ -5041,7 +4826,9 @@ function handleVoiceUserSpeech(userSpeech) {
   })
   .then(res => res.json())
   .then(({ job_id }) => {
+    if (activeEventSource) activeEventSource.close();
     const es = new EventSource('/api/stream/' + job_id);
+    activeEventSource = es;
     es.addEventListener('result', e => {
       try {
         const d = JSON.parse(e.data);
