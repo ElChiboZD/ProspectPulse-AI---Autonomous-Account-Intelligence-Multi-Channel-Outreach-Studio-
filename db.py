@@ -5,7 +5,12 @@ import sys
 from datetime import datetime
 
 if getattr(sys, 'frozen', False):
-    DB_DIR = os.path.dirname(sys.executable)
+    app_data = os.environ.get('APPDATA', os.path.dirname(sys.executable))
+    DB_DIR = os.path.join(app_data, 'ProspectPulseAI')
+    try:
+        os.makedirs(DB_DIR, exist_ok=True)
+    except Exception:
+        DB_DIR = os.path.dirname(sys.executable)
 else:
     DB_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(DB_DIR, "prospectpulse.db")

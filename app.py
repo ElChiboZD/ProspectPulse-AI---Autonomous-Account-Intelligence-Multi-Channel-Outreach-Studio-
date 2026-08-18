@@ -1,30 +1,41 @@
 #!/usr/bin/env python3
 """
-ProspectPulse AI — Native Desktop Application Wrapper
-Runs the local intelligence server in a background thread and opens a native Edge WebView2 desktop window.
+ProspectPulse AI — Standalone Desktop Application
+Self-contained native Windows Edge WebView2 desktop application with dynamic port allocation and background server lifecycle.
 """
 
 import os
 import sys
 import time
+import socket
 import threading
 import urllib.request
 import urllib.error
 import webview
 
-# Import the local server components
 import server
 import db
 
-PORT = int(os.environ.get("PORT", "8765"))
-SERVER_URL = f"http://127.0.0.1:{PORT}"
+def find_free_port(start_port=8765, max_attempts=50):
+    """Finds an available TCP port starting from start_port."""
+    for port in range(start_port, start_port + max_attempts):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(('127.0.0.1', port))
+                return port
+            except OSError:
+                continue
+    return start_port
+
+SERVER_PORT = find_free_port(8765)
+SERVER_URL = f"http://127.0.0.1:{SERVER_PORT}"
 
 def start_server():
     """Starts the Python ThreadingHTTPServer in a background daemon thread."""
     try:
         db.init_db()
-        srv = server.ThreadingHTTPServer(("127.0.0.1", PORT), server.Handler)
-        print(f"[*] ProspectPulse AI Server running at {SERVER_URL}")
+        srv = server.ThreadingHTTPServer(("127.0.0.1", SERVER_PORT), server.Handler)
+        print(f"[*] ProspectPulse AI Standalone Engine running on {SERVER_URL}")
         srv.serve_forever()
     except Exception as e:
         print(f"[!] Server error: {e}")
@@ -38,7 +49,7 @@ def wait_for_server(url, timeout=10):
                 if resp.status == 200:
                     return True
         except (urllib.error.URLError, ConnectionRefusedError, TimeoutError):
-            time.sleep(0.2)
+            time.sleep(0.15)
     return False
 
 def main():
@@ -52,7 +63,7 @@ def main():
 
     # 3. Create native desktop window
     window = webview.create_window(
-        title="ProspectPulse AI — Autonomous Account Intelligence & Outreach Studio",
+        title="ProspectPulse AI — Autonomous Account Intelligence Studio",
         url=SERVER_URL,
         width=1420,
         height=920,
@@ -63,9 +74,14 @@ def main():
     )
 
     # 4. Start GUI event loop
-    print("[*] Launching Native Desktop Window...")
-    webview.start(debug=False)
-    print("[*] ProspectPulse AI Desktop Window Closed.")
+    print("[*] Launching Native Standalone Window...")
+    try:
+        webview.start(debug=False, gui="edgechromium")
+    except Exception:
+        # Fallback to default GUI backend
+        webview.start(debug=False)
+
+    print("[*] ProspectPulse AI Desktop Application Closed.")
     sys.exit(0)
 
 if __name__ == "__main__":
