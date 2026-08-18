@@ -97,7 +97,19 @@ Switch seamlessly between pre-built enterprise pitch presets:
 ### 17. 🏢 Enterprise Multi-Unit Account Hierarchy Tree
 * Visualizes parent organizations, regional hubs, and targeted buying centers for global multi-threading.
 
-### 18. 🌓 Obsidian Dark / High-Contrast Theme Toggle
+### 18. 📹 Interactive Webcam Video Pitch Studio & Shareable Landing Page
+* Record or simulate a 30s video pitch with live webcam feed, real-time lower-third branding, and generated shareable video landing page links.
+
+### 19. 🛡️ Buying Committee Matrix & Single-Thread Risk Gauge
+* Maps Champion vs. Economic Buyer vs. Operations stakeholders with automated single-thread risk warnings.
+
+### 20. ⚡ Instant Inbound Reply Smasher Presets
+* 1-Click test buttons for common prospect pushbacks ("We have a vendor", "No budget", "Send pricing", "Reach out next quarter").
+
+### 21. 🎯 Dynamic Cadence Strategy Selector
+* Real-time switcher between 5-Touch Strategic (14d), High-Velocity Blitz (5d), and Event Rush (48h).
+
+### 22. 🌓 Obsidian Dark / High-Contrast Theme Toggle
 * One-click theme switcher optimized for daylight demos, client screen-shares, and conference projectors.
 
 ---

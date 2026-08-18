@@ -1016,6 +1016,37 @@
           </div>
         </div>
 
+        <!-- BUYING COMMITTEE & SINGLE-THREAD RISK CARD -->
+        <div class="panel-card" style="border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.02);">
+          <div class="panel-head">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="panel-title" style="color: var(--amber);">🛡️ Buying Committee &amp; Single-Thread Risk</span>
+            </div>
+            <span class="badge badge-amber" id="singleThreadRiskBadge">⚠️ High Risk (1 Lead Mapped)</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Enterprise deals require multi-threading across Champion, Economic Buyer, and Operations to prevent ghosting.</p>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 10.5px; font-weight: 700; color: var(--emerald); text-transform: uppercase;">👑 Champion</div>
+              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeChampion">VP Marketing / Brand</div>
+              <div style="font-size: 11px; color: var(--text-faint); margin-top: 2px;">Focus: Wearer retention</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 10.5px; font-weight: 700; color: var(--sky); text-transform: uppercase;">💰 Economic Buyer</div>
+              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeEconomic">CFO / Finance</div>
+              <div style="font-size: 11px; color: var(--text-faint); margin-top: 2px;">Focus: Hard cost ROI</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 10.5px; font-weight: 700; color: var(--indigo); text-transform: uppercase;">⚙️ Operations</div>
+              <div style="font-size: 12px; font-weight: 700; color: #fff; margin-top: 2px;" id="committeeOps">Director Operations</div>
+              <div style="font-size: 11px; color: var(--text-faint); margin-top: 2px;">Focus: 5-Day delivery</div>
+            </div>
+          </div>
+
+          <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="openMultiThreadingModal()">👥 Launch Coordinated 3-Way Multi-Threading Campaign</button>
+        </div>
+
         <!-- DYNAMIC ROI CALCULATOR WIDGET -->
         <div class="panel-card" style="border-color: rgba(99, 102, 241, 0.3);">
           <div class="panel-head">
@@ -1081,6 +1112,7 @@
       <div class="channel-tab" id="cTabLinkedin" onclick="switchChannelTab('linkedin')">💬 LinkedIn InMail (300 Char)</div>
       <div class="channel-tab" id="cTabPhone" onclick="switchChannelTab('phone')">📞 30s Cold Call &amp; Voicemail</div>
       <div class="channel-tab" id="cTabProof" onclick="switchChannelTab('proof')">🎨 Live Product Proof Studio</div>
+      <div class="channel-tab" id="cTabVideo" onclick="switchChannelTab('video')">📹 Video Pitch Studio</div>
       <div class="channel-tab" id="cTabRoi" onclick="switchChannelTab('roi')">🧮 Custom ROI Teardown</div>
     </div>
 
@@ -1284,6 +1316,56 @@
           <div id="fullRoiTeardownView"></div>
         </div>
 
+        <!-- TAB 6: WEBCAM VIDEO PITCH STUDIO & SHAREABLE LANDING PAGE -->
+        <div id="channelViewVideo" class="panel-card" style="display: none;">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--rose);">📹 Interactive Video Pitch Studio &amp; Shareable Landing Page</span>
+            <span class="badge badge-rose">Loom / Vidyard Engine</span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Record or simulate a personalized 30-second video pitch with real-time lower-third branding and an instant shareable landing page link.</p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <!-- WEBCAM / AVATAR STAGE -->
+            <div style="background: #000; border: 1px solid var(--border); border-radius: 12px; height: 260px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <video id="liveWebcamVideo" autoplay muted style="width: 100%; height: 100%; object-fit: cover; display: none;"></video>
+              <div id="webcamAvatarFallback" style="text-align: center;">
+                <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--indigo-glow); border: 2px solid var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 10px;">
+                  🎙️
+                </div>
+                <div style="font-size: 13px; font-weight: 700; color: #fff;">Async Video Pitch Simulator</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Click below to activate live webcam feed</div>
+              </div>
+
+              <!-- LOWER THIRD BRANDING OVERLAY -->
+              <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 800; font-size: 12px; color: #fff;" id="videoOverlaySender">Travis · Sock Club</div>
+                  <div style="font-size: 10.5px; color: var(--sky);" id="videoOverlayCo">Exclusive Preview for Target Account</div>
+                </div>
+                <span class="badge badge-emerald" style="font-size: 9.5px;">HD 1080P</span>
+              </div>
+            </div>
+
+            <!-- CONTROLS & SHAREABLE LINK -->
+            <div style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 14px; border-radius: 10px;">
+                <strong style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Generated Shareable Video Landing Page</strong>
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                  <input type="text" id="shareableVideoLinkInput" value="https://prospectpulse.ai/v/preview-8492" readonly style="font-size: 12px; font-family: monospace; background: rgba(0,0,0,0.4);">
+                  <button class="btn btn-secondary btn-sm" onclick="copyVideoLandingPageLink()">📋 Copy Link</button>
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-faint); margin-top: 8px;">Embeds high-retention video thumbnail directly into the prospect's email client.</div>
+              </div>
+
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+                <button class="btn btn-primary btn-sm" id="btnToggleWebcam" onclick="toggleWebcamFeed()">🎥 Enable Webcam</button>
+                <button class="btn btn-secondary btn-sm" onclick="embedVideoLinkToEmail()">📎 Embed Video in Email</button>
+                <button class="btn btn-secondary btn-sm" onclick="openTeleprompterModal()">📜 Open Teleprompter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- RIGHT SIDEBAR: MOBILE SIMULATOR & 5-TOUCH CADENCE -->
@@ -1333,7 +1415,12 @@
 
         <div class="panel-card">
           <div class="panel-head">
-            <span class="panel-title">📅 5-Touch Cadence</span>
+            <span class="panel-title">📅 Cadence Strategy</span>
+            <select id="cadenceStrategySelect" onchange="updateCadenceStrategy(this.value)" style="width: auto; padding: 2px 8px; font-size: 11px;">
+              <option value="standard" selected>5-Touch Strategic (14d)</option>
+              <option value="blitz">🔥 High-Velocity Blitz (5d)</option>
+              <option value="event">🎪 Event Rush (48h)</option>
+            </select>
           </div>
           <div class="sequence-timeline" id="sequenceTimeline"></div>
         </div>
@@ -1384,9 +1471,20 @@
         <h2 style="font-size: 18px; margin-bottom: 6px;">Inbound Reply Handler &amp; Rebuttal Triage</h2>
         <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Paste an actual prospect email reply to generate a high-converting rebuttal.</p>
 
+        <!-- QUICK REPLY PRESETS -->
+        <div style="margin-bottom: 12px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">⚡ Quick Objection Presets (Click to Load):</span>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10.5px;" onclick="loadReplyPreset('vendor')">"We have a vendor"</button>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10.5px;" onclick="loadReplyPreset('budget')">"No budget right now"</button>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10.5px;" onclick="loadReplyPreset('pricing')">"Send pricing/catalog"</button>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10.5px;" onclick="loadReplyPreset('quarter')">"Check back next quarter"</button>
+          </div>
+        </div>
+
         <div style="margin-bottom: 14px;">
           <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Prospect's Reply Text</label>
-          <textarea id="replyInput" rows="5" placeholder="e.g. 'We already work with an incumbent vendor, why should we switch?'" style="margin-top: 6px;"></textarea>
+          <textarea id="replyInput" rows="4" placeholder="e.g. 'We already work with an incumbent vendor, why should we switch?'" style="margin-top: 6px;"></textarea>
         </div>
 
         <button class="btn btn-primary" onclick="generateReplyTriage()">⚡ Generate Strategic Response</button>
@@ -2664,6 +2762,43 @@ function parseAndRenderResults(raw) {
     `;
   }
 
+  // Buying Committee & Single-Thread Risk Gauge
+  const badgeEl = document.getElementById('singleThreadRiskBadge');
+  const champEl = document.getElementById('committeeChampion');
+  const econEl = document.getElementById('committeeEconomic');
+  const opsEl = document.getElementById('committeeOps');
+
+  let totalContacts = 0;
+  let allLeads = [];
+  if (data.tiers) {
+    data.tiers.forEach(t => {
+      (t.contacts || []).forEach(c => {
+        totalContacts++;
+        allLeads.push(c);
+      });
+    });
+  }
+
+  if (badgeEl) {
+    if (totalContacts >= 3) {
+      badgeEl.className = 'badge badge-emerald';
+      badgeEl.textContent = `✓ Multi-Threaded (${totalContacts} Leads Mapped)`;
+    } else {
+      badgeEl.className = 'badge badge-amber';
+      badgeEl.textContent = `⚠️ Single-Thread Risk (${totalContacts || 1} Lead Mapped)`;
+    }
+  }
+
+  if (champEl && allLeads[0]) champEl.textContent = `${allLeads[0].name} · ${allLeads[0].title.split(',')[0]}`;
+  if (econEl) econEl.textContent = allLeads[1] ? `${allLeads[1].name} · ${allLeads[1].title.split(',')[0]}` : `VP Finance / CFO`;
+  if (opsEl) opsEl.textContent = allLeads[2] ? `${allLeads[2].name} · ${allLeads[2].title.split(',')[0]}` : `Director People & Ops`;
+
+  // Update Video Overlay & Shareable link
+  const vCo = document.getElementById('videoOverlayCo');
+  const vLink = document.getElementById('shareableVideoLinkInput');
+  if (vCo) vCo.textContent = `Custom Proof Preview for ${data.company}`;
+  if (vLink) vLink.value = `https://prospectpulse.ai/v/${domain.replace(/\\./g, '-')}-proof-${Math.floor(Math.random()*8999+1000)}`;
+
   // Firmographics & Brand Palette
   document.getElementById('firmographicsContent').innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -3354,7 +3489,121 @@ function switchChannelTab(tab) {
   document.getElementById('channelViewLinkedin').style.display = tab === 'linkedin' ? 'block' : 'none';
   document.getElementById('channelViewPhone').style.display = tab === 'phone' ? 'block' : 'none';
   document.getElementById('channelViewProof').style.display = tab === 'proof' ? 'block' : 'none';
+  document.getElementById('channelViewVideo').style.display = tab === 'video' ? 'block' : 'none';
   document.getElementById('channelViewRoi').style.display = tab === 'roi' ? 'block' : 'none';
+}
+
+// 📹 Video Pitch Studio & Webcam Feed Engine
+let webcamStream = null;
+function toggleWebcamFeed() {
+  const vid = document.getElementById('liveWebcamVideo');
+  const fallback = document.getElementById('webcamAvatarFallback');
+  const btn = document.getElementById('btnToggleWebcam');
+
+  if (webcamStream) {
+    webcamStream.getTracks().forEach(t => t.stop());
+    webcamStream = null;
+    if (vid) vid.style.display = 'none';
+    if (fallback) fallback.style.display = 'block';
+    if (btn) { btn.textContent = '🎥 Enable Webcam'; btn.className = 'btn btn-primary btn-sm'; }
+    showToast('Webcam turned off');
+  } else {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(stream => {
+          webcamStream = stream;
+          if (vid) {
+            vid.srcObject = stream;
+            vid.style.display = 'block';
+          }
+          if (fallback) fallback.style.display = 'none';
+          if (btn) { btn.textContent = '⏹️ Stop Webcam'; btn.className = 'btn btn-secondary btn-sm'; }
+          showToast('🎥 Webcam active! Ready to record 30s pitch.');
+        })
+        .catch(err => {
+          console.warn('Webcam access error:', err);
+          showToast('⚠️ Webcam permission needed — running in high-def preview mode.');
+        });
+    } else {
+      showToast('⚠️ Webcam not supported on this browser.');
+    }
+  }
+}
+
+function copyVideoLandingPageLink() {
+  const input = document.getElementById('shareableVideoLinkInput');
+  if (input) {
+    navigator.clipboard.writeText(input.value).then(() => showToast('✓ Shareable video link copied to clipboard!'));
+  }
+}
+
+function embedVideoLinkToEmail() {
+  const link = document.getElementById('shareableVideoLinkInput') ? document.getElementById('shareableVideoLinkInput').value : 'https://prospectpulse.ai/v/preview';
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  const snippet = `\n\n▶️ [Watch 30s Video Pitch & Virtual Proof for ${co}](${link})`;
+  const emailInput = document.getElementById('emailBodyInput');
+  if (emailInput) {
+    emailInput.value += snippet;
+    runDeliverabilityAudit();
+    showToast('✓ Video landing page link embedded into email draft!');
+  }
+}
+
+// ⚡ Quick Inbound Reply Smasher Presets
+function loadReplyPreset(type) {
+  const input = document.getElementById('replyInput');
+  const co = (currentAccountData && currentAccountData.company) || 'our company';
+  const comp = (currentAccountData && currentAccountData.competitor && currentAccountData.competitor.name) || 'SwagUp';
+
+  if (type === 'vendor') {
+    input.value = `Thanks for reaching out, but we already have an established contract with ${comp} for all our promotional items.`;
+  } else if (type === 'budget') {
+    input.value = `We are currently in a company-wide budget freeze through the end of the quarter. Reach out later.`;
+  } else if (type === 'pricing') {
+    input.value = `Can you just email over your pricing sheet, catalog PDF, and minimum order quantities?`;
+  } else if (type === 'quarter') {
+    input.value = `Timing isn't great right now. Can you follow up with us in Q4?`;
+  }
+  generateReplyTriage();
+}
+
+// 🎯 Dynamic Cadence Strategy Selector
+function updateCadenceStrategy(strat) {
+  if (!currentDraftData) return;
+  const tl = document.getElementById('sequenceTimeline');
+  if (!tl) return;
+
+  let seq = [];
+  if (strat === 'blitz') {
+    seq = [
+      { day: 0, channel: 'Email', label: 'Day 0: Initial Hook + Proof', body: currentDraftData.subject },
+      { day: 2, channel: 'Phone', label: 'Day 2: 30s Cold Call + Voicemail', body: 'Opening hook & proof drop' },
+      { day: 5, channel: 'InMail', label: 'Day 5: 300-Char LinkedIn Close', body: 'Direct peer connection note' }
+    ];
+  } else if (strat === 'event') {
+    seq = [
+      { day: '0h', channel: 'Email', label: 'Hour 0: Urgent 5-Day Rush Proof', body: currentDraftData.subject },
+      { day: '24h', channel: 'Phone', label: 'Hour 24: Direct Mill Call', body: 'Confirm delivery deadline' },
+      { day: '48h', channel: 'Email', label: 'Hour 48: Final Proof Sign-off', body: 'Lock in production slot' }
+    ];
+  } else {
+    seq = currentDraftData.sequence || [
+      { day: 0, channel: 'Email', label: 'Day 0: Initial Hook + Proof' },
+      { day: 3, channel: 'LinkedIn', label: 'Day 3: Social Touch & Connection' },
+      { day: 7, channel: 'Phone', label: 'Day 7: Cold Call & Voicemail Drop' },
+      { day: 11, channel: 'Email', label: 'Day 11: ROI Teardown & Case Study' },
+      { day: 14, channel: 'Email', label: 'Day 14: Breakup / Permission to Close' }
+    ];
+  }
+
+  tl.innerHTML = seq.map(s => `
+    <div class="timeline-step">
+      <div class="timeline-dot"></div>
+      <div style="font-size: 11px; font-weight: 700; color: var(--indigo); text-transform: uppercase;">${s.day === 0 || typeof s.day === 'string' ? s.day : 'Day ' + s.day} · ${s.channel}</div>
+      <div style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px;">${s.label}</div>
+    </div>
+  `).join('');
+  showToast(`🎯 Switched to ${strat.toUpperCase()} cadence strategy!`);
 }
 
 function updateCharCount() {
