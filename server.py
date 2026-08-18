@@ -70,7 +70,11 @@ class RateLimiter:
 api_run_limiter = RateLimiter(10, 60)
 api_tts_limiter = RateLimiter(5, 60)
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+import sys
+if getattr(sys, 'frozen', False):
+    ROOT = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+else:
+    ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(ROOT, "static")
 PROMPTS = os.path.join(ROOT, "prompts")
 
