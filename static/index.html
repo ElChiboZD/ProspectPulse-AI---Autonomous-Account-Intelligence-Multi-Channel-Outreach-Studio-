@@ -798,12 +798,14 @@
 
 <div class="app-container">
 
-  <!-- Workflow Breadcrumb -->
+  <!-- Workflow Breadcrumb (6 Elite Steps) -->
   <div class="flow-tabs">
-    <div class="flow-tab active" id="tab1" onclick="gotoScreen(1)"><div class="tab-idx">1</div> <span>Find Account</span></div>
-    <div class="flow-tab" id="tab2" onclick="gotoScreen(2)"><div class="tab-idx">2</div> <span>Stakeholders &amp; Radar</span></div>
-    <div class="flow-tab" id="tab3" onclick="gotoScreen(3)"><div class="tab-idx">3</div> <span>Outreach Studio</span></div>
-    <div class="flow-tab" id="tab4" onclick="gotoScreen(4)"><div class="tab-idx">4</div> <span>AI Objection Roleplay &amp; Triage</span></div>
+    <div class="flow-tab active" id="tab1" onclick="gotoScreen(1)"><div class="tab-idx">1</div> <span>Account Radar</span></div>
+    <div class="flow-tab" id="tab2" onclick="gotoScreen(2)"><div class="tab-idx">2</div> <span>Intel &amp; Buying Committee</span></div>
+    <div class="flow-tab" id="tab3" onclick="gotoScreen(3)"><div class="tab-idx">3</div> <span>🧬 Deal Autopsy &amp; ESG</span></div>
+    <div class="flow-tab" id="tab4" onclick="gotoScreen(4)"><div class="tab-idx">4</div> <span>Multi-Channel Studio</span></div>
+    <div class="flow-tab" id="tab5" onclick="gotoScreen(5)"><div class="tab-idx">5</div> <span>💼 Mutual Action Plan</span></div>
+    <div class="flow-tab" id="tab6" onclick="gotoScreen(6)"><div class="tab-idx">6</div> <span>AI Roleplay &amp; Whisperer</span></div>
   </div>
 
   <!-- SCREEN 1: OMNI SEARCH & BATCH IMPORTER -->
@@ -1088,8 +1090,106 @@
     </div>
   </div>
 
-  <!-- SCREEN 3: MULTI-CHANNEL OUTREACH STUDIO -->
+  <!-- SCREEN 3: DEAL AUTOPSY, GHOSTING RISK & ESG ALIGNMENT -->
   <div id="screen3" class="screen-view" style="display: none;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div>
+        <h2 style="font-size: 22px;">🧬 Deal Autopsy, Ghosting Risk &amp; ESG Alignment</h2>
+        <p style="color: var(--text-muted); font-size: 13.5px;">Advanced deal velocity diagnostics, incumbent contract vulnerability, and ESG supply chain alignment.</p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" onclick="gotoScreen(2)">← Back to Intel</button>
+        <button class="btn btn-primary btn-sm" onclick="gotoScreen(4)">Next: Outreach Studio →</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      
+      <!-- LEFT: DEAL VELOCITY & GHOSTING PREDICTION -->
+      <div>
+        <div class="panel-card" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.02);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--emerald);">🔮 Deal Velocity &amp; Win Probability Radar</span>
+            <span class="badge badge-emerald" id="autopsyWinProb">84% Predicted Win Rate</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px;">
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; color: var(--text-faint);">Ghosting Risk Index</div>
+              <div style="font-size: 18px; font-weight: 800; color: var(--emerald); margin-top: 2px;" id="ghostingRiskVal">16% (Low Risk)</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Multi-thread coverage across 3 buying centers mitigates stalling.</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; color: var(--text-faint);">Contract Displacement Window</div>
+              <div style="font-size: 18px; font-weight: 800; color: var(--amber); margin-top: 2px;" id="contractWindowVal">Q3 Budget Cycle (45d)</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Optimal wedge timing before annual vendor renewals lock in.</div>
+            </div>
+          </div>
+
+          <!-- KEY FRICTION FACTORS -->
+          <div style="margin-top: 16px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Predicted Deal Friction &amp; Mitigation Strategy</label>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px; font-size: 12.5px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border-left: 3px solid var(--emerald);">
+                <strong>Procurement Hurdle:</strong> Standard W-9 &amp; ACH vendor setup (Typically 48h turnaround with automated onboarding packet).
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border-left: 3px solid var(--sky);">
+                <strong>Sign-Off Bottleneck:</strong> Creative brand proof review (Neutralized by our guaranteed 1-hour free virtual mockup).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESG & SUPPLY CHAIN DECARBONIZATION -->
+        <div class="panel-card" style="border-color: rgba(6, 182, 212, 0.3); margin-top: 20px;">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--sky);">🌱 ESG &amp; Scope-3 Supply Chain Decarbonization</span>
+            <button class="btn btn-secondary btn-sm" onclick="insertEsgWedgeToDraft()">⚡ Insert ESG Wedge</button>
+          </div>
+          <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Highlight US manufacturing and landfill diversion to appeal directly to executive sustainability targets.</p>
+
+          <div style="background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.2); padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6;">
+            <div>🌎 <strong>Carbon Footprint Reduction:</strong> Direct North Carolina mill knitting cuts trans-Pacific cargo emissions by <strong>~78%</strong> vs overseas catalog imports.</div>
+            <div style="margin-top: 6px;">♻️ <strong>Landfill Diversion Rate:</strong> 95%+ wearable retention keeps ~4,500 units of cheap plastic swag out of municipal waste streams per enterprise order.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: 10-K KPI ALIGNMENT & STRATEGIC LEVERS -->
+      <div>
+        <div class="panel-card" style="border-color: rgba(99, 102, 241, 0.3);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--indigo);">🎯 10-K &amp; C-Suite Strategic KPI Alignment</span>
+            <span class="badge badge-indigo">Executive Levers</span>
+          </div>
+          <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Aligns your sales pitch with this account's primary stated executive goals:</p>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-weight: 700; color: #fff;">1. Employee Retention &amp; Culture Onboarding</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Premium custom knit gifts generate genuine employee pride and social media unboxing organic reach.</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-weight: 700; color: #fff;">2. High-Touch VIP Client Retention</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Custom woven accessories provide 50,000+ brand impressions per recipient compared to disposable paper/plastic giveaways.</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-weight: 700; color: #fff;">3. Budget Efficiency &amp; Supply Chain Resilience</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Domestic USA production eliminates port customs delays, tariffs, and expensive rush airfreight fees.</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 18px;">
+            <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="gotoScreen(4)">⚡ Proceed to Multi-Channel Outreach Studio →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCREEN 4: MULTI-CHANNEL OUTREACH STUDIO -->
+  <div id="screen4" class="screen-view" style="display: none;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
       <div>
         <h2 id="studioRecipientTitle" style="font-size: 22px;">Multi-Channel Outreach Studio</h2>
@@ -1429,8 +1529,122 @@
     </div>
   </div>
 
-  <!-- SCREEN 4: AI OBJECTION ROLEPLAY SIMULATOR & REPLY TRIAGE -->
-  <div id="screen4" class="screen-view" style="display: none;">
+  <!-- SCREEN 5: MUTUAL ACTION PLAN & BUYER DEAL ROOM -->
+  <div id="screen5" class="screen-view" style="display: none;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div>
+        <h2 style="font-size: 22px;">💼 Executive Mutual Action Plan (MAP) &amp; Buyer Portal</h2>
+        <p style="color: var(--text-muted); font-size: 13.5px;">Collaborative deal room and 4-milestone roadmap for transparent buyer alignment.</p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" onclick="exportMapPdf()">📄 Export MAP Brief</button>
+        <button class="btn btn-primary btn-sm" onclick="copyDealRoomLink()">🔗 Copy Deal Room Link</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 380px; gap: 24px;">
+      
+      <!-- MAIN ROADMAP STAGE -->
+      <div>
+        <div class="panel-card">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--indigo);">🗺️ 4-Phase Mutual Execution Roadmap</span>
+            <span class="badge badge-indigo" id="mapTargetAccountBadge">Target Account Roadmap</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+            <!-- PHASE 1 -->
+            <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 18px;">✅</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Phase 1: 1-Hour Virtual Design Proof Delivery</strong>
+                    <div style="font-size: 12px; color: var(--emerald);">Completed · Turnaround: 42 Minutes</div>
+                  </div>
+                </div>
+                <span class="badge badge-emerald">Verified</span>
+              </div>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 8px;">Custom digital jacquard mockups rendered with official brand pantones.</p>
+            </div>
+
+            <!-- PHASE 2 -->
+            <div style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.3); border-radius: 10px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 18px;">🔄</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Phase 2: Physical Quality Spec Sample to HQ</strong>
+                    <div style="font-size: 12px; color: var(--sky);">In Progress · Courier 2-Day Air Express</div>
+                  </div>
+                </div>
+                <span class="badge badge-sky">In Transit</span>
+              </div>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 8px;">Sample swatch pack dispatched to executive leadership for touch &amp; feel verification.</p>
+            </div>
+
+            <!-- PHASE 3 -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 18px;">⏳</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Phase 3: Procurement Onboarding &amp; Sign-Off</strong>
+                    <div style="font-size: 12px; color: var(--text-faint);">Estimated: Day 5 · W-9, MSA &amp; Net-30 Approval</div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnSignoffSim" onclick="simulateBuyerSignoff()">✍️ Sign Spec Proof</button>
+              </div>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 8px;">Final digital sign-off and standard automated vendor onboarding packet.</p>
+            </div>
+
+            <!-- PHASE 4 -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 18px;">🚀</span>
+                  <div>
+                    <strong style="color: #fff; font-size: 14px;">Phase 4: US Mill Knit Run &amp; Guaranteed Event Delivery</strong>
+                    <div style="font-size: 12px; color: var(--text-faint);">Estimated: Day 10 · Guaranteed 5-Day Rush Production</div>
+                  </div>
+                </div>
+                <span class="badge badge-amber">Scheduled</span>
+              </div>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 8px;">Direct-to-event drop shipping with individualized tracking portal for organizers.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: BUYER DEAL ROOM PORTAL PREVIEW -->
+      <div>
+        <div class="panel-card" style="border-color: rgba(99,102,241,0.35);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--indigo);">🌐 Interactive Deal Room Preview</span>
+          </div>
+
+          <div style="background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 8px;">
+            <div style="font-size: 11px; color: var(--text-faint); text-transform: uppercase; font-weight: 700;">Shareable Buyer Portal URL</div>
+            <div style="font-size: 12px; color: var(--sky); font-family: monospace; word-break: break-all; margin-top: 4px;" id="dealRoomUrlText">https://dealroom.prospectpulse.ai/account-preview-8492</div>
+            <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 10px;" onclick="copyDealRoomLink()">📋 Copy Portal Link</button>
+          </div>
+
+          <div style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 12.5px; line-height: 1.5;">
+            <strong>Why Top Enterprise Reps Use MAPs:</strong>
+            <ul style="padding-left: 16px; margin-top: 6px; color: var(--text-muted); font-size: 12px;">
+              <li>Reduces enterprise deal cycle time by <strong>32%</strong></li>
+              <li>Eliminates surprise legal &amp; procurement blockers</li>
+              <li>Creates mutual accountability across buying committee</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCREEN 6: AI OBJECTION ROLEPLAY SIMULATOR & LIVE CALL WHISPERER -->
+  <div id="screen6" class="screen-view" style="display: none;">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
       
       <!-- LEFT: AI DISCOVERY CALL SIMULATOR (ROLEPLAY) -->
@@ -1451,18 +1665,34 @@
         </div>
 
         <!-- Roleplay Chat Box -->
-        <div id="roleplayChatBox" style="background: rgba(10,12,18,0.8); border: 1px solid var(--border); border-radius: var(--radius-md); height: 260px; overflow-y: auto; padding: 14px; margin-bottom: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 10px;">
+        <div id="roleplayChatBox" style="background: rgba(10,12,18,0.8); border: 1px solid var(--border); border-radius: var(--radius-md); height: 200px; overflow-y: auto; padding: 14px; margin-bottom: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 10px;">
           <!-- Messages populated dynamically -->
         </div>
 
         <!-- AI Coach Feedback Bar -->
-        <div id="roleplayCoachBar" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 12px; font-size: 12px; display: none;">
+        <div id="roleplayCoachBar" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: var(--radius-md); padding: 8px 12px; margin-bottom: 12px; font-size: 12px; display: none;">
           <strong style="color: var(--emerald);">🎯 AI Coach Rating:</strong> <span id="roleplayCoachText"></span>
         </div>
 
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="roleplayUserInput" placeholder="Type your opening pitch or objection rebuttal..." onkeydown="if(event.key==='Enter')sendRoleplayMessage()">
+        <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+          <input type="text" id="roleplayUserInput" placeholder="Type your pitch or objection rebuttal..." onkeydown="if(event.key==='Enter')sendRoleplayMessage()">
           <button class="btn btn-primary" onclick="sendRoleplayMessage()">Send</button>
+        </div>
+
+        <!-- LIVE CALL WHISPERER HUD -->
+        <div style="background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: var(--indigo); font-size: 11.5px; text-transform: uppercase;">🎙️ Real-Time Call Whisperer (HUD)</strong>
+            <span class="badge badge-indigo">Instant Cue</span>
+          </div>
+          <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;">
+            <button class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="whisperCoach('price')">"Price is too high"</button>
+            <button class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="whisperCoach('busy')">"Send an email"</button>
+            <button class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 2px 6px;" onclick="whisperCoach('swag')">"Swag gets thrown away"</button>
+          </div>
+          <div id="whisperCoachOutput" style="font-size: 12px; color: #E2E8F0; background: rgba(0,0,0,0.4); padding: 8px 10px; border-radius: 6px; border-left: 3px solid var(--indigo);">
+            Click an objection above to load live talk-track cues.
+          </div>
         </div>
       </div>
 
@@ -3771,6 +4001,53 @@ function downloadEml() {
   a.href = URL.createObjectURL(blob);
   a.download = 'outreach-draft.eml';
   a.click();
+}
+
+// 🧬 Deal Autopsy & ESG Strategic Levers
+function insertEsgWedgeToDraft() {
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  const snippet = `\n\nSustainability & ESG Note: Sourcing directly from our North Carolina mill cuts trans-Pacific cargo carbon emissions by ~78% vs Shenzhen catalog brokers, while our 95%+ wearable retention diverts ~4,500 units of plastic landfill waste per order.`;
+  const el = document.getElementById('emailBodyInput');
+  if (el) {
+    el.value += snippet;
+    runDeliverabilityAudit();
+    showToast('✓ ESG decarbonization wedge inserted into email draft!');
+  }
+}
+
+// 💼 Mutual Action Plan (MAP) & Buyer Deal Room
+function copyDealRoomLink() {
+  const link = (document.getElementById('dealRoomUrlText') && document.getElementById('dealRoomUrlText').textContent) || 'https://dealroom.prospectpulse.ai/preview';
+  navigator.clipboard.writeText(link).then(() => showToast('✓ Buyer Deal Room link copied to clipboard!'));
+}
+
+function simulateBuyerSignoff() {
+  const btn = document.getElementById('btnSignoffSim');
+  if (btn) {
+    btn.className = 'btn btn-primary btn-sm';
+    btn.innerHTML = '✅ Signed &amp; Approved by Procurement';
+    btn.disabled = true;
+    showToast('🎉 Milestone 3 Approved! Procurement Onboarding Packet Dispatched.');
+  }
+}
+
+function exportMapPdf() {
+  exportFullDossier('pdf');
+}
+
+// 🎙️ Live Call Whisperer Real-Time HUD Prompter
+function whisperCoach(type) {
+  const out = document.getElementById('whisperCoachOutput');
+  if (!out) return;
+
+  if (type === 'price') {
+    out.innerHTML = `<strong>💡 Whisper Cue (Value Wedge):</strong> "Acknowledge cost difference directly: 'We are ~$2 more per unit than overseas catalogs, but 95%+ of your team keeps and wears them for 6+ months instead of throwing them in the trash on day one.'"`;
+  } else if (type === 'busy') {
+    out.innerHTML = `<strong>💡 Whisper Cue (Low Friction):</strong> "Permission-to-email pivot: 'Completely understand. I already rendered a 1-hour free custom digital proof for your brand. Can I email the 1-click preview over to review when you have 30 seconds?'"`;
+  } else if (type === 'swag') {
+    out.innerHTML = `<strong>💡 Whisper Cue (Decarbonization):</strong> "Sustainability hook: 'That's exactly why we don't do plastic junk. Direct USA combed cotton has a 95% keep rate, turning budget from landfill waste into genuine employee pride.'"`;
+  }
+  showToast('🎙️ Live Call Whisperer cue updated!');
 }
 
 function exportSalesforceCsv() {

@@ -109,7 +109,16 @@ Switch seamlessly between pre-built enterprise pitch presets:
 ### 21. 🎯 Dynamic Cadence Strategy Selector
 * Real-time switcher between 5-Touch Strategic (14d), High-Velocity Blitz (5d), and Event Rush (48h).
 
-### 22. 🌓 Obsidian Dark / High-Contrast Theme Toggle
+### 22. 🧬 Deal Autopsy, Ghosting Risk & ESG Strategic Alignment (Step 3)
+* Win Probability forecast, Ghosting Risk Index, contract displacement timing, and Scope-3 carbon/landfill diversion math.
+
+### 23. 💼 1-Click Mutual Action Plan (MAP) & Buyer Deal Room Portal (Step 5)
+* Generates an interactive 4-milestone execution roadmap (`https://dealroom.prospectpulse.ai/...`) with digital spec sign-off.
+
+### 24. 🎙️ Real-Time Live Call Whisperer HUD (Step 6)
+* Sub-150ms instant coaching cues during live discovery calls for handling price, gatekeepers, and landfill objections.
+
+### 25. 🌓 Obsidian Dark / High-Contrast Theme Toggle
 * One-click theme switcher optimized for daylight demos, client screen-shares, and conference projectors.
 
 ---
