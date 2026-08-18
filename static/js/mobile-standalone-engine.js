@@ -150,7 +150,6 @@ window.fetch = async function(...args) {
                 try {
                     query = new URL(url, window.location.origin).searchParams.get('q');
                 } catch (e) {
-                    // Fallback for relative URLs
                     const queryParams = url.split('?')[1];
                     if (queryParams) {
                         const params = new URLSearchParams(queryParams);
@@ -169,7 +168,28 @@ window.fetch = async function(...args) {
                     localStorage.setItem('searchHistory', JSON.stringify(history.slice(0, 50)));
                 }
             }
-            return createResponse(getCompanyData(query));
+
+            let baseData = getCompanyData(query);
+
+            // If online on mobile data/Wi-Fi, asynchronously attempt live web enrichment
+            if (navigator.onLine && window.MobileLiveWebEngine && typeof window.MobileLiveWebEngine.fetchLiveCompanyData === 'function') {
+                try {
+                    const liveWebData = await window.MobileLiveWebEngine.fetchLiveCompanyData(query);
+                    if (liveWebData && liveWebData.description) {
+                        baseData.description = liveWebData.description;
+                        if (liveWebData.name) baseData.name = liveWebData.name;
+                        if (liveWebData.revenue) baseData.revenue = liveWebData.revenue;
+                        if (liveWebData.headcount) baseData.headcount = liveWebData.headcount;
+                        if (liveWebData.pain_points) baseData.painPoints = liveWebData.pain_points;
+                        if (liveWebData.competitor_incumbent) baseData.competitorIncumbent = liveWebData.competitor_incumbent;
+                        baseData.liveEnriched = true;
+                    }
+                } catch (err) {
+                    console.warn('[MobileEngine] Live web enrichment fallback to on-device:', err);
+                }
+            }
+
+            return createResponse(baseData);
         }
 
         // 2. Deep Dive & Signals
