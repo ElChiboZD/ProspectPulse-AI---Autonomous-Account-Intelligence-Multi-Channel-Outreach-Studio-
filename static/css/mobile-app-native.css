@@ -1,0 +1,377 @@
+/* ==========================================================================
+   ProspectPulse AI — Native Mobile App Design System (Material You 3.0)
+   Ground-Up Complete Mobile Rewrite for Android 14/15/16 and iOS 18
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root {
+  /* Google Material 3 Dark Palette Tokens */
+  --md-sys-color-background: #111318;
+  --md-sys-color-on-background: #E2E2E9;
+  --md-sys-color-surface: #111318;
+  --md-sys-color-surface-dim: #0C0E12;
+  --md-sys-color-surface-container-lowest: #0B0D11;
+  --md-sys-color-surface-container-low: #191B20;
+  --md-sys-color-surface-container: #1D2024;
+  --md-sys-color-surface-container-high: #272A2F;
+  --md-sys-color-surface-container-highest: #32353A;
+
+  --md-sys-color-primary: #A8C7FA;
+  --md-sys-color-on-primary: #042E6F;
+  --md-sys-color-primary-container: #0842A0;
+  --md-sys-color-on-primary-container: #D3E3FD;
+
+  --md-sys-color-secondary: #C3C7D2;
+  --md-sys-color-secondary-container: #3F4249;
+  --md-sys-color-on-secondary-container: #DFE2ED;
+
+  --md-sys-color-tertiary: #C4EED0;
+  --md-sys-color-tertiary-container: #0F5223;
+  --md-sys-color-on-tertiary-container: #D4F8DE;
+
+  --md-sys-color-error: #F2B8B5;
+  --md-sys-color-error-container: #8C1D18;
+  --md-sys-color-outline: #8E919A;
+  --md-sys-color-outline-variant: #44474E;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html, body {
+  background-color: var(--md-sys-color-surface-dim);
+  color: var(--md-sys-color-on-background);
+  font-family: 'Roboto', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#appWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: calc(84px + var(--safe-bottom));
+}
+
+/* ----------------------------------------------------
+   1. M3 FLOATING TOP APP BAR (Google Workspace Style)
+   ---------------------------------------------------- */
+.m3-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: calc(10px + var(--safe-top)) 16px 8px 16px;
+  background: var(--md-sys-color-surface-dim);
+}
+
+.m3-search-pill {
+  height: 56px;
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 16px;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+.m3-search-pill:focus-within {
+  background: var(--md-sys-color-surface-container-highest);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.m3-search-icon {
+  font-size: 18px;
+  color: var(--md-sys-color-outline);
+}
+
+.m3-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #FFF;
+  font-family: inherit;
+}
+
+.m3-search-input::placeholder {
+  color: var(--md-sys-color-outline);
+  font-size: 15px;
+}
+
+.m3-avatar-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.m3-avatar-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ----------------------------------------------------
+   2. M3 HORIZONTAL FILTER CHIPS
+   ---------------------------------------------------- */
+.m3-filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 16px 14px 16px;
+  scrollbar-width: none;
+}
+
+.m3-filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.m3-chip {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  background: var(--md-sys-color-surface-container-low);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.m3-chip.active {
+  background: var(--md-sys-color-secondary-container);
+  border-color: transparent;
+  color: var(--md-sys-color-on-secondary-container);
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------
+   3. SCREEN CONTAINERS & CARDS
+   ---------------------------------------------------- */
+.m3-screen {
+  display: none;
+  padding: 0 16px;
+  animation: m3Fade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.m3-screen.active-screen {
+  display: block;
+}
+
+@keyframes m3Fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.m3-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+  margin: 14px 0 10px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.m3-card {
+  background: var(--md-sys-color-surface-container);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s, transform 0.1s;
+  cursor: pointer;
+}
+
+.m3-card:active {
+  background: var(--md-sys-color-surface-container-high);
+  transform: scale(0.99);
+}
+
+/* Priority Account Row */
+.m3-account-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.m3-account-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.m3-account-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.m3-account-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFF;
+}
+
+.m3-account-meta {
+  font-size: 13px;
+  color: var(--md-sys-color-outline);
+}
+
+.m3-signal-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+/* ----------------------------------------------------
+   4. M3 SEGMENTED CONTROLS & BUTTONS
+   ---------------------------------------------------- */
+.m3-segmented-row {
+  display: flex;
+  background: var(--md-sys-color-surface-container-low);
+  border-radius: 28px;
+  padding: 4px;
+  margin-bottom: 14px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.m3-segment-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 24px;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-outline);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.m3-segment-btn.active {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-btn-primary {
+  width: 100%;
+  height: 50px;
+  border-radius: 25px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.15s;
+}
+
+.m3-btn-primary:active {
+  background: #8AB4F8;
+  transform: scale(0.98);
+}
+
+/* ----------------------------------------------------
+   5. M3 BOTTOM NAVIGATION BAR (Google Material 3)
+   ---------------------------------------------------- */
+.m3-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(76px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: var(--md-sys-color-surface-container-low);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 3000;
+}
+
+.m3-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--md-sys-color-outline);
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.m3-nav-pill {
+  width: 60px;
+  height: 32px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.m3-nav-text {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.m3-nav-btn.active .m3-nav-pill {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-nav-btn.active .m3-nav-text {
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
+}
