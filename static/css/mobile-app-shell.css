@@ -1,0 +1,518 @@
+/* ==========================================================================
+   ProspectPulse AI — Elite Native Mobile App Design System (2026 OLED Obsidian)
+   ========================================================================== */
+
+:root {
+  --app-bg: #050608;
+  --app-surface-1: #0D0F15;
+  --app-surface-2: #141722;
+  --app-surface-3: #1C202E;
+  --app-border: rgba(255, 255, 255, 0.07);
+  --app-border-focus: rgba(59, 130, 246, 0.5);
+  
+  --primary-500: #3B82F6;
+  --primary-600: #2563EB;
+  --primary-glow: rgba(59, 130, 246, 0.35);
+  
+  --emerald-500: #10B981;
+  --emerald-glow: rgba(16, 185, 129, 0.3);
+  --violet-500: #8B5CF6;
+  --amber-500: #F59E0B;
+  --rose-500: #F43F5E;
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+  
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+  
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html, body {
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', Roboto, sans-serif;
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* App Viewport Container */
+#nativeMobileApp {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(76px + var(--safe-bottom));
+  position: relative;
+}
+
+/* ----------------------------------------------------
+   1. ELITE NATIVE TOP BAR
+   ---------------------------------------------------- */
+.native-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 56px;
+  background: rgba(5, 6, 8, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--app-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.native-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.native-brand-badge-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #3B82F6, #6366F1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.native-brand-text {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.native-live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--emerald-500);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+.live-pulse-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--emerald-500);
+  animation: pulseGlow 1.5s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.native-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------
+   2. ELITE STICKY BOTTOM NAVIGATION BAR
+   ---------------------------------------------------- */
+.native-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(10, 12, 18, 0.94);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-top: 1px solid var(--app-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 1000;
+}
+
+.nav-tab-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: pointer;
+}
+
+.nav-tab-icon {
+  font-size: 20px;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-tab-item.active {
+  color: #60A5FA;
+}
+
+.nav-tab-item.active .nav-tab-icon {
+  transform: translateY(-2px) scale(1.15);
+}
+
+.nav-tab-item.active::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 16px;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--primary-500);
+  box-shadow: 0 0 10px var(--primary-500);
+}
+
+.nav-tab-item:active {
+  transform: scale(0.92);
+}
+
+/* ----------------------------------------------------
+   3. NATIVE SCREEN CONTAINERS & CARDS
+   ---------------------------------------------------- */
+.native-screen {
+  display: none;
+  padding: 16px;
+  animation: nativeScreenFade 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.native-screen.active-screen {
+  display: block;
+}
+
+@keyframes nativeScreenFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Titles */
+.native-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin: 18px 0 10px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Obsidian Glass Card */
+.native-card {
+  background: var(--app-surface-1);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* ----------------------------------------------------
+   4. SCREEN 1: RADAR & FLAGSHIP CAROUSEL
+   ---------------------------------------------------- */
+.radar-hero {
+  padding: 8px 4px 16px 4px;
+}
+
+.radar-greeting {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--text-primary);
+}
+
+.radar-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Search Bar Pill */
+.native-search-pill {
+  position: relative;
+  margin: 14px 0 20px 0;
+}
+
+.native-search-input {
+  width: 100%;
+  height: 52px;
+  background: var(--app-surface-2);
+  border: 1.5px solid var(--app-border);
+  border-radius: var(--radius-xl);
+  padding: 0 54px 0 18px;
+  font-size: 15px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.native-search-input:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+  background: var(--app-surface-3);
+}
+
+.native-search-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-500);
+  border: none;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Flagship Horizontal Carousel */
+.flagship-carousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.flagship-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.flagship-card-item {
+  flex: 0 0 82%;
+  scroll-snap-align: start;
+  background: linear-gradient(145deg, #121520, #0E1018);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.flagship-card-item:active {
+  transform: scale(0.97);
+  border-color: var(--primary-500);
+}
+
+.flag-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flag-logo-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.flag-icon {
+  font-size: 24px;
+}
+
+.flag-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFF;
+}
+
+.flag-tag {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.flag-score-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--emerald-500);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.flag-wedge-pill {
+  font-size: 12px;
+  color: #93C5FD;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------
+   5. SEGMENTED TABS (CONTROL BAR)
+   ---------------------------------------------------- */
+.segmented-control {
+  display: flex;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  margin-bottom: 16px;
+}
+
+.segment-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.segment-btn.active {
+  background: var(--primary-500);
+  color: #FFF;
+  box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+/* ----------------------------------------------------
+   6. VOICE OBJECTION ARENA (ROLEPLAY HUD)
+   ---------------------------------------------------- */
+.voice-cockpit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 10px;
+  text-align: center;
+}
+
+.voice-visualizer-orb {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #3B82F6 0%, rgba(59, 130, 246, 0.1) 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 54px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+  animation: orbFloat 3s ease-in-out infinite;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+  50% { transform: scale(1.08); box-shadow: 0 0 60px rgba(59, 130, 246, 0.6); }
+}
+
+.voice-ptt-button {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  color: #FFF;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.voice-ptt-button:active {
+  transform: scale(0.92);
+}
+
+/* ----------------------------------------------------
+   7. FLOATING ACTION COPY BAR
+   ---------------------------------------------------- */
+.native-float-action {
+  position: fixed;
+  bottom: calc(74px + var(--safe-bottom));
+  left: 16px;
+  right: 16px;
+  height: 52px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #FFF;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+  cursor: pointer;
+  z-index: 900;
+}
+
+.native-float-action:active {
+  transform: scale(0.97);
+}
