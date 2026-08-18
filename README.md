@@ -17,11 +17,13 @@ Developed with precision by **[@ElChibo](https://github.com/ElChibo)**
 In under **5 seconds**, it produces:
 1. **Verified Firmographics & Live Headcount** (via Sumble Org API).
 2. **Real-Time News & Why-Now Triggers** (via Gemini 3.6 Google Search Grounding).
-3. **Living Current Decision-Maker Mapping** (via strict LinkedIn X-Ray discovery, filtering out former employees).
+3. **Living Current Decision-Maker Mapping** (via strict LinkedIn X-Ray discovery, filtering out departed employees).
 4. **Competitor Displacement Battlecards & Trap Questions** (covering SwagUp, 4imprint, Salesforce, Intercom Fin, Adyen, and Apollo).
 5. **Dynamic Quantitative ROI & Economic Value Models**.
 6. **Multi-Channel Sequences** (Day 0 Cold Email, 300-Char LinkedIn InMail, Cold Call Phone Scripts, and Photorealistic Product Proofs).
 7. **Interactive AI Discovery Call & Objection Roleplay Sandbox**.
+8. **Real-Time Voice Pitch & AI Voicemail Audio Player** (Native Web Speech Audio Engine).
+9. **Print-Ready Executive Account Dossier PDF Export**.
 
 ---
 
@@ -35,7 +37,7 @@ In under **5 seconds**, it produces:
 
 ---
 
-## 🚀 Key Feature Matrix
+## 🚀 Complete Feature Suite
 
 ### 1. 🎛️ Universal Multi-Organization Portability
 Switch seamlessly between pre-built enterprise pitch presets:
@@ -44,21 +46,31 @@ Switch seamlessly between pre-built enterprise pitch presets:
 * **💳 Stripe**: Pitching +3.8% card authorization lift and 1-click Link checkout.
 * **🤖 Enterprise AI SalesTech**: Pitching autonomous multi-source account intelligence.
 
-### 2. 🧮 Embedded Dynamic ROI Calculator
-* Automatically calculates landfill waste vs. wearer longevity, support ticket deflection savings, or developer productivity gains.
-* 1-Click **"⚡ Insert to Draft"** embeds the quantitative ROI block directly into your outreach email.
+### 2. 🎙️ Real-Time Voice Pitch & AI Voicemail Audio Player
+* Listen to spoken cold call pitches and voicemails synthesized in real time.
+* Features animated glowing audio waveforms and playback speed controls (`1.0x` to `1.3x`).
 
-### 3. 🛡️ Live Deliverability & Spam Trigger Auditor
+### 3. 📄 1-Click Executive Account Dossier PDF Export
+* Generates a multi-page, print-ready PDF executive briefing complete with firmographics, verified contacts, displacement battlecards, quantitative ROI, and full outreach sequence.
+
+### 4. 📊 Propensity-to-Buy & Timing Scorecard (0–100 Intent Gauge)
+* Real-time radial intent score calculated from hiring velocity, incumbent displacement vulnerability, and event timing windows.
+
+### 5. 🎨 Company Logo & Brand Palette Extractor
+* Automatically extracts the target company's logo and official hex brand pantones with 1-click styling onto custom product proofs.
+
+### 6. ✉️ 1-Click Direct Gmail Compose & LinkedIn Web Opener
+* Launches Gmail compose in one click with To, Subject, and personalized body pre-filled.
+* Navigates directly to the verified decision-maker's LinkedIn profile.
+
+### 7. 🛡️ Live Deliverability & Spam Trigger Auditor
 * Scans email drafts in real time for mobile read time, reading grade levels, and risky spam trigger words (*"guarantee"*, *"100%"*, *"act now"*).
 * Includes a 1-click **"⚡ Auto-Clean Flags"** button to replace spam triggers with consultative executive phrasing.
 
-### 4. 📄 1-Page Executive Account Brief (Print/PDF Ready)
-* Generates a single-page printable executive cheat sheet with company firmographics, top stakeholder bios, competitor trap questions, and ROI models.
-
-### 5. 🎭 AI Discovery Call & Objection Simulator
+### 8. 🎭 AI Discovery Call & Objection Simulator
 * Interactive practice arena where you pitch against skeptical VP of Marketing, overworked HR, or analytical CFO personas with real-time AI coach feedback.
 
-### 6. 📂 Bulk CSV & Multi-Domain Territory Importer
+### 9. 📂 Bulk CSV & Multi-Domain Territory Importer
 * Paste 5–10 domains or upload a `.csv` file to run automated territory research in batch.
 
 ---
@@ -85,7 +97,7 @@ Switch seamlessly between pre-built enterprise pitch presets:
                │      Obsidian Dark UI Console     │
                │   • Multi-Channel Outreach Studio │
                │   • Photorealistic Proof Canvas   │
-               │   • 1-Page Printable Call Briefs  │
+               │   • Voice Synthesizer & PDF Briefs│
                └───────────────────────────────────┘
 ```
 
@@ -101,8 +113,8 @@ Switch seamlessly between pre-built enterprise pitch presets:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/ElChibo/ProspectPulse-AI.git
-cd ProspectPulse-AI
+git clone https://github.com/ElChiboZD/ProspectPulse-AI---Autonomous-Account-Intelligence-Multi-Channel-Outreach-Studio-.git
+cd ProspectPulse-AI---Autonomous-Account-Intelligence-Multi-Channel-Outreach-Studio-
 ```
 
 ### 2. Configure Environment Variables
@@ -137,6 +149,7 @@ ProspectPulse-AI/
 ├── .gitignore                  # Git ignore rules (protects API keys)
 ├── README.md                   # Project documentation & architecture
 ├── server.py                   # Python HTTP backend & MCP agent pipeline
+├── push_to_github.py           # GitHub sync utility
 ├── static/
 │   ├── index.html              # Obsidian Dark UI console & outreach studio
 │   └── proofs/                 # Photorealistic Gemini AI demo proofs
