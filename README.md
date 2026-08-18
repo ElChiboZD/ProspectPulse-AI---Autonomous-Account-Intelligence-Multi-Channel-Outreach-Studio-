@@ -85,7 +85,19 @@ Switch seamlessly between pre-built enterprise pitch presets:
 ### 13. 📂 Bulk CSV & Multi-Domain Territory Importer
 * Paste 5–10 domains or upload a `.csv` file to run automated territory research in batch.
 
-### 14. 🌓 Obsidian Dark / High-Contrast Theme Toggle
+### 14. 📱 Live Mobile iPhone Lock Screen & Notification Simulator
+* Live iPhone frame rendering real-time push notifications and scrollable mobile mail views with exact character truncation modeling.
+
+### 15. 🎯 AI Open Probability & Subject Line Heatmap
+* Real-time subject scoring analyzing open likelihood %, mobile cutoff thresholds, and emotional curiosity resonance.
+
+### 16. 🔮 Predictive Objection Forecaster
+* Forecasts the top 3 specific objections this account will raise before you dial, with 1-click counter-arguments.
+
+### 17. 🏢 Enterprise Multi-Unit Account Hierarchy Tree
+* Visualizes parent organizations, regional hubs, and targeted buying centers for global multi-threading.
+
+### 18. 🌓 Obsidian Dark / High-Contrast Theme Toggle
 * One-click theme switcher optimized for daylight demos, client screen-shares, and conference projectors.
 
 ---
