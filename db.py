@@ -35,6 +35,19 @@ def init_db():
             FOREIGN KEY(search_id) REFERENCES searches(id)
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE,
+            name TEXT,
+            title TEXT,
+            company TEXT,
+            preset TEXT,
+            api_key TEXT,
+            avatar_url TEXT,
+            updated_at TEXT
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -107,3 +120,36 @@ def get_stats():
         "total_outreach": total_outreach,
         "unique_domains": unique_domains
     }
+
+def save_user_profile(email, name, title, company, preset, api_key="", avatar_url=""):
+    conn = get_connection()
+    cursor = conn.cursor()
+    timestamp = datetime.utcnow().isoformat()
+    cursor.execute('''
+        INSERT INTO user_profiles (email, name, title, company, preset, api_key, avatar_url, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(email) DO UPDATE SET
+            name=excluded.name,
+            title=excluded.title,
+            company=excluded.company,
+            preset=excluded.preset,
+            api_key=excluded.api_key,
+            avatar_url=excluded.avatar_url,
+            updated_at=excluded.updated_at
+    ''', (email, name, title, company, preset, api_key, avatar_url, timestamp))
+    conn.commit()
+    conn.close()
+    return True
+
+def get_user_profile(email=None):
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    if email:
+        cursor.execute('SELECT * FROM user_profiles WHERE email = ? LIMIT 1', (email,))
+    else:
+        cursor.execute('SELECT * FROM user_profiles ORDER BY updated_at DESC LIMIT 1')
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+

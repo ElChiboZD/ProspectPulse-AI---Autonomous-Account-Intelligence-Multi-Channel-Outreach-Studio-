@@ -35,7 +35,22 @@
 <script src="js/dealroom.js" defer></script>
 <link rel="stylesheet" href="css/multithread-visualizer.css">
 <script src="js/multithread-visualizer.js" defer></script>
+<link rel="stylesheet" href="css/tone-rewriter.css">
+<script src="js/tone-rewriter.js" defer></script>
+<link rel="stylesheet" href="css/command-palette.css">
+<script src="js/command-palette.js" defer></script>
+<link rel="stylesheet" href="css/auth-setup.css">
+<script src="js/auth-setup.js" defer></script>
 <style>
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes screen-view {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .screen-view { animation: screen-view 0.3s ease-out forwards; }
   :root {
     --bg: #08090D;
     --bg-surface: #0F1219;
@@ -604,6 +619,14 @@
   }
 
   /* Interactive Product Canvas */
+  .screen-view {
+    animation: fadeInScreen 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes fadeInScreen {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .product-preview-stage {
     background: radial-gradient(circle at center, #1E2333 0%, #0F121C 100%);
     border: 1px solid var(--border);
@@ -891,6 +914,13 @@
   </div>
 
   <div class="nav-right">
+    <!-- Sleek Search Badge -->
+    <button class="profile-badge" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08); gap: 12px; margin-right: 8px;" onclick="if(window.toggleCommandPalette) window.toggleCommandPalette()">
+      <span style="color: var(--text-muted); font-size: 14px;">🔍</span>
+      <span style="color: var(--text-faint); font-weight: 500;">Search accounts or commands...</span>
+      <span class="mono" style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--text-muted);">Ctrl K</span>
+    </button>
+
     <!-- Primary Quick Actions -->
     <button class="btn btn-secondary btn-sm" onclick="openBulkImporterModal()">📂 Bulk Territory</button>
     <button class="btn btn-secondary btn-sm" onclick="openRoiCalculatorModal()">💰 ROI Model</button>
@@ -969,15 +999,30 @@
           </button>
         </div>
 
-        <div class="chip-array">
-          <span style="font-size: 12px; color: var(--text-faint); margin-right: 4px;">Popular Targets:</span>
-          <div class="quick-chip" onclick="quickSelect('sockclub.com')">🧦 Sock Club</div>
-          <div class="quick-chip" onclick="quickSelect('vitacoco.com')">🥥 Vita Coco</div>
-          <div class="quick-chip" onclick="quickSelect('lululemon.com')">🧘 Lululemon</div>
-          <div class="quick-chip" onclick="quickSelect('stripe.com')">💳 Stripe</div>
-          <div class="quick-chip" onclick="quickSelect('glossier.com')">💄 Glossier</div>
-          <div class="quick-chip" onclick="quickSelect('warbyparker.com')">👓 Warby Parker</div>
-          <div class="quick-chip" onclick="quickSelect('cargurus.com')">🚗 CarGurus</div>
+        <div style="margin-top: 16px;">
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 12px;">🔥 Instant Flagship Account Radar</span>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+            <div class="contact-card" onclick="quickSelect('lululemon.com')">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">🧦 Lululemon</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Retail / Apparel · 38,000 HC</div>
+              <div class="badge badge-indigo" style="margin-top: 8px; display: inline-block;">SwagUp Incumbent</div>
+            </div>
+            <div class="contact-card" onclick="quickSelect('uber.com')">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">🚗 Uber</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Mobility & Tech · 32,000 HC</div>
+              <div class="badge badge-sky" style="margin-top: 8px; display: inline-block;">Salesforce Incumbent</div>
+            </div>
+            <div class="contact-card" onclick="quickSelect('openai.com')">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">🤖 OpenAI</div>
+              <div style="font-size: 12px; color: var(--text-muted);">GenAI Platform · 1,500 HC</div>
+              <div class="badge badge-emerald" style="margin-top: 8px; display: inline-block;">Enterprise AI</div>
+            </div>
+            <div class="contact-card" onclick="quickSelect('snowflake.com')">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">❄️ Snowflake</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Data Cloud · 7,000 HC</div>
+              <div class="badge badge-amber" style="margin-top: 8px; display: inline-block;">Global Summit Gifting</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1393,13 +1438,13 @@
           </div>
 
           <!-- AI Tone Adjuster Knobs -->
-          <div style="margin-bottom: 10px;">
-            <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">AI Rewrite &amp; Tone Tuning:</span>
+          <div class="tone-rewriter-studio" style="margin-bottom: 10px;">
+            <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Dynamic 4-Tone Outreach Rewriter Studio:</span>
             <div class="tone-pills">
-              <div class="tone-pill" onclick="tuneTone('short')">⚡ Short &amp; Punchy (&lt; 60 words)</div>
-              <div class="tone-pill" onclick="tuneTone('executive')">👔 Executive ROI Focus</div>
-              <div class="tone-pill" onclick="tuneTone('rush')">🔥 Urgency &amp; Rapid Turnaround</div>
-              <div class="tone-pill" onclick="tuneTone('casual')">🎯 Casual &amp; Soft CTA</div>
+              <div class="tone-pill" onclick="window.applyTone('executive')" title="Formal, board-level framing, ROI-driven, data-grounded">👔 Executive Consultative</div>
+              <div class="tone-pill" onclick="window.applyTone('challenger')" title="Bold, direct attack on incumbent broker markups or platform latency, provocative trap questions">⚡ Challenger Wedge</div>
+              <div class="tone-pill" onclick="window.applyTone('short')" title="Under 60 words, mobile-optimized, frictionless 1-line CTA">🎯 Short &amp; Punchy</div>
+              <div class="tone-pill" onclick="window.applyTone('humorous')" title="Clever industry observation, self-aware, disarming">💡 Humorous Pattern-Interrupt</div>
             </div>
           </div>
 
@@ -2268,6 +2313,42 @@
 let currentScreen = 1;
 let activeChannel = 'email';
 let currentActivePreset = 'sockclub';
+
+function gotoScreen(num) {
+    currentScreen = num;
+    document.querySelectorAll('.screen-view').forEach(s => s.style.display = 'none');
+    const target = document.getElementById('screen' + num);
+    if (target) {
+      target.style.display = 'block';
+      target.style.animation = 'none';
+      target.offsetHeight; /* trigger reflow */
+      target.style.animation = null;
+    }
+
+    document.querySelectorAll('.flow-tab').forEach((tab, i) => {
+      const idx = i + 1;
+      tab.classList.toggle('active', idx === num);
+      const tabIdxDiv = tab.querySelector('.tab-idx');
+      if (idx < num) {
+        tabIdxDiv.innerHTML = '✓';
+        tabIdxDiv.style.background = 'var(--emerald)';
+        tabIdxDiv.style.color = '#fff';
+      } else {
+        tabIdxDiv.innerHTML = idx;
+        if (idx === num) {
+          tabIdxDiv.style.background = 'var(--indigo)';
+          tabIdxDiv.style.color = '#fff';
+        } else {
+          tabIdxDiv.style.background = 'rgba(255, 255, 255, 0.1)';
+          tabIdxDiv.style.color = '';
+        }
+      }
+    });
+
+    if (num === 4 && typeof roleplayMessages !== 'undefined' && roleplayMessages.length === 0) {
+      if (typeof resetRoleplayChat === 'function') resetRoleplayChat();
+    }
+  }
 
 let activeProfileData = {
   companyName: "Sock Club",

@@ -977,6 +977,10 @@ class Handler(BaseHTTPRequestHandler):
             stats = db.get_stats()
             return self._send(200, "application/json", json.dumps(stats).encode())
 
+        if path == "/api/auth/profile":
+            prof = db.get_user_profile()
+            return self._send(200, "application/json", json.dumps({"profile": prof}).encode())
+
         return self._send(404, "text/plain", b"not found")
 
     def do_POST(self):
@@ -1444,6 +1448,22 @@ class Handler(BaseHTTPRequestHandler):
                 ]
             }
             return self._send(200, "application/json", json.dumps(resp_data).encode())
+
+        if path == "/api/auth/save-profile":
+            email = data.get("email", "user@workspace.com")
+            name = data.get("name", "Sales Representative")
+            title = data.get("title", "Enterprise Account Executive")
+            company = data.get("company", "Sock Club")
+            preset = data.get("preset", "sockclub")
+            api_key = data.get("api_key", "")
+            avatar_url = data.get("avatar_url", "")
+            db.save_user_profile(email, name, title, company, preset, api_key, avatar_url)
+            if api_key:
+                os.environ["GEMINI_API_KEY"] = api_key
+            return self._send(200, "application/json", json.dumps({"status": "saved", "profile": {"email": email, "name": name, "title": title, "company": company, "preset": preset, "avatar_url": avatar_url}}).encode())
+
+        if path == "/api/auth/logout":
+            return self._send(200, "application/json", b'{"status":"logged_out"}')
 
         return self._send(404, "application/json", b'{"error":"no route"}')
 

@@ -4,3 +4,5 @@ dulwich>=0.21.0
 requests
 cachetools
 dnspython
+pywebview>=5.0.0
+
