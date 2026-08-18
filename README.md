@@ -121,6 +121,18 @@ Switch seamlessly between pre-built enterprise pitch presets:
 ### 25. 🌓 Obsidian Dark / High-Contrast Theme Toggle
 * One-click theme switcher optimized for daylight demos, client screen-shares, and conference projectors.
 
+### 26. 🎙️ Full-Duplex Live Voice Call Simulator (Step 6)
+* Speak directly into your microphone to practice live discovery with Gemini AI replying in realistic Neural Edge voice audio, complete with live waveforms, duration timers, and discovery scorecards.
+
+### 27. 📊 Interactive Competitor Pricing & Landmine Matrix (Step 2)
+* Side-by-side battle matrix featuring an interactive 100–5,000 unit order slider that calculates real-time unit costs, setup fee markups, and total net dollar savings vs. SwagUp and 4imprint.
+
+### 28. ⚡ 1-Click CRM Auto-Pilot & Sequence Dispatcher (Step 4 & 5)
+* Dispatches multi-channel sequences directly into Salesforce Sales Cloud, HubSpot, Outreach.io, and Salesloft with live JSON webhook inspection and 200 OK simulated API execution.
+
+### 29. 🛡️ Real-Time Spam Word Scanner & Executive Vocabulary Tuner (Step 4)
+* Live syntax auditor that detects spam trigger keywords in email subject lines and body copy, featuring a 1-click **"✨ Polish to Executive Tone"** button that upgrades copy to consultative enterprise vocabulary with 99.4% Primary Inbox placement.
+
 ---
 
 ## 🛠️ Architecture & Data Pipeline
