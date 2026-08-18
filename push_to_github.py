@@ -38,10 +38,10 @@ def main():
     print("Pushing 'master' branch to GitHub 'main'...")
     try:
         porcelain.push(repo_path, push_url, "refs/heads/master:refs/heads/main")
-        print("\n🎉 SUCCESS: ProspectPulse AI has been pushed to GitHub!")
+        print("\n[SUCCESS] ProspectPulse AI has been pushed to GitHub!")
         print(f"View your repository at: {repo_url.replace('.git', '')}")
     except Exception as e:
-        print(f"\nPush failed: {e}")
+        print(f"\nPush details: {e}")
         print("\nAuthentication required. To push with your GitHub Personal Access Token (PAT):")
         print(f"  python push_to_github.py {repo_url} ghp_yourTokenHere")
         print("\nOr install Git for Windows and run:")
