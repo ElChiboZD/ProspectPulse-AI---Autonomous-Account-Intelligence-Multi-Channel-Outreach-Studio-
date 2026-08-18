@@ -39,11 +39,17 @@
 <script src="js/tone-rewriter.js" defer></script>
 <link rel="stylesheet" href="css/command-palette.css">
 <script src="js/command-palette.js" defer></script>
+<link rel="stylesheet" href="css/feedback.css">
+<script src="js/feedback.js" defer></script>
 <link rel="stylesheet" href="css/auth-setup.css">
 <script src="js/auth-setup.js" defer></script>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/mobile.css">
 <script src="js/mobile.js" defer></script>
+<link rel="stylesheet" href="css/test-drive.css">
+<script src="js/test-drive.js" defer></script>
+<link rel="stylesheet" href="css/mobile-pro.css">
+<script src="js/mobile-pro.js" defer></script>
 <style>
   @keyframes fadeInDown {
     from { opacity: 0; transform: translateY(-10px); }
@@ -1002,28 +1008,32 @@
           </button>
         </div>
 
-        <div style="margin-top: 16px;">
-          <span style="font-size: 12px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 12px;">🔥 Instant Flagship Account Radar</span>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
-            <div class="contact-card" onclick="quickSelect('lululemon.com')">
-              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">🧦 Lululemon</div>
-              <div style="font-size: 12px; color: var(--text-muted);">Retail / Apparel · 38,000 HC</div>
-              <div class="badge badge-indigo" style="margin-top: 8px; display: inline-block;">SwagUp Incumbent</div>
+        <div style="margin-top: 16px;" id="testDriveContainer">
+          <div class="test-drive-banner">
+            <span style="font-size: 16px;">🧪</span>
+            <strong style="font-size: 14px;">Interactive Test Drive Mode</strong>
+            <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">Select an account to run a live 5-second simulated research cycle.</span>
+          </div>
+          <div class="test-drive-grid">
+            <div class="test-drive-card" onclick="startTestDrive('lululemon')">
+              <div class="td-header">🧦 Lululemon</div>
+              <div class="td-sub">Retail Apparel · 38,000 HC</div>
+              <div class="badge badge-indigo td-badge">Incumbent: SwagUp</div>
             </div>
-            <div class="contact-card" onclick="quickSelect('uber.com')">
-              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">🚗 Uber</div>
-              <div style="font-size: 12px; color: var(--text-muted);">Mobility & Tech · 32,000 HC</div>
-              <div class="badge badge-sky" style="margin-top: 8px; display: inline-block;">Salesforce Incumbent</div>
+            <div class="test-drive-card" onclick="startTestDrive('uber')">
+              <div class="td-header">🚗 Uber</div>
+              <div class="td-sub">Mobility & Tech · 32,000 HC</div>
+              <div class="badge badge-sky td-badge">Incumbent: Salesforce</div>
             </div>
-            <div class="contact-card" onclick="quickSelect('openai.com')">
-              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">🤖 OpenAI</div>
-              <div style="font-size: 12px; color: var(--text-muted);">GenAI Platform · 1,500 HC</div>
-              <div class="badge badge-emerald" style="margin-top: 8px; display: inline-block;">Enterprise AI</div>
+            <div class="test-drive-card" onclick="startTestDrive('openai')">
+              <div class="td-header">🤖 OpenAI</div>
+              <div class="td-sub">GenAI Platform · 1,500 HC</div>
+              <div class="badge badge-emerald td-badge">Enterprise AI</div>
             </div>
-            <div class="contact-card" onclick="quickSelect('snowflake.com')">
-              <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">❄️ Snowflake</div>
-              <div style="font-size: 12px; color: var(--text-muted);">Data Cloud · 7,000 HC</div>
-              <div class="badge badge-amber" style="margin-top: 8px; display: inline-block;">Global Summit Gifting</div>
+            <div class="test-drive-card" onclick="startTestDrive('snowflake')">
+              <div class="td-header">❄️ Snowflake</div>
+              <div class="td-sub">Data Cloud · 7,000 HC</div>
+              <div class="badge badge-amber td-badge">Global Summit Gifting</div>
             </div>
           </div>
         </div>

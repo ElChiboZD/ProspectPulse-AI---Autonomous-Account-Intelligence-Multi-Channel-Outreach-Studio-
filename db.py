@@ -5,8 +5,13 @@ import sys
 from datetime import datetime
 
 if getattr(sys, 'frozen', False):
-    app_data = os.environ.get('APPDATA', os.path.dirname(sys.executable))
-    DB_DIR = os.path.join(app_data, 'ProspectPulseAI')
+    if sys.platform == 'darwin':
+        base_dir = os.path.expanduser('~/Library/Application Support')
+    elif sys.platform == 'win32':
+        base_dir = os.environ.get('APPDATA', os.path.dirname(sys.executable))
+    else:
+        base_dir = os.path.expanduser('~/.config')
+    DB_DIR = os.path.join(base_dir, 'ProspectPulseAI')
     try:
         os.makedirs(DB_DIR, exist_ok=True)
     except Exception:
@@ -56,6 +61,17 @@ def init_db():
             api_key TEXT,
             avatar_url TEXT,
             updated_at TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS beta_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT,
+            feedback_type TEXT,
+            rating INTEGER,
+            message TEXT,
+            diagnostic_info TEXT,
+            timestamp TEXT
         )
     ''')
     conn.commit()
@@ -162,4 +178,25 @@ def get_user_profile(email=None):
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
+
+def save_beta_feedback(email, feedback_type, rating, message, diagnostic_info):
+    conn = get_connection()
+    cursor = conn.cursor()
+    timestamp = datetime.utcnow().isoformat()
+    cursor.execute('''
+        INSERT INTO beta_feedback (email, feedback_type, rating, message, diagnostic_info, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (email, feedback_type, rating, message, json.dumps(diagnostic_info), timestamp))
+    conn.commit()
+    conn.close()
+    return True
+
+def get_beta_feedback():
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM beta_feedback ORDER BY timestamp DESC')
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
 

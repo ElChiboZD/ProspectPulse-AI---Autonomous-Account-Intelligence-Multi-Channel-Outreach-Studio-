@@ -60,6 +60,13 @@ def push_branches():
     porcelain.push(ROOT, push_url, refspecs=[b"refs/heads/windows-exe:refs/heads/windows-exe"])
     print("    [SUCCESS] Branch 'windows-exe' is live on GitHub!")
 
+    # 4. Create and push 'macos-app' branch
+    mac_branch = b"refs/heads/macos-app"
+    repo.refs[mac_branch] = current_head
+    print("\n[*] Pushing 'macos-app' branch to GitHub...")
+    porcelain.push(ROOT, push_url, refspecs=[b"refs/heads/macos-app:refs/heads/macos-app"])
+    print("    [SUCCESS] Branch 'macos-app' is live on GitHub!")
+
     print("\n" + "=" * 60)
     print("  All branches successfully created and pushed to GitHub!")
     print("  View them at: https://github.com/ElChiboZD/ProspectPulse-AI---Autonomous-Account-Intelligence-Multi-Channel-Outreach-Studio-/branches")

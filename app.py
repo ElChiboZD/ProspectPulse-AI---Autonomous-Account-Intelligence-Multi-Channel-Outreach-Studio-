@@ -74,11 +74,16 @@ def main():
     )
 
     # 4. Start GUI event loop
-    print("[*] Launching Native Standalone Window...")
+    print(f"[*] Launching Native Standalone Window on {sys.platform}...")
     try:
-        webview.start(debug=False, gui="edgechromium")
+        if sys.platform == "win32":
+            webview.start(debug=False, gui="edgechromium")
+        elif sys.platform == "darwin":
+            webview.start(debug=False, gui="cocoa")
+        else:
+            webview.start(debug=False, gui="gtk")
     except Exception:
-        # Fallback to default GUI backend
+        # Fallback to default platform GUI backend
         webview.start(debug=False)
 
     print("[*] ProspectPulse AI Desktop Application Closed.")

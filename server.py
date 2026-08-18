@@ -989,6 +989,13 @@ class Handler(BaseHTTPRequestHandler):
             prof = db.get_user_profile()
             return self._send(200, "application/json", json.dumps({"profile": prof}).encode())
 
+        if path == "/api/feedback":
+            try:
+                feedback = db.get_beta_feedback()
+                return self._send(200, "application/json", json.dumps(feedback).encode())
+            except Exception as e:
+                return self._send(500, "application/json", json.dumps({"error": str(e)}).encode())
+
         return self._send(404, "text/plain", b"not found")
 
     def do_POST(self):
@@ -1108,17 +1115,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, "application/json", json.dumps({"email": email, "deliverable": False, "mx_records": [], "risk": "high"}).encode())
 
         if path == "/api/feedback":
-            # Append tester feedback to a local file (POC — no DB).
             try:
-                fb = {
-                    "name": (data.get("name") or "").strip()[:120],
-                    "text": (data.get("text") or "").strip()[:4000],
-                    "context": (data.get("context") or "")[:200],
-                }
-                if not fb["text"]:
-                    return self._send(400, "application/json", b'{"error":"empty"}')
-                with open(os.path.join(ROOT, "feedback.log"), "a") as f:
-                    f.write(json.dumps(fb) + "\n")
+                email = data.get("email", "")
+                feedback_type = data.get("feedback_type", "praise")
+                rating = int(data.get("rating", 5))
+                message = data.get("message", "").strip()
+                diagnostic_info = data.get("diagnostic_info", {})
+                
+                if not message:
+                    return self._send(400, "application/json", b'{"error":"empty message"}')
+                
+                db.save_beta_feedback(email, feedback_type, rating, message, diagnostic_info)
                 return self._send(200, "application/json", b'{"ok":true}')
             except Exception as e:
                 return self._send(500, "application/json",

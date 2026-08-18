@@ -1,0 +1,67 @@
+name: Multi-Platform Build & Release (Windows & macOS)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    name: 🪟 Build Windows .EXE
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Windows Executables
+        run: |
+          python package_distribution.py
+
+      - name: Upload Windows Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/ProspectPulse-AI-Standalone.exe
+            dist/ProspectPulse-AI-*-Windows-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    name: 🍏 Build macOS .APP
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+          pip3 install pyinstaller pyobjc-framework-Cocoa pyobjc-framework-WebKit
+
+      - name: Build macOS Application Bundle
+        run: |
+          python3 build_mac.py
+          cd dist && zip -r ProspectPulse-AI-MacOS.zip ProspectPulse-AI.app
+
+      - name: Upload macOS Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/ProspectPulse-AI-MacOS.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
