@@ -1,0 +1,399 @@
+/* ==========================================================================
+   ProspectPulse AI — Mobile-Native UI Overhaul (Android 14+ / iOS Design System)
+   ========================================================================== */
+
+@media screen and (max-width: 768px), (pointer: coarse) {
+  :root {
+    --mobile-bg: #07080B;
+    --mobile-surface: #101218;
+    --mobile-surface-hover: #161922;
+    --mobile-border: rgba(255, 255, 255, 0.08);
+    --mobile-accent: #3B82F6;
+    --mobile-accent-glow: rgba(59, 130, 246, 0.25);
+    --mobile-success: #10B981;
+    --mobile-text-main: #F3F4F6;
+    --mobile-text-muted: #9CA3AF;
+  }
+
+  body {
+    background-color: var(--mobile-bg) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', Roboto, sans-serif !important;
+    padding-bottom: 84px !important; /* Space for bottom nav */
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    overflow-x: hidden !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none;
+  }
+
+  /* ----------------------------------------------------
+     1. HIDE CLUTTERED DESKTOP ELEMENTS ON MOBILE
+     ---------------------------------------------------- */
+  .top-bar,
+  .top-nav,
+  header.header-desktop,
+  .desktop-only,
+  #topBarContainer,
+  nav.main-nav {
+    display: none !important;
+  }
+
+  /* ----------------------------------------------------
+     2. SLEEK NATIVE MOBILE HEADER
+     ---------------------------------------------------- */
+  #mobileNativeHeader {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(13, 15, 22, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--mobile-border);
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 9999;
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-logo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3B82F6, #6366F1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .mobile-brand-title {
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.3px;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mobile-brand-badge {
+    font-size: 9px;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60A5FA;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .mobile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-avatar-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    background: #1F2937;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .mobile-avatar-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ----------------------------------------------------
+     3. NATIVE BOTTOM NAVIGATION TAB BAR
+     ---------------------------------------------------- */
+  #mobileNativeBottomBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(10, 12, 18, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--mobile-border);
+    display: flex !important;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 10000;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .mob-tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    color: #6B7280;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 8px 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .mob-tab-btn .mob-tab-icon {
+    font-size: 20px;
+    transition: transform 0.2s;
+  }
+
+  .mob-tab-btn.active {
+    color: #60A5FA;
+  }
+
+  .mob-tab-btn.active .mob-tab-icon {
+    transform: translateY(-2px) scale(1.1);
+  }
+
+  .mob-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    width: 20px;
+    height: 3px;
+    border-radius: 4px;
+    background: #3B82F6;
+    box-shadow: 0 0 10px #3B82F6;
+  }
+
+  .mob-tab-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* ----------------------------------------------------
+     4. CONTAINER & SCREEN MOBILE OPTIMIZATIONS
+     ---------------------------------------------------- */
+  .container, .screen-container, main, .main-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 14px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  /* Full-width responsive cards */
+  .card, .glass-card, .dashboard-card, .panel {
+    background: var(--mobile-surface) !important;
+    border: 1px solid var(--mobile-border) !important;
+    border-radius: 16px !important;
+    padding: 16px !important;
+    margin-bottom: 14px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  /* ----------------------------------------------------
+     5. SCREEN 1: RADAR & SEARCH HERO
+     ---------------------------------------------------- */
+  .mobile-hero-section {
+    padding: 10px 4px 16px 4px;
+  }
+
+  .mobile-hero-greeting {
+    font-size: 22px;
+    font-weight: 800;
+    color: #FFF;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .mobile-hero-sub {
+    font-size: 13px;
+    color: var(--mobile-text-muted);
+    margin-bottom: 16px;
+  }
+
+  .mobile-search-wrapper {
+    position: relative;
+    margin-bottom: 18px;
+  }
+
+  .mobile-search-input {
+    width: 100% !important;
+    height: 52px !important;
+    background: #141721 !important;
+    border: 1.5px solid rgba(59, 130, 246, 0.3) !important;
+    border-radius: 14px !important;
+    padding: 0 54px 0 16px !important;
+    font-size: 15px !important;
+    color: #FFF !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    transition: border-color 0.2s;
+  }
+
+  .mobile-search-input:focus {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  .mobile-search-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #3B82F6;
+    border: none;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* Flagship Grid on Mobile */
+  .mobile-flagship-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+  }
+
+  .mobile-flagship-card {
+    background: #141721;
+    border: 1px solid var(--mobile-border);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    touch-action: manipulation;
+  }
+
+  .mobile-flagship-card:active {
+    transform: scale(0.96);
+    border-color: #3B82F6;
+    background: #191D2B;
+  }
+
+  .mob-flag-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mob-flag-icon {
+    font-size: 20px;
+  }
+
+  .mob-flag-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #FFF;
+  }
+
+  .mob-flag-tag {
+    font-size: 11px;
+    color: #9CA3AF;
+  }
+
+  .mob-flag-wedge {
+    font-size: 10px;
+    color: #10B981;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    width: fit-content;
+  }
+
+  /* ----------------------------------------------------
+     6. MOBILE ACTION BUTTONS & FORMS
+     ---------------------------------------------------- */
+  button, .btn, input[type="button"], input[type="submit"] {
+    min-height: 46px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    touch-action: manipulation !important;
+  }
+
+  .btn-primary, button.primary {
+    background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
+    color: #FFF !important;
+    border: none !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+  }
+
+  /* ----------------------------------------------------
+     7. TONE REWRITER PILLS ON MOBILE
+     ---------------------------------------------------- */
+  .tone-pills-container, #tonePillsRow {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    padding-bottom: 6px !important;
+    scrollbar-width: none !important;
+  }
+
+  .tone-pills-container::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .tone-pill-btn {
+    white-space: nowrap !important;
+    padding: 8px 14px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* ----------------------------------------------------
+     8. HIDE ALL CRAMPED DESKTOP TABLES ON MOBILE
+     ---------------------------------------------------- */
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    font-size: 12px !important;
+  }
+
+  /* Stack split columns vertically on mobile */
+  .grid-2, .grid-3, .grid-4, .split-view, .two-col, .three-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Modals Full Screen on Mobile */
+  .modal-content, .dialog-box {
+    width: 94% !important;
+    max-width: 94% !important;
+    margin: 10px auto !important;
+    max-height: 88vh !important;
+    border-radius: 20px !important;
+  }
+}
