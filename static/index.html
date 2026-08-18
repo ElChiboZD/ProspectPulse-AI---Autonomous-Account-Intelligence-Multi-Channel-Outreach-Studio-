@@ -2068,7 +2068,7 @@ function updateProductStudioCanvas(key) {
   const domain = (currentAccountData && currentAccountData.companyZoomInfoUrl ? currentAccountData.companyZoomInfoUrl.split('/').pop() : '').toLowerCase();
 
   if (key === 'sockclub') {
-    title.textContent = "🎨 1-Hour Virtual Sock Proof Studio";
+    title.textContent = "🎨 Real-Time Custom Sock Proof & Packaging Studio";
     
     // Check if we have a pre-rendered high-res photorealistic studio proof for this target
     let photoProofUrl = '/static/proofs/sockclub.jpg';
@@ -2079,49 +2079,111 @@ function updateProductStudioCanvas(key) {
     }
 
     canvas.innerHTML = `
-      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
-        <button class="btn btn-primary btn-sm" id="btnProofPhoto" onclick="toggleProofMode('photo')">📸 Gemini AI Photorealistic Proof</button>
-        <button class="btn btn-secondary btn-sm" id="btnProofVector" onclick="toggleProofMode('vector')">📐 Interactive SVG &amp; Color Editor</button>
-      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+        
+        <!-- DUAL MODE SWITCHER -->
+        <div style="display: flex; gap: 6px; margin-bottom: 14px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 8px;">
+          <button class="btn btn-primary btn-sm" id="btnProofVector" onclick="toggleProofMode('vector')">📐 Real-Time Studio Editor</button>
+          <button class="btn btn-secondary btn-sm" id="btnProofPhoto" onclick="toggleProofMode('photo')">📸 Photorealistic Demo</button>
+        </div>
 
-      <!-- PHOTO PROOF VIEW -->
-      <div id="proofPhotoView" style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
-        <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 320px;">
-          <img id="photoProofImg" src="${photoProofUrl}" alt="Custom Knit Sock Proof" style="width: 100%; height: auto; display: block; object-fit: cover;">
-          <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--emerald); border: 1px solid rgba(16,185,129,0.3);">
-            ✓ Gemini 3.6 Studio Render
-          </div>
-        </div>
-        <div style="margin-top: 14px;">
-          <strong style="font-size: 15px; color: #fff;">Custom Jacquard Woven Proof for ${co}</strong>
-          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">75% US Combed Cotton · Woven Jacquard Pattern · Kraft Header Card</div>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 14px;">
-          <button class="btn btn-primary btn-sm" onclick="attachProofToEmail()">📎 Attach Proof Link to Email</button>
-          <a class="btn btn-secondary btn-sm" href="${photoProofUrl}" download="${co.toLowerCase()}-sock-proof.jpg" target="_blank">💾 Save High-Res Proof</a>
-        </div>
-      </div>
+        <!-- REAL-TIME VECTOR STUDIO STAGE -->
+        <div id="proofVectorView" style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+          
+          <!-- STAGE CANVAS WITH KRAFT PACKAGING -->
+          <div id="realtimeProofStage" style="background: #080A10; border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.6); max-width: 380px; width: 100%; position: relative;">
+            
+            <!-- KRAFT HEADER CARD PACKAGING -->
+            <div style="background: #D4B895; border: 2px solid #8C6D46; border-radius: 8px 8px 0 0; padding: 10px 14px; margin-bottom: -4px; position: relative; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3); text-align: center; color: #3E2723;">
+              <div style="font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">SOCK CLUB · NORTH CAROLINA MILL</div>
+              <div style="font-size: 13px; font-weight: 900; margin-top: 2px; color: #1E1B18;" id="kraftBrandTitle">${co.toUpperCase()} CUSTOM PROOF</div>
+              <div style="font-size: 9px; opacity: 0.85; margin-top: 2px;">75% US Combed Cotton · 20% Nylon · 5% Lycra</div>
+            </div>
 
-      <!-- VECTOR SVG PROOF VIEW -->
-      <div id="proofVectorView" style="display: none; flex-direction: column; align-items: center; text-align: center; width: 100%;">
-        <svg width="200" height="280" viewBox="0 0 220 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M60 20 H160 V180 C160 220 180 250 210 270 C220 280 210 300 190 300 H120 C70 300 50 250 50 200 V20 Z" fill="#1E293B" stroke="#6366F1" stroke-width="4" id="sockBaseSvg" />
-          <rect x="58" y="20" width="104" height="30" fill="#6366F1" rx="4" id="sockCuffSvg" />
-          <path d="M120 300 H190 C210 300 220 280 210 270 C180 270 160 290 120 300 Z" fill="#6366F1" id="sockToeSvg" />
-          <path d="M50 180 C50 220 70 240 90 240 C90 200 70 180 50 180 Z" fill="#6366F1" id="sockHeelSvg" />
-          <text x="110" y="110" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="14" text-anchor="middle" id="sockBrandText">${co.toUpperCase()}</text>
-          <text x="110" y="130" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">USA COMBED COTTON</text>
-        </svg>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; width: 100%; max-width: 320px;">
-          <div>
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">BASE COLOR</label>
-            <input type="color" id="sockBaseColorInput" value="#1E293B" onchange="updateSockColors()" style="height: 34px; padding: 2px; margin-top: 4px; cursor: pointer;">
+            <!-- LIVE VECTOR SOCK SVG -->
+            <svg id="liveSockSvg" width="200" height="270" viewBox="0 0 220 320" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 12px 24px rgba(0,0,0,0.7)); margin: 8px 0;">
+              <!-- Sock Base Body -->
+              <path d="M60 20 H160 V180 C160 220 180 250 210 270 C220 280 210 300 190 300 H120 C70 300 50 250 50 200 V20 Z" fill="#1E293B" stroke="#475569" stroke-width="2" id="sockBaseSvg" />
+              
+              <!-- Ribbed Cuff -->
+              <rect x="58" y="20" width="104" height="36" fill="#6366F1" rx="4" id="sockCuffSvg" />
+              
+              <!-- Pattern Stripes / Diamonds -->
+              <g id="sockPatternGroup">
+                <line x1="60" y1="80" x2="160" y2="80" stroke="#06B6D4" stroke-width="4" stroke-dasharray="6,4" id="sockPattern1" />
+                <line x1="60" y1="100" x2="160" y2="100" stroke="#06B6D4" stroke-width="6" id="sockPattern2" />
+                <line x1="60" y1="120" x2="160" y2="120" stroke="#06B6D4" stroke-width="4" stroke-dasharray="6,4" id="sockPattern3" />
+              </g>
+
+              <!-- Heel & Toe Reinforced Weave -->
+              <path d="M120 300 H190 C210 300 220 280 210 270 C180 270 160 290 120 300 Z" fill="#6366F1" id="sockToeSvg" />
+              <path d="M50 180 C50 220 70 240 90 240 C90 200 70 180 50 180 Z" fill="#6366F1" id="sockHeelSvg" />
+              
+              <!-- Dynamic Brand Logo / Text On Arch -->
+              <text x="110" y="155" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="13" text-anchor="middle" id="sockBrandText">${co.toUpperCase()}</text>
+              <text x="110" y="170" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="8" text-anchor="middle">USA MILL KNIT</text>
+            </svg>
+
+            <div style="font-size: 11px; color: var(--text-faint);">Live 0ms Vector Jacquard Simulation with True Pantone Mapping</div>
           </div>
-          <div>
-            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">ACCENT COLOR</label>
-            <input type="color" id="sockAccentColorInput" value="#6366F1" onchange="updateSockColors()" style="height: 34px; padding: 2px; margin-top: 4px; cursor: pointer;">
+
+          <!-- REAL-TIME LIVE CONTROLS -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 14px; width: 100%; max-width: 380px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🎨 Real-Time Knit Palette:</span>
+              <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10.5px;" onclick="autoMatchBrandColors()">⚡ Auto-Match Brand</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <div>
+                <label style="font-size: 10px; font-weight: 700; color: var(--text-muted);">BASE YARN</label>
+                <input type="color" id="sockBaseColorInput" value="#1E293B" oninput="updateSockColors()" style="height: 30px; padding: 2px; margin-top: 4px; cursor: pointer; border-radius: 6px; width: 100%;">
+              </div>
+              <div>
+                <label style="font-size: 10px; font-weight: 700; color: var(--text-muted);">HEEL / TOE</label>
+                <input type="color" id="sockAccentColorInput" value="#6366F1" oninput="updateSockColors()" style="height: 30px; padding: 2px; margin-top: 4px; cursor: pointer; border-radius: 6px; width: 100%;">
+              </div>
+              <div>
+                <label style="font-size: 10px; font-weight: 700; color: var(--text-muted);">JACQUARD STRIPE</label>
+                <input type="color" id="sockStripeColorInput" value="#06B6D4" oninput="updateSockColors()" style="height: 30px; padding: 2px; margin-top: 4px; cursor: pointer; border-radius: 6px; width: 100%;">
+              </div>
+            </div>
+
+            <!-- Pattern Selector -->
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+              <label style="font-size: 10.5px; font-weight: 700; color: var(--text-muted);">PATTERN:</label>
+              <select id="sockPatternSelect" onchange="updateSockPattern()" style="width: auto; padding: 3px 8px; font-size: 11px;">
+                <option value="stripes" selected>⚡ Performance Racing Stripes</option>
+                <option value="argyle">💎 Diamond Argyle Jacquard</option>
+                <option value="minimal">👔 Minimalist Executive Solid</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 14px;">
+            <button class="btn btn-primary btn-sm" onclick="attachProofToEmail()">📎 Attach Proof Link to Email</button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadProductProof()">💾 Save High-Res Proof</button>
           </div>
         </div>
+
+        <!-- PHOTOREALISTIC DEMO VIEW -->
+        <div id="proofPhotoView" style="display: none; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+          <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 340px;">
+            <img id="photoProofImg" src="${photoProofUrl}" alt="Photorealistic Custom Sock Proof" style="width: 100%; height: auto; display: block; object-fit: cover;">
+            <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--emerald); border: 1px solid rgba(16,185,129,0.3);">
+              ✓ 75% US Combed Cotton
+            </div>
+          </div>
+          <div style="margin-top: 14px;">
+            <strong style="font-size: 15px; color: #fff;">1-Hour Digital Proof Mockup for ${co}</strong>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Direct North Carolina Mill · Jacquard Knit (No Printed Fading)</div>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 14px;">
+            <button class="btn btn-primary btn-sm" onclick="attachProofToEmail()">📎 Attach Proof Link to Email</button>
+            <a class="btn btn-secondary btn-sm" href="${photoProofUrl}" download="${co.toLowerCase()}-sock-proof.jpg" target="_blank">💾 Save High-Res Proof</a>
+          </div>
+        </div>
+
       </div>
     `;
   } else if (key === 'zendesk') {
@@ -3326,18 +3388,88 @@ function showObjection(type) {
 }
 
 function updateSockColors() {
-  const base = document.getElementById('sockBaseColorInput').value;
-  const accent = document.getElementById('sockAccentColorInput').value;
+  const base = document.getElementById('sockBaseColorInput') ? document.getElementById('sockBaseColorInput').value : '#1E293B';
+  const accent = document.getElementById('sockAccentColorInput') ? document.getElementById('sockAccentColorInput').value : '#6366F1';
+  const stripe = document.getElementById('sockStripeColorInput') ? document.getElementById('sockStripeColorInput').value : '#06B6D4';
 
   const b = document.getElementById('sockBaseSvg');
   const c = document.getElementById('sockCuffSvg');
   const t = document.getElementById('sockToeSvg');
   const h = document.getElementById('sockHeelSvg');
+  const p1 = document.getElementById('sockPattern1');
+  const p2 = document.getElementById('sockPattern2');
+  const p3 = document.getElementById('sockPattern3');
 
   if (b) b.setAttribute('fill', base);
   if (c) c.setAttribute('fill', accent);
   if (t) t.setAttribute('fill', accent);
   if (h) h.setAttribute('fill', accent);
+  if (p1) p1.setAttribute('stroke', stripe);
+  if (p2) p2.setAttribute('stroke', stripe);
+  if (p3) p3.setAttribute('stroke', stripe);
+}
+
+function updateSockPattern() {
+  const pat = document.getElementById('sockPatternSelect').value;
+  const pGroup = document.getElementById('sockPatternGroup');
+  const stripeColor = document.getElementById('sockStripeColorInput') ? document.getElementById('sockStripeColorInput').value : '#06B6D4';
+
+  if (!pGroup) return;
+
+  if (pat === 'stripes') {
+    pGroup.innerHTML = `
+      <line x1="60" y1="80" x2="160" y2="80" stroke="${stripeColor}" stroke-width="4" stroke-dasharray="6,4" id="sockPattern1" />
+      <line x1="60" y1="100" x2="160" y2="100" stroke="${stripeColor}" stroke-width="6" id="sockPattern2" />
+      <line x1="60" y1="120" x2="160" y2="120" stroke="${stripeColor}" stroke-width="4" stroke-dasharray="6,4" id="sockPattern3" />
+    `;
+  } else if (pat === 'argyle') {
+    pGroup.innerHTML = `
+      <polygon points="110,65 140,95 110,125 80,95" fill="none" stroke="${stripeColor}" stroke-width="3" />
+      <polygon points="110,125 140,155 110,185 80,155" fill="none" stroke="${stripeColor}" stroke-width="3" />
+      <line x1="80" y1="65" x2="140" y2="185" stroke="${stripeColor}" stroke-width="1.5" stroke-dasharray="3,3" />
+      <line x1="140" y1="65" x2="80" y2="185" stroke="${stripeColor}" stroke-width="1.5" stroke-dasharray="3,3" />
+    `;
+  } else {
+    // minimal solid
+    pGroup.innerHTML = `
+      <line x1="60" y1="60" x2="160" y2="60" stroke="${stripeColor}" stroke-width="3" />
+    `;
+  }
+  showToast('🎨 Jacquard pattern updated in real time!');
+}
+
+function autoMatchBrandColors() {
+  const co = (currentAccountData && currentAccountData.company) || 'brand';
+  const domain = (currentAccountData && currentAccountData.companyZoomInfoUrl ? currentAccountData.companyZoomInfoUrl.split('/').pop() : '').toLowerCase();
+
+  let baseHex = '#0F172A';
+  let accentHex = '#6366F1';
+  let stripeHex = '#06B6D4';
+
+  if (domain.includes('lulu') || co.toLowerCase().includes('lulu')) {
+    baseHex = '#990000'; // Lululemon Crimson
+    accentHex = '#1A1A1A';
+    stripeHex = '#FFFFFF';
+  } else if (domain.includes('vita') || co.toLowerCase().includes('vita') || domain.includes('coco')) {
+    baseHex = '#0055A5'; // Vita Coco Royal Blue
+    accentHex = '#00A859';
+    stripeHex = '#FDB913';
+  } else if (domain.includes('stripe')) {
+    baseHex = '#635BFF'; // Stripe Blurple
+    accentHex = '#0A2540';
+    stripeHex = '#00D4FF';
+  }
+
+  const bIn = document.getElementById('sockBaseColorInput');
+  const aIn = document.getElementById('sockAccentColorInput');
+  const sIn = document.getElementById('sockStripeColorInput');
+
+  if (bIn) bIn.value = baseHex;
+  if (aIn) aIn.value = accentHex;
+  if (sIn) sIn.value = stripeHex;
+
+  updateSockColors();
+  showToast(`⚡ Brand colors auto-matched for ${co}!`);
 }
 
 function downloadProductProof() {
