@@ -1071,7 +1071,17 @@
               </button>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+              <!-- Voice Persona Selector -->
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted);">
+                <span>Voice:</span>
+                <select id="voicePersonaSelect" style="width: auto; padding: 3px 8px; font-size: 11.5px; background: rgba(0,0,0,0.4); border-color: rgba(99,102,241,0.4); color: #fff;">
+                  <option value="warm_male" selected>🤵 Travis (Austin AE · Warm &amp; Consultative)</option>
+                  <option value="exec_male">👔 Marcus (Enterprise VP · Direct &amp; Confident)</option>
+                  <option value="warm_female">👩 Sarah (Field Marketing Specialist)</option>
+                </select>
+              </div>
+
               <!-- Animated Audio Wave -->
               <div class="audio-wave" id="audioWaveBars">
                 <div class="audio-bar"></div>
@@ -1087,9 +1097,9 @@
               <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted);">
                 <span>Speed:</span>
                 <select id="voiceSpeedSelect" style="width: auto; padding: 2px 8px; font-size: 11px;">
-                  <option value="1.0">1.0x</option>
-                  <option value="1.15" selected>1.15x</option>
-                  <option value="1.3">1.3x</option>
+                  <option value="0.95">0.95x (Deliberate)</option>
+                  <option value="1.0" selected>1.0x (Natural Pace)</option>
+                  <option value="1.15">1.15x (Brisk)</option>
                 </select>
               </div>
             </div>
@@ -2774,8 +2784,19 @@ function copyAllMultiThreads() {
   navigator.clipboard.writeText(`=== THREAD 1 ===\n${t1}\n\n=== THREAD 2 ===\n${t2}\n\n=== THREAD 3 ===\n${t3}`).then(() => alert('✓ All 3 emails copied!'));
 }
 
-// Speech Synthesis & AI Voicemail Audio Player
+// Speech Synthesis & AI Voicemail Audio Player (Neural Engine)
 let activeSpeechUtterance = null;
+let systemVoices = [];
+
+function loadSystemVoices() {
+  if ('speechSynthesis' in window) {
+    systemVoices = window.speechSynthesis.getVoices();
+  }
+}
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = loadSystemVoices;
+  loadSystemVoices();
+}
 
 function playVoicePitch(type) {
   if (!('speechSynthesis' in window)) {
@@ -2784,24 +2805,55 @@ function playVoicePitch(type) {
   }
   
   window.speechSynthesis.cancel();
+  loadSystemVoices();
   
-  let textToSpeak = '';
+  let rawText = '';
   if (type === 'opener') {
-    textToSpeak = document.getElementById('callOpenerText').textContent.replace(/"/g, '');
+    rawText = document.getElementById('callOpenerText').textContent.replace(/"/g, '');
   } else {
-    textToSpeak = document.getElementById('voicemailText').value.replace(/"/g, '');
+    rawText = document.getElementById('voicemailText').value.replace(/"/g, '');
   }
 
-  if (!textToSpeak) return;
+  if (!rawText) return;
 
-  const speed = parseFloat(document.getElementById('voiceSpeedSelect').value) || 1.15;
-  activeSpeechUtterance = new SpeechSynthesisUtterance(textToSpeak);
+  // Conversational Prosody Shaping (Natural pauses & pacing)
+  const prosodyText = rawText
+    .replace(/—/g, ', ')
+    .replace(/ - /g, ', ')
+    .replace(/([.!?])\s+/g, '$1  ')
+    .replace(/([,;])\s*/g, '$1 ');
+
+  const persona = (document.getElementById('voicePersonaSelect') && document.getElementById('voicePersonaSelect').value) || 'warm_male';
+  const speed = parseFloat((document.getElementById('voiceSpeedSelect') && document.getElementById('voiceSpeedSelect').value) || 1.0);
+
+  activeSpeechUtterance = new SpeechSynthesisUtterance(prosodyText);
   activeSpeechUtterance.rate = speed;
-  activeSpeechUtterance.pitch = 1.0;
 
-  const voices = window.speechSynthesis.getVoices();
-  const naturalVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('David') || v.name.includes('Alex')));
-  if (naturalVoice) activeSpeechUtterance.voice = naturalVoice;
+  // Voice Persona Matching & Natural Neural Pitch Tuning
+  const enVoices = systemVoices.filter(v => v.lang.startsWith('en'));
+  let chosenVoice = null;
+
+  if (persona === 'warm_male') {
+    activeSpeechUtterance.pitch = 0.95; // Warm, grounded resonance
+    chosenVoice = enVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('Neural')) && (v.name.includes('Ryan') || v.name.includes('Guy') || v.name.includes('Christopher') || v.name.includes('Male')))
+               || enVoices.find(v => v.name.includes('Google US English') || v.name.includes('David') || v.name.includes('Alex') || v.name.includes('Daniel'))
+               || enVoices[0];
+  } else if (persona === 'exec_male') {
+    activeSpeechUtterance.pitch = 0.90; // Authoritative executive baritone
+    chosenVoice = enVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online')) && (v.name.includes('Eric') || v.name.includes('Christopher') || v.name.includes('Guy')))
+               || enVoices.find(v => v.name.includes('David') || v.name.includes('Google US English') || v.name.includes('Daniel'))
+               || enVoices[0];
+  } else {
+    // warm_female
+    activeSpeechUtterance.pitch = 1.05; // Clear, energetic consultative tone
+    chosenVoice = enVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('Neural')) && (v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Female')))
+               || enVoices.find(v => v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Google'))
+               || enVoices[0];
+  }
+
+  if (chosenVoice) {
+    activeSpeechUtterance.voice = chosenVoice;
+  }
 
   const wave = document.getElementById('audioWaveBars');
   const stopBtn = document.getElementById('btnStopVoice');
