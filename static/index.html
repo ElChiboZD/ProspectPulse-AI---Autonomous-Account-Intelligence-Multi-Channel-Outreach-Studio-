@@ -2784,28 +2784,11 @@ function copyAllMultiThreads() {
   navigator.clipboard.writeText(`=== THREAD 1 ===\n${t1}\n\n=== THREAD 2 ===\n${t2}\n\n=== THREAD 3 ===\n${t3}`).then(() => alert('✓ All 3 emails copied!'));
 }
 
-// Speech Synthesis & AI Voicemail Audio Player (Neural Engine)
-let activeSpeechUtterance = null;
-let systemVoices = [];
-
-function loadSystemVoices() {
-  if ('speechSynthesis' in window) {
-    systemVoices = window.speechSynthesis.getVoices();
-  }
-}
-if ('speechSynthesis' in window) {
-  window.speechSynthesis.onvoiceschanged = loadSystemVoices;
-  loadSystemVoices();
-}
+// Studio-Grade Neural Speech Engine (edge-tts Server Pipeline)
+let activeNeuralAudio = null;
 
 function playVoicePitch(type) {
-  if (!('speechSynthesis' in window)) {
-    alert('Speech synthesis is not supported in this browser.');
-    return;
-  }
-  
-  window.speechSynthesis.cancel();
-  loadSystemVoices();
+  stopVoiceAudio();
   
   let rawText = '';
   if (type === 'opener') {
@@ -2816,64 +2799,62 @@ function playVoicePitch(type) {
 
   if (!rawText) return;
 
-  // Conversational Prosody Shaping (Natural pauses & pacing)
-  const prosodyText = rawText
-    .replace(/—/g, ', ')
-    .replace(/ - /g, ', ')
-    .replace(/([.!?])\s+/g, '$1  ')
-    .replace(/([,;])\s*/g, '$1 ');
-
   const persona = (document.getElementById('voicePersonaSelect') && document.getElementById('voicePersonaSelect').value) || 'warm_male';
-  const speed = parseFloat((document.getElementById('voiceSpeedSelect') && document.getElementById('voiceSpeedSelect').value) || 1.0);
+  let edgeVoice = 'en-US-GuyNeural';
+  if (persona === 'exec_male') edgeVoice = 'en-US-ChristopherNeural';
+  else if (persona === 'warm_female') edgeVoice = 'en-US-JennyNeural';
 
-  activeSpeechUtterance = new SpeechSynthesisUtterance(prosodyText);
-  activeSpeechUtterance.rate = speed;
-
-  // Voice Persona Matching & Natural Neural Pitch Tuning
-  const enVoices = systemVoices.filter(v => v.lang.startsWith('en'));
-  let chosenVoice = null;
-
-  if (persona === 'warm_male') {
-    activeSpeechUtterance.pitch = 0.95; // Warm, grounded resonance
-    chosenVoice = enVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('Neural')) && (v.name.includes('Ryan') || v.name.includes('Guy') || v.name.includes('Christopher') || v.name.includes('Male')))
-               || enVoices.find(v => v.name.includes('Google US English') || v.name.includes('David') || v.name.includes('Alex') || v.name.includes('Daniel'))
-               || enVoices[0];
-  } else if (persona === 'exec_male') {
-    activeSpeechUtterance.pitch = 0.90; // Authoritative executive baritone
-    chosenVoice = enVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online')) && (v.name.includes('Eric') || v.name.includes('Christopher') || v.name.includes('Guy')))
-               || enVoices.find(v => v.name.includes('David') || v.name.includes('Google US English') || v.name.includes('Daniel'))
-               || enVoices[0];
-  } else {
-    // warm_female
-    activeSpeechUtterance.pitch = 1.05; // Clear, energetic consultative tone
-    chosenVoice = enVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('Neural')) && (v.name.includes('Jenny') || v.name.includes('Aria') || v.name.includes('Female')))
-               || enVoices.find(v => v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Google'))
-               || enVoices[0];
-  }
-
-  if (chosenVoice) {
-    activeSpeechUtterance.voice = chosenVoice;
-  }
+  const speedVal = parseFloat((document.getElementById('voiceSpeedSelect') && document.getElementById('voiceSpeedSelect').value) || 1.0);
+  let rateStr = '+0%';
+  if (speedVal < 1.0) rateStr = '-8%';
+  else if (speedVal > 1.1) rateStr = '+12%';
 
   const wave = document.getElementById('audioWaveBars');
   const stopBtn = document.getElementById('btnStopVoice');
-  
   if (wave) wave.classList.add('audio-playing');
   if (stopBtn) stopBtn.style.display = 'inline-block';
 
-  activeSpeechUtterance.onend = () => {
-    if (wave) wave.classList.remove('audio-playing');
-    if (stopBtn) stopBtn.style.display = 'none';
-  };
-  activeSpeechUtterance.onerror = () => {
-    if (wave) wave.classList.remove('audio-playing');
-    if (stopBtn) stopBtn.style.display = 'none';
-  };
-
-  window.speechSynthesis.speak(activeSpeechUtterance);
+  // Request high-fidelity neural MP3 from server
+  fetch('/api/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: rawText,
+      voice: edgeVoice,
+      rate: rateStr
+    })
+  })
+  .then(resp => {
+    if (!resp.ok) throw new Error('Neural TTS error');
+    return resp.blob();
+  })
+  .then(blob => {
+    const audioUrl = URL.createObjectURL(blob);
+    activeNeuralAudio = new Audio(audioUrl);
+    activeNeuralAudio.play();
+    activeNeuralAudio.onended = () => stopVoiceAudio();
+    activeNeuralAudio.onerror = () => stopVoiceAudio();
+  })
+  .catch(err => {
+    console.warn('Falling back to local speech synthesis:', err);
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(rawText);
+      u.rate = speedVal;
+      u.onend = () => stopVoiceAudio();
+      u.onerror = () => stopVoiceAudio();
+      window.speechSynthesis.speak(u);
+    } else {
+      stopVoiceAudio();
+    }
+  });
 }
 
 function stopVoiceAudio() {
+  if (activeNeuralAudio) {
+    activeNeuralAudio.pause();
+    activeNeuralAudio.currentTime = 0;
+    activeNeuralAudio = null;
+  }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }

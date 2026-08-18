@@ -1184,6 +1184,38 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, "application/json",
                               json.dumps({"job_id": job_id}).encode())
 
+        if path == "/api/tts":
+            # Studio-grade Neural Speech Synthesis Engine
+            text = (data.get("text") or "").strip()
+            voice = data.get("voice", "en-US-GuyNeural")
+            rate = data.get("rate", "+0%")
+            if not text:
+                return self._send(400, "application/json", b'{"error":"empty text"}')
+            
+            try:
+                import asyncio
+                import edge_tts
+                
+                async def _gen():
+                    communicate = edge_tts.Communicate(text, voice, rate=rate)
+                    audio_bytes = bytearray()
+                    async for chunk in communicate.stream():
+                        if chunk["type"] == "audio":
+                            audio_bytes.extend(chunk["data"])
+                    return bytes(audio_bytes)
+                
+                audio_data = asyncio.run(_gen())
+                self.send_response(200)
+                self.send_header("Content-Type", "audio/mpeg")
+                self.send_header("Content-Length", str(len(audio_data)))
+                self.send_header("Cache-Control", "no-cache")
+                self.end_headers()
+                self.wfile.write(audio_data)
+                return
+            except Exception as e:
+                print(f"[TTS ERROR] {e}")
+                return self._send(500, "application/json", json.dumps({"error": str(e)}).encode())
+
         if path == "/api/roleplay":
             # AI Discovery Call & Objection Handling Simulator
             messages = data.get("messages", [])
