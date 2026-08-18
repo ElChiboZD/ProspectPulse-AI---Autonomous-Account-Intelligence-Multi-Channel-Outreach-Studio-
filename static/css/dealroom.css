@@ -1,0 +1,38 @@
+/* dealroom.css */
+.dealroom-builder-modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  max-width: 600px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: var(--shadow-glow);
+  text-align: center;
+}
+.qr-code-box {
+  width: 180px;
+  height: 180px;
+  background: #fff;
+  border-radius: 12px;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.qr-code-box img {
+  width: 160px;
+  height: 160px;
+}
+.link-box {
+  background: rgba(0,0,0,0.4);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-family: monospace;
+  color: var(--sky);
+  margin-bottom: 20px;
+  word-break: break-all;
+}

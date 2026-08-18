@@ -1,0 +1,56 @@
+/* multithread-visualizer.css */
+.mt-visualizer-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: 20px;
+}
+.mt-risk-gauge {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+.mt-risk-bar-container {
+  flex: 1; margin: 0 16px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;
+}
+.mt-risk-bar {
+  height: 100%; width: 50%; background: var(--amber); transition: width 0.3s;
+}
+.mt-warning-banner {
+  background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); color: var(--rose);
+  padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 16px; display: none;
+}
+.mt-tree {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;
+}
+.mt-node {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  padding: 12px; border-radius: 8px; text-align: center; cursor: pointer;
+  transition: all 0.2s;
+}
+.mt-node.mapped {
+  background: rgba(99,102,241,0.1); border-color: var(--primary);
+}
+.mt-node-icon { font-size: 24px; margin-bottom: 8px; }
+.mt-node-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+.mt-node-name { font-size: 13px; font-weight: 600; margin-top: 4px; }
+
+.mt-sequence-viewer {
+  display: none; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+  border-radius: 8px; margin-top: 16px;
+}
+.mt-seq-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+}
+.mt-seq-tab {
+  padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--muted);
+  cursor: pointer; flex: 1; text-align: center;
+}
+.mt-seq-tab.active {
+  background: rgba(255,255,255,0.05); color: var(--text-main); border-bottom: 2px solid var(--primary);
+}
+.mt-seq-content {
+  padding: 16px; font-size: 14px; line-height: 1.5; display: none;
+}
+.mt-seq-content.active { display: block; }

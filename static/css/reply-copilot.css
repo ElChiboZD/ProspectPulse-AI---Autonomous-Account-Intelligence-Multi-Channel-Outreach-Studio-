@@ -1,0 +1,48 @@
+/* reply-copilot.css */
+.reply-copilot-modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  max-width: 800px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: var(--shadow-glow);
+}
+.rc-preset-chip {
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.rc-preset-chip:hover {
+  background: var(--indigo-glow);
+  border-color: var(--indigo);
+}
+.rc-hud {
+  display: flex; gap: 16px; margin: 20px 0;
+}
+.rc-hud-item {
+  background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; flex: 1; text-align: center;
+}
+.rc-tabs {
+  display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+.rc-tab {
+  padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--muted);
+  cursor: pointer; border-radius: 6px;
+}
+.rc-tab.active {
+  background: var(--primary); color: #fff;
+}
+.rc-card-content {
+  background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px; font-size: 14px; line-height: 1.5;
+}
+.rc-card-actions {
+  display: flex; gap: 8px; margin-top: 12px;
+}

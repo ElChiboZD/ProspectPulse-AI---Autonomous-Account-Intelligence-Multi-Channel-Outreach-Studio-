@@ -289,6 +289,42 @@ def competitor_intel(comp):
 JOBS = {}
 JOBS_LOCK = threading.Lock()
 
+DEALROOMS = {}
+
+def generate_dealroom_html(data):
+    company = data.get("company", "Company")
+    color = data.get("brand_color", "#1f9e5f")
+    logo = data.get("logo_url", "")
+    milestones = data.get("map_milestones", ["Discovery", "Proof of Concept", "Security Review", "Contracting"])
+    milestones_html = "".join([f"<li><label><input type='checkbox'> {m}</label></li>" for m in milestones])
+    return f'''<!DOCTYPE html>
+<html>
+<head>
+<title>{company} Deal Room</title>
+<style>
+  body {{ font-family: sans-serif; background: #f9fafb; margin: 0; padding: 20px; }}
+  .header {{ background-color: {color}; padding: 20px; color: white; border-radius: 8px; }}
+  .card {{ background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1 style="display:inline;vertical-align:middle;">{company} Deal Room</h1>
+  </div>
+  <div class="card">
+    <h2>Action Plan (Milestones)</h2>
+    <ul>{milestones_html}</ul>
+  </div>
+  <div class="card">
+    <h2>ROI Calculator</h2>
+    <p>Embedded ROI calculator loaded.</p>
+  </div>
+  <div class="card">
+    <button style="background:{color};color:white;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-size:16px;">Book 15-Min Spec Review</button>
+  </div>
+</body>
+</html>'''
+
 
 
 
@@ -919,10 +955,19 @@ class Handler(BaseHTTPRequestHandler):
             return self._serve_static("index.html", "text/html; charset=utf-8")
         if path == "/v2" or path == "/v2/" or path == "/index2.html":
             return self._serve_static("index.html", "text/html; charset=utf-8")
+        if path == "/dealroom.html":
+            return self._serve_static("dealroom.html", "text/html; charset=utf-8")
         if path.startswith("/static/"):
             return self._serve_static(path[len("/static/"):], self._guess(path))
         if path.startswith("/data/") or path.startswith("/js/") or path.startswith("/css/") or path.startswith("/proofs/"):
             return self._serve_static(path.lstrip("/"), self._guess(path))
+
+        if path.startswith("/dealroom/"):
+            dr_id = path.rsplit("/", 1)[-1]
+            if dr_id not in DEALROOMS:
+                return self._send(404, "text/plain", b"Deal room not found")
+            html_content = generate_dealroom_html(DEALROOMS[dr_id])
+            return self._send(200, "text/html; charset=utf-8", html_content.encode("utf-8"))
 
         if path.startswith("/api/stream/"):
             return self._stream(path.rsplit("/", 1)[-1])
@@ -1350,6 +1395,75 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, "application/json", json.dumps({"success": True, "status_code": resp.status_code}).encode())
             except requests.exceptions.RequestException as e:
                 return self._send(500, "application/json", json.dumps({"error": str(e)}).encode())
+
+        if path == "/api/reply-copilot":
+            reply_text = data.get("reply_text", "").lower()
+            intent = "brush_off"
+            sentiment = 30
+            subtext = "Standard brush-off, likely not fully aware of the value prop."
+            
+            if "budget" in reply_text or "locked" in reply_text:
+                intent = "budget_freeze"
+                sentiment = 40
+                subtext = "Buyer is locked in contract but concerned about budget waste."
+            elif "competitor" in reply_text or "swagup" in reply_text:
+                intent = "competitor_incumbent"
+                sentiment = 50
+                subtext = "Using a competitor, potential for wedge on quality or speed."
+            elif "ghost" in reply_text:
+                intent = "ghosting_risk"
+            elif "interest" in reply_text:
+                intent = "latent_interest"
+                sentiment = 80
+
+            resp_data = {
+                "classification": intent,
+                "sentiment": sentiment,
+                "subtext": subtext,
+                "responses": {
+                    "wedge": "I completely understand. Most of our clients initially felt locked in, but found our direct manufacturing eliminates broker markups.",
+                    "consultative": "Makes sense that budget is tight. What if we could show you a zero-risk trial that proves a 30% reduction in total cost of ownership?",
+                    "pattern_interrupt": "Fair enough. Is it a hard lock, or would you be open to a quick diagnostic on your current setup's efficiency?"
+                }
+            }
+            return self._send(200, "application/json", json.dumps(resp_data).encode())
+
+        if path == "/api/dealroom/generate":
+            dr_id = "dr_" + uuid.uuid4().hex[:8]
+            DEALROOMS[dr_id] = data
+            return self._send(200, "application/json", json.dumps({
+                "dealroom_id": dr_id,
+                "dealroom_url": f"http://127.0.0.1:8765/dealroom/{dr_id}"
+            }).encode())
+
+        if path == "/api/multithread/generate":
+            company = data.get("company_name", "Target Account")
+            resp_data = {
+                "cadence": [
+                    {
+                        "track": "Champion",
+                        "role": "VP Marketing/CX",
+                        "focus": "Brand equity, wearable retention, speed",
+                        "subject": f"Enhancing {company}'s brand equity",
+                        "body": "Focusing on brand equity and retention..."
+                    },
+                    {
+                        "track": "Economic Buyer",
+                        "role": "CFO/RevOps",
+                        "focus": "TCO reduction, eliminating broker markups, ROI",
+                        "subject": f"Reducing TCO for {company}",
+                        "body": "Focusing on ROI and eliminating markups..."
+                    },
+                    {
+                        "track": "Procurement",
+                        "role": "Procurement/Ops",
+                        "focus": "Supply chain compliance, USA manufacturing, rush turnaround",
+                        "subject": f"USA manufacturing for {company}",
+                        "body": "Focusing on supply chain and rush turnarounds..."
+                    }
+                ]
+            }
+            return self._send(200, "application/json", json.dumps(resp_data).encode())
 
         return self._send(404, "application/json", b'{"error":"no route"}')
 
