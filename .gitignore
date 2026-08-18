@@ -42,7 +42,12 @@ scratch/
 .clean-config/
 
 # OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# Android / Node build caches
+node_modules/
+.gradle/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/capacitor-cordova-android-plugins/build/
+
