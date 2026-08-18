@@ -1,0 +1,170 @@
+/* Bulk Importer CSS */
+.bulk-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  z-index: 200;
+  display: none;
+  place-items: center;
+  padding: 20px;
+}
+
+.bulk-modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  max-width: 1000px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+}
+
+.bulk-modal-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.bulk-modal-close:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.bulk-drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  text-align: center;
+  transition: all 0.2s;
+  background: rgba(10, 12, 18, 0.5);
+  cursor: pointer;
+}
+.bulk-drop-zone.dragover {
+  border-color: var(--indigo);
+  background: var(--indigo-glow);
+}
+
+.bulk-textarea {
+  width: 100%;
+  background: rgba(10, 12, 18, 0.7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  color: var(--text-main);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  outline: none;
+  margin-top: 16px;
+  min-height: 120px;
+  resize: vertical;
+}
+.bulk-textarea:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 2px var(--indigo-glow);
+}
+
+.aggregated-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+  padding: 16px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.agg-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.agg-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.agg-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.bulk-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 13px;
+}
+.bulk-table th {
+  text-align: left;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.bulk-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+.bulk-table tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+.pill-intent {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-block;
+}
+.pill-high { background: var(--emerald-glow); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); }
+.pill-med { background: var(--amber-glow); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+.pill-low { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+
+.tech-stack-icons {
+  display: flex;
+  gap: 6px;
+}
+.tech-icon {
+  width: 20px;
+  height: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #fff;
+}
+
+.progress-container {
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 16px;
+  display: none;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--indigo), var(--violet));
+  transition: width 0.3s ease;
+}

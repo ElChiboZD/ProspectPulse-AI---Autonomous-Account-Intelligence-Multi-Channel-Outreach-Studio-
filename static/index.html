@@ -21,6 +21,14 @@
 <script src="js/share.js" defer></script>
 <script src="js/before-after.js" defer></script>
 <script src="js/history-ui.js" defer></script>
+<link rel="stylesheet" href="css/bulk-importer.css">
+<script src="js/bulk-importer.js" defer></script>
+<link rel="stylesheet" href="css/voice-arena.css">
+<script src="js/voice-arena.js" defer></script>
+<link rel="stylesheet" href="css/webhook-dispatcher.css">
+<script src="js/webhook-dispatcher.js" defer></script>
+<link rel="stylesheet" href="css/roi-calculator.css">
+<script src="js/roi-calculator.js" defer></script>
 
 <style>
   :root {
@@ -819,6 +827,10 @@
       <span>Developed by</span>
       <span style="font-weight: 700; color: #fff;">@ElChibo</span>
     </div>
+    <button class="btn btn-secondary btn-sm" onclick="window.openVoiceArenaModal()">🎙️ Voice Arena</button>
+    <button class="btn btn-secondary btn-sm" onclick="window.openWebhookDispatcherModal()">📢 Dispatch Hub</button>
+    <button class="btn btn-secondary btn-sm" onclick="openBulkImporterModal()">📂 Bulk Territory</button>
+    <button class="btn btn-secondary btn-sm" onclick="openRoiCalculatorModal()">💰 ROI Calculator</button>
     <button class="btn btn-secondary btn-sm" onclick="window.startTour()">🎓 Tour</button>
     <button class="btn btn-secondary btn-sm" onclick="window.toggleTimeline()">📊 Timeline</button>
     <button class="btn btn-secondary btn-sm" onclick="window.openBeforeAfterModal()">⚡ See the Difference</button>
@@ -879,22 +891,11 @@
       </div>
 
       <!-- BULK / CSV BATCH IMPORTER SECTION -->
-      <div id="batchSearchSection" style="display: none;">
-        <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Paste Multiple Domains (Comma or Line Separated) or Upload CSV</label>
-        <textarea id="batchDomainsInput" rows="4" style="margin-top: 6px; font-family: 'JetBrains Mono', monospace;" placeholder="lululemon.com, vitacoco.com, stripe.com, figma.com, glossier.com"></textarea>
-        <div class="flex-between" style="margin-top: 10px;">
-          <input type="file" id="csvFileInput" accept=".csv,.txt" onchange="handleCsvUpload(event)" style="display: none;">
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('csvFileInput').click()">📁 Upload .CSV List</button>
-          <button class="btn btn-primary" onclick="runBatchEnrichment()">⚡ Run Batch Research on All Accounts</button>
-        </div>
-
-        <div id="batchResultsTableContainer" style="margin-top: 20px; display: none;">
-          <div class="flex-between" style="margin-bottom: 10px;">
-            <strong style="font-size: 14px;">Batch Processing Results</strong>
-            <button class="btn btn-secondary btn-sm" onclick="exportBatchCsv()">📥 Export Territory CSV</button>
-          </div>
-          <div id="batchResultsTable" style="font-size: 13px;"></div>
-        </div>
+      <div id="batchSearchSection" style="display: none; padding: 30px; text-align: center; border: 2px dashed var(--border); border-radius: var(--radius-lg); margin-top: 10px; background: rgba(10, 12, 18, 0.5);">
+        <div style="font-size: 32px; margin-bottom: 10px;">📂</div>
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Bulk CSV & Territory Importer</div>
+        <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 16px;">Process multiple domains at once. We'll find intent signals, key decision-makers, and auto-detect tech stacks.</p>
+        <button class="btn btn-primary" onclick="openBulkImporterModal()" style="font-size: 14px; padding: 10px 24px;">🚀 Open Batch Radar</button>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);">
@@ -1221,6 +1222,7 @@
       </div>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">🔄 Reset</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.openWebhookDispatcherModal()" style="border-color: var(--amber); color: var(--amber);">📢 Dispatch Hub</button>
         <button class="btn btn-primary btn-sm" onclick="openDirectGmailCompose()">✉️ Direct Gmail Compose</button>
         <button class="btn btn-secondary btn-sm" onclick="openCrmSyncModal()">⚡ Push to CRM</button>
         <button class="btn btn-secondary btn-sm" onclick="openTeleprompterModal()">📹 Video Teleprompter</button>
@@ -1574,6 +1576,7 @@
         <p style="color: var(--text-muted); font-size: 13.5px;">Collaborative deal room and 4-milestone roadmap for transparent buyer alignment.</p>
       </div>
       <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" onclick="window.openWebhookDispatcherModal()" style="border-color: var(--amber); color: var(--amber);">📢 Dispatch Hub</button>
         <button class="btn btn-secondary btn-sm" onclick="exportMapPdf()">📄 Export MAP Brief</button>
         <button class="btn btn-primary btn-sm" onclick="copyDealRoomLink()">🔗 Copy Deal Room Link</button>
       </div>
@@ -2077,6 +2080,94 @@
     <!-- Teleprompter Text Stage -->
     <div id="teleprompterStage" style="background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; height: 320px; overflow-y: auto; padding: 24px; font-size: 19px; line-height: 1.8; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth;">
       <!-- Populated dynamically -->
+    </div>
+  </div>
+</div>
+<!-- VOICE ARENA MODAL -->
+<div class="modal-overlay" id="voiceArenaModal" onclick="if(event.target===this)window.closeVoiceArenaModal()">
+  <div class="modal-content voice-arena-modal-content">
+    <div class="panel-head">
+      <span class="panel-title" style="color: var(--indigo); font-size: 18px;">🎙️ Live Voice Discovery Arena</span>
+      <button class="btn btn-secondary btn-sm" onclick="window.closeVoiceArenaModal()">✕ Close</button>
+    </div>
+    <div class="voice-arena-layout">
+      <!-- Persona Selector -->
+      <div class="va-persona-section">
+        <label>Buyer Persona Target:</label>
+        <select id="vaPersonaSelect">
+          <option value="cfo">👔 Skeptical CFO (Budget & TCO focus)</option>
+          <option value="vp_sales">📈 Overwhelmed VP of Sales (Rep productivity & reply rates)</option>
+          <option value="procurement">📋 Strict Procurement Director (Vendor consolidation & contracts)</option>
+          <option value="hr">👥 Head of People / HR (Culture & employee retention)</option>
+        </select>
+        <div class="va-hud">
+          <div class="va-stat">
+            <span class="va-stat-label">Quality Score</span>
+            <div class="va-gauge" id="vaQualityGauge" style="--val: 0%"></div>
+            <span class="va-stat-val" id="vaQualityVal">0/100</span>
+          </div>
+          <div class="va-stat">
+            <span class="va-stat-label">Talk/Listen Ratio</span>
+            <div class="va-gauge" id="vaRatioGauge" style="--val: 50%; background: linear-gradient(90deg, var(--sky) var(--val), var(--amber) var(--val));"></div>
+            <span class="va-stat-val" id="vaRatioVal">50/50</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Live Console -->
+      <div class="va-console">
+        <div class="va-transcript" id="vaTranscript">
+          <div class="va-system-msg">System: Select a persona and click Start Mic to begin live roleplay.</div>
+        </div>
+        
+        <div class="va-controls">
+          <button class="btn btn-primary va-mic-btn" id="vaStartMicBtn" onclick="window.toggleVoiceArenaMic()">🎙️ Start Live Mic Discovery</button>
+          <div class="va-mic-wave" id="vaMicWave"></div>
+        </div>
+      </div>
+      
+      <!-- Live Whisper Coach -->
+      <div class="va-whisper-coach">
+        <strong style="color: var(--emerald);">💡 Live Whisper Coach</strong>
+        <div id="vaWhisperText">Waiting for call to begin...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WEBHOOK DISPATCHER MODAL -->
+<div class="modal-overlay" id="webhookDispatcherModal" onclick="if(event.target===this)window.closeWebhookDispatcherModal()">
+  <div class="modal-content webhook-dispatcher-modal-content">
+    <div class="panel-head">
+      <span class="panel-title" style="color: var(--amber); font-size: 18px;">📢 CRM Webhooks & Slack Alert Dispatcher</span>
+      <button class="btn btn-secondary btn-sm" onclick="window.closeWebhookDispatcherModal()">✕ Close</button>
+    </div>
+    <div class="webhook-layout">
+      <div class="webhook-config">
+        <label>Webhook Target:</label>
+        <select id="webhookTargetSelect" onchange="window.updateWebhookUrlPlaceholder()">
+          <option value="slack">💬 Slack Incoming Webhook</option>
+          <option value="hubspot">⚙️ HubSpot Pipeline Hook</option>
+          <option value="salesforce">☁️ Salesforce Web-to-Lead / Flow Hook</option>
+          <option value="custom">🌐 Custom Webhook URL</option>
+        </select>
+        
+        <label>Webhook URL:</label>
+        <input type="text" id="webhookUrlInput" placeholder="https://your-webhook-endpoint.com/api/slack" oninput="window.saveWebhookConfig()">
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button class="btn btn-secondary" onclick="window.testWebhookConnection()">🧪 Test Connection</button>
+          <button class="btn btn-primary" onclick="window.dispatchActiveLeadWebhook()">🚀 Dispatch Active Lead & Sequence</button>
+        </div>
+      </div>
+      
+      <div class="webhook-preview">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label style="margin: 0;">Live JSON Payload Inspector</label>
+          <button class="btn btn-secondary btn-sm" onclick="window.toggleWebhookPayload()">👁️ Toggle Preview</button>
+        </div>
+        <pre id="webhookPayloadPreview" class="mono" style="background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 11px; height: 180px; overflow-y: auto; color: var(--text-faint);">// Payload preview will appear here...</pre>
+      </div>
     </div>
   </div>
 </div>
