@@ -70,8 +70,23 @@ Switch seamlessly between pre-built enterprise pitch presets:
 ### 8. 🎭 AI Discovery Call & Objection Simulator
 * Interactive practice arena where you pitch against skeptical VP of Marketing, overworked HR, or analytical CFO personas with real-time AI coach feedback.
 
-### 9. 📂 Bulk CSV & Multi-Domain Territory Importer
+### 9. 📊 2026 Competitor Comparison Landscape Matrix
+* Multi-column side-by-side comparison tables against SwagUp, 4imprint, Salesforce, Intercom, and legacy databases.
+
+### 10. 📹 45-Second Video Pitch Teleprompter Mode
+* Auto-scrolling teleprompter with reading timer and speed controls for recording high-converting async video pitches (Loom / Vidyard).
+
+### 11. 💡 5-Whys Executive Discovery Diagnostic Generator
+* Uncovers latent prospect pain in the first 3 minutes of a discovery call with 5 tailored questions.
+
+### 12. 💰 Deal Size & ARR Pipeline Value Estimator
+* Computes initial order value, annualized ARR, and expected sales commission in real time.
+
+### 13. 📂 Bulk CSV & Multi-Domain Territory Importer
 * Paste 5–10 domains or upload a `.csv` file to run automated territory research in batch.
+
+### 14. 🌓 Obsidian Dark / High-Contrast Theme Toggle
+* One-click theme switcher optimized for daylight demos, client screen-shares, and conference projectors.
 
 ---
 

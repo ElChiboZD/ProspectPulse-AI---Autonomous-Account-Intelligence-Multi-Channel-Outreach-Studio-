@@ -701,6 +701,7 @@
     <button class="btn btn-secondary btn-sm" onclick="openMatrixModal()">📊 Matrix</button>
     <button class="btn btn-secondary btn-sm" onclick="openBattlecardsModal()">⚔️ Battlecards</button>
     <button class="btn btn-secondary btn-sm" onclick="openHistoryModal()">📜 History</button>
+    <button class="btn btn-secondary btn-sm" onclick="toggleContrastTheme()" id="themeToggleBtn" title="Toggle High-Contrast Screen-Share Theme">🌓 Theme</button>
     <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.35); color: #fca5a5; background: rgba(239, 68, 68, 0.08);" title="Reset console and start a new search">🔄 Reset</button>
   </div>
 </header>
@@ -850,12 +851,45 @@
     <div class="split-workspace">
       <!-- LEFT COLUMN -->
       <div class="left-col">
+        <!-- PIPELINE VALUE & COMMISSION ESTIMATOR -->
+        <div class="panel-card" style="border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.03);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--emerald);">💰 Pipeline Value &amp; Deal Tier</span>
+            <span class="badge badge-emerald" id="pipelineWinLikelihood">38% Win Likelihood</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+              <div style="font-size: 11px; color: var(--text-faint);">Estimated Initial Deal</div>
+              <div style="font-size: 16px; font-weight: 800; color: #fff; margin-top: 2px;" id="dealInitialVal">$4,850</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+              <div style="font-size: 11px; color: var(--text-faint);">Annualized Account ARR</div>
+              <div style="font-size: 16px; font-weight: 800; color: var(--emerald); margin-top: 2px;" id="dealArrVal">$19,400</div>
+            </div>
+          </div>
+          <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-muted); display: flex; justify-content: space-between;">
+            <span>Est. Rep Commission @ 10%: <strong style="color: var(--sky);" id="dealCommissionVal">$1,940</strong></span>
+            <span>Tier: <strong style="color: #fff;" id="dealTierName">Enterprise Account</strong></span>
+          </div>
+        </div>
+
         <div class="panel-card">
           <div class="panel-head">
             <span class="panel-title">🏢 Firmographics (Sumble Verified)</span>
             <span id="sumbleVerifiedPill" class="badge badge-emerald">Live API</span>
           </div>
           <div id="firmographicsContent" style="font-size: 13.5px; line-height: 1.6;"></div>
+        </div>
+
+        <!-- 5-WHYS EXECUTIVE DISCOVERY QUESTIONS -->
+        <div class="panel-card" style="border-color: rgba(6, 182, 212, 0.3);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--sky);">💡 5-Whys Discovery Diagnostic Questions</span>
+            <button class="btn btn-secondary btn-sm" onclick="copyDiscoveryQuestions()">📋 Copy Questions</button>
+          </div>
+          <div id="discoveryQuestionsList" style="font-size: 13px; line-height: 1.6; color: var(--text-main);">
+            <!-- Populated dynamically -->
+          </div>
         </div>
 
         <!-- DYNAMIC ROI CALCULATOR WIDGET -->
@@ -909,6 +943,7 @@
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">🔄 Reset</button>
         <button class="btn btn-primary btn-sm" onclick="openDirectGmailCompose()">✉️ Direct Gmail Compose</button>
+        <button class="btn btn-secondary btn-sm" onclick="openTeleprompterModal()">📹 Video Teleprompter</button>
         <button class="btn btn-secondary btn-sm" onclick="openVerifiedLinkedInProfile()">💼 Open LinkedIn Profile</button>
         <button class="btn btn-secondary btn-sm" onclick="openInEmailClient()">✉️ Mailto App</button>
         <button class="btn btn-secondary btn-sm" onclick="copyFullCadence()">📋 Copy Cadence</button>
@@ -1332,6 +1367,46 @@
     <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Objective breakdown of direct competitors, pricing models, turnarounds, and architectural weaknesses.</p>
 
     <div id="matrixTableContainer" style="overflow-x: auto; font-size: 13px;"></div>
+  </div>
+</div>
+
+<!-- 45-SECOND VIDEO PITCH TELEPROMPTER MODAL -->
+<div class="modal-overlay" id="teleprompterModal" onclick="if(event.target===this)closeTeleprompterModal()">
+  <div class="modal-content" style="max-width: 800px; background: #05070D; border: 1px solid rgba(99,102,241,0.4);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="pulse-dot" style="background: var(--rose); box-shadow: 0 0 8px var(--rose);"></span>
+        <h2 style="font-size: 19px;">📹 45-Second Loom / Video Pitch Teleprompter</h2>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="teleTimerDisplay" class="mono" style="font-size: 14px; font-weight: 700; color: var(--emerald); background: rgba(16,185,129,0.1); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);">00:00 / 00:45</span>
+        <button class="btn btn-secondary btn-sm" onclick="closeTeleprompterModal()">✕ Close</button>
+      </div>
+    </div>
+
+    <!-- Teleprompter Controls Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px;">
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="btn btn-primary btn-sm" id="btnTeleScroll" onclick="toggleTeleprompterScroll()">▶️ Start Auto-Scroll</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetTeleprompterScroll()">🔄 Reset</button>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--text-muted);">
+        <label>Speed:</label>
+        <select id="teleSpeedSelect" style="width: auto; padding: 3px 8px; font-size: 11px;">
+          <option value="1">1x (Standard)</option>
+          <option value="1.5" selected>1.5x (Optimal)</option>
+          <option value="2">2x (Fast)</option>
+        </select>
+        <label>Font Size:</label>
+        <button class="btn btn-secondary btn-sm" style="padding: 2px 8px;" onclick="adjustTeleFontSize(-2)">A-</button>
+        <button class="btn btn-secondary btn-sm" style="padding: 2px 8px;" onclick="adjustTeleFontSize(2)">A+</button>
+      </div>
+    </div>
+
+    <!-- Teleprompter Text Stage -->
+    <div id="teleprompterStage" style="background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; height: 320px; overflow-y: auto; padding: 24px; font-size: 19px; line-height: 1.8; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth;">
+      <!-- Populated dynamically -->
+    </div>
   </div>
 </div>
 
@@ -2262,6 +2337,29 @@ function parseAndRenderResults(raw) {
   if (scoreNumEl) scoreNumEl.textContent = score;
   const summaryEl = document.getElementById('intentScoreSummary');
   if (summaryEl) summaryEl.textContent = `${data.company} exhibits optimal timing: verified executive leadership mapped, recent strategic milestones, and displacement signals.`;
+
+  // Pipeline & Commission Estimator
+  const dealInitEl = document.getElementById('dealInitialVal');
+  const dealArrEl = document.getElementById('dealArrVal');
+  const commEl = document.getElementById('dealCommissionVal');
+  const tierNameEl = document.getElementById('dealTierName');
+  if (dealInitEl) dealInitEl.textContent = `$4,850`;
+  if (dealArrEl) dealArrEl.textContent = `$19,400`;
+  if (commEl) commEl.textContent = `$1,940`;
+  if (tierNameEl) tierNameEl.textContent = `${data.company} Tier-1 Account`;
+
+  // 5-Whys Discovery Diagnostic Questions
+  const discListEl = document.getElementById('discoveryQuestionsList');
+  if (discListEl) {
+    const co = data.company || 'your team';
+    discListEl.innerHTML = `
+      <div style="margin-bottom: 8px;"><strong>1. Incumbent Process:</strong> How does ${co} currently source custom items for employee onboarding and major events?</div>
+      <div style="margin-bottom: 8px;"><strong>2. Hidden Landfill Friction:</strong> What percentage of generic catalog items (pens, plastic swag) end up in trash bins vs being worn 60 days later?</div>
+      <div style="margin-bottom: 8px;"><strong>3. Turnaround Risk:</strong> When last-minute event deadlines surge, how often do overseas brokers miss shipping windows?</div>
+      <div style="margin-bottom: 8px;"><strong>4. Economic Value:</strong> If your team could order direct from a USA mill with guaranteed 5-day rush, what would that save in rush broker fees?</div>
+      <div><strong>5. Decision Timing:</strong> Who on the Brand and People Ops team owns the final proof sign-off for upcoming quarterly summits?</div>
+    `;
+  }
 
   // Firmographics & Brand Palette
   document.getElementById('firmographicsContent').innerHTML = `
@@ -3261,15 +3359,132 @@ function renderMatrixTable() {
   container.innerHTML = html;
 }
 
-function copyMatrixTable() {
-  const m = COMPARISON_MATRICES[currentActivePreset] || COMPARISON_MATRICES.sockclub;
-  let md = `### ${m.title}\n\n`;
-  md += `| ${m.headers.join(' | ')} |\n`;
-  md += `| ${m.headers.map(() => '---').join(' | ')} |\n`;
-  m.rows.forEach(r => {
-    md += `| ${r.join(' | ')} |\n`;
-  });
-  navigator.clipboard.writeText(md).then(() => showToast('📋 Comparison matrix copied to clipboard!'));
+// Theme Toggle (Obsidian Dark vs High-Contrast)
+function toggleContrastTheme() {
+  document.body.classList.toggle('high-contrast');
+  const isHc = document.body.classList.contains('high-contrast');
+  showToast(isHc ? '🌓 High-Contrast Screen-Share Mode Activated' : '🌒 Obsidian Dark Mode Activated');
+}
+
+// Copy Discovery Questions
+function copyDiscoveryQuestions() {
+  const el = document.getElementById('discoveryQuestionsList');
+  if (!el) return;
+  const co = (currentAccountData && currentAccountData.company) || 'Account';
+  let txt = `### 💡 5-Whys Executive Discovery Diagnostics for ${co}\n\n` + el.innerText;
+  navigator.clipboard.writeText(txt).then(() => showToast('📋 5-Whys Discovery Questions copied!'));
+}
+
+// 45-Second Video Pitch Teleprompter Engine
+let teleScrollInterval = null;
+let teleTimerInterval = null;
+let teleSecondsElapsed = 0;
+let teleFontSize = 19;
+
+function openTeleprompterModal() {
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
+  const topContact = (currentAccountData && currentAccountData.tiers && currentAccountData.tiers[0] && currentAccountData.tiers[0].contacts && currentAccountData.tiers[0].contacts[0]) || { name: 'there' };
+  const leadName = topContact.name.split(' ')[0] || 'there';
+
+  const stage = document.getElementById('teleprompterStage');
+  
+  if (currentActivePreset === 'sockclub') {
+    stage.innerHTML = `
+      <p>👋 <strong>"Hey ${leadName}, Travis here with Sock Club in Austin.</strong></p>
+      <p>I was looking over <strong>${co}'s</strong> upcoming brand activations and team onboarding calendar.</p>
+      <p>Most teams we speak with are tired of buying generic catalog swag where <strong>90% ends up in landfill bins</strong> 60 days later.</p>
+      <p>We manufacture custom-knit combed cotton socks directly in our <strong>North Carolina mill</strong> with a <strong>95%+ keep-and-wear rate</strong>.</p>
+      <p>Our in-house design team actually put together a <strong>free custom digital proof</strong> with ${co}'s exact brand pantones.</p>
+      <p>I attached the 1-click preview link in your inbox. Would love to hear what you think — have a great week!"</p>
+    `;
+  } else if (currentActivePreset === 'zendesk') {
+    stage.innerHTML = `
+      <p>👋 <strong>"Hey ${leadName}, Travis here with Zendesk.</strong></p>
+      <p>Noticed ${co} is scaling customer support volume across digital channels.</p>
+      <p>Instead of hiring 10 more agents or deploying complex 6-month consulting rollouts, Zendesk AI agents resolve <strong>45%+ of tier-1 support tickets autonomously</strong> on day one.</p>
+      <p>I put together an interactive 1-minute simulation for ${co}'s help center. Check out the preview link in your inbox — talk soon!"</p>
+    `;
+  } else if (currentActivePreset === 'stripe') {
+    stage.innerHTML = `
+      <p>👋 <strong>"Hey ${leadName}, Travis here with Stripe.</strong></p>
+      <p>Reaching out because high-growth platforms in your space are unlocking <strong>+3.8% in card authorization lift</strong> and saving 100+ developer hours with Stripe Elements.</p>
+      <p>With Link 1-click checkout, 100M+ customers check out in <strong>under 6 seconds</strong>.</p>
+      <p>I emailed you a custom checkout teardown for ${co} — let me know what you think!"</p>
+    `;
+  } else {
+    stage.innerHTML = `
+      <p>👋 <strong>"Hey ${leadName}, Travis here with ProspectPulse.</strong></p>
+      <p>Reaching out because revenue teams are losing 40+ hours per rep every month doing manual pre-call research across stale databases.</p>
+      <p>Our autonomous multi-agent pipeline verifies <strong>100% current LinkedIn roles</strong> and synthesizes tailored multi-channel cadences in under 5 seconds.</p>
+      <p>I sent an executive dossier preview to your inbox — have a great week!"</p>
+    `;
+  }
+
+  resetTeleprompterScroll();
+  document.getElementById('teleprompterModal').style.display = 'grid';
+}
+
+function closeTeleprompterModal() {
+  resetTeleprompterScroll();
+  document.getElementById('teleprompterModal').style.display = 'none';
+}
+
+function toggleTeleprompterScroll() {
+  const btn = document.getElementById('btnTeleScroll');
+  if (teleScrollInterval) {
+    // Pause
+    clearInterval(teleScrollInterval);
+    clearInterval(teleTimerInterval);
+    teleScrollInterval = null;
+    teleTimerInterval = null;
+    btn.textContent = '▶️ Resume Auto-Scroll';
+  } else {
+    // Start
+    const speedMultiplier = parseFloat(document.getElementById('teleSpeedSelect').value) || 1.5;
+    const stage = document.getElementById('teleprompterStage');
+    btn.textContent = '⏸️ Pause';
+
+    teleScrollInterval = setInterval(() => {
+      stage.scrollTop += 1;
+      if (stage.scrollTop + stage.clientHeight >= stage.scrollHeight - 5) {
+        clearInterval(teleScrollInterval);
+        clearInterval(teleTimerInterval);
+        teleScrollInterval = null;
+        btn.textContent = '✓ Finished';
+      }
+    }, Math.floor(40 / speedMultiplier));
+
+    teleTimerInterval = setInterval(() => {
+      teleSecondsElapsed++;
+      const mm = String(Math.floor(teleSecondsElapsed / 60)).padStart(2, '0');
+      const ss = String(teleSecondsElapsed % 60).padStart(2, '0');
+      document.getElementById('teleTimerDisplay').textContent = `${mm}:${ss} / 00:45`;
+    }, 1000);
+  }
+}
+
+function resetTeleprompterScroll() {
+  clearInterval(teleScrollInterval);
+  clearInterval(teleTimerInterval);
+  teleScrollInterval = null;
+  teleTimerInterval = null;
+  teleSecondsElapsed = 0;
+  
+  const stage = document.getElementById('teleprompterStage');
+  if (stage) stage.scrollTop = 0;
+  
+  const timer = document.getElementById('teleTimerDisplay');
+  if (timer) timer.textContent = '00:00 / 00:45';
+  
+  const btn = document.getElementById('btnTeleScroll');
+  if (btn) btn.textContent = '▶️ Start Auto-Scroll';
+}
+
+function adjustTeleFontSize(delta) {
+  teleFontSize = Math.max(14, Math.min(28, teleFontSize + delta));
+  const stage = document.getElementById('teleprompterStage');
+  if (stage) stage.style.fontSize = teleFontSize + 'px';
 }
 
 // Master Console Reset Function
