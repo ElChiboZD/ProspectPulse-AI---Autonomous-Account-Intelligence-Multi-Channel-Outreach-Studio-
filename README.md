@@ -132,7 +132,12 @@ git clone https://github.com/ElChiboZD/ProspectPulse-AI---Autonomous-Account-Int
 cd ProspectPulse-AI---Autonomous-Account-Intelligence-Multi-Channel-Outreach-Studio-
 ```
 
-### 2. Configure Environment Variables
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Configure Environment Variables
 Copy `.env.example` to `.env` and insert your API credentials:
 ```bash
 cp .env.example .env
@@ -146,12 +151,12 @@ SUMBLE_API_KEY=your_sumble_api_key
 PORT=8765
 ```
 
-### 3. Launch the Server
+### 4. Launch the Server
 ```bash
 python server.py
 ```
 
-### 4. Open in Browser
+### 5. Open in Browser
 Visit **`http://127.0.0.1:8765`** in your browser.
 
 ---
