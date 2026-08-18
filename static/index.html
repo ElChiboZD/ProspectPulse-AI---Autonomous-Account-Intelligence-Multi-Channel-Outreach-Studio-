@@ -1,0 +1,2719 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProspectPulse AI — Autonomous Account Intelligence &amp; Outreach Engine</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236366F1'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='%23FFFFFF'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.min.js"></script>
+
+<style>
+  :root {
+    --bg: #08090D;
+    --bg-surface: #0F1219;
+    --bg-elevated: #161B26;
+    --bg-card: rgba(22, 27, 38, 0.72);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.16);
+    --border-focus: rgba(99, 102, 241, 0.45);
+    
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-faint: #64748B;
+    
+    --indigo: #6366F1;
+    --indigo-glow: rgba(99, 102, 241, 0.25);
+    --violet: #8B5CF6;
+    --emerald: #10B981;
+    --emerald-glow: rgba(16, 185, 129, 0.2);
+    --amber: #F59E0B;
+    --amber-glow: rgba(245, 158, 11, 0.18);
+    --rose: #F43F5E;
+    --rose-glow: rgba(244, 63, 94, 0.2);
+    --sky: #0EA5E9;
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --shadow-soft: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 24px -4px var(--indigo-glow);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20vh;
+    left: 15vw;
+    width: 70vw;
+    height: 50vh;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-main);
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Navigation Bar */
+  header.nav-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(8, 9, 13, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .logo-symbol {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--violet) 100%);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 16px;
+    box-shadow: 0 4px 14px var(--indigo-glow);
+  }
+
+  .profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .profile-badge:hover {
+    border-color: var(--border-hover);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .mcp-signals {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mcp-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 8px var(--emerald);
+    animation: pulseGlow 2s infinite ease-in-out;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    outline: none;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--violet) 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px var(--indigo-glow);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 6px 22px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--border-hover);
+  }
+  .btn-sm {
+    padding: 5px 11px;
+    font-size: 12px;
+    border-radius: var(--radius-sm);
+  }
+
+  .app-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 28px 100px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .flow-tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    padding: 6px;
+    border-radius: var(--radius-lg);
+    width: fit-content;
+  }
+  .flow-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .flow-tab.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  .tab-idx {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .flow-tab.active .tab-idx {
+    background: var(--indigo);
+    color: #fff;
+  }
+
+  /* Search Hero */
+  .search-hero-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .search-hero-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0.4) 50%, transparent 100%);
+  }
+
+  .omni-search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(10, 12, 18, 0.85);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 8px 12px;
+    transition: all 0.2s;
+  }
+  .omni-search-box:focus-within {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px var(--indigo-glow);
+  }
+  .omni-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-main);
+    font-family: inherit;
+  }
+
+  .chip-array {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .quick-chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .quick-chip:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--indigo);
+    color: var(--text-main);
+  }
+
+  /* Dual Workspace */
+  .split-workspace {
+    display: grid;
+    grid-template-columns: 410px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .split-workspace { grid-template-columns: 1fr; }
+  }
+
+  .panel-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 20px;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .panel-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Stakeholder Cards */
+  .tier-section { margin-bottom: 22px; }
+  .tier-header {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .contact-card {
+    background: rgba(18, 22, 32, 0.7);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+  .contact-card:hover {
+    border-color: var(--border-hover);
+    background: rgba(26, 32, 48, 0.85);
+    transform: translateY(-1px);
+  }
+  .contact-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .contact-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--indigo);
+  }
+  .contact-info { flex: 1; }
+  .contact-name { font-weight: 700; font-size: 14.5px; color: var(--text-main); }
+  .contact-title { font-size: 12.5px; color: var(--text-muted); }
+
+  .badge-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .badge-emerald { background: var(--emerald-glow); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+  .badge-sky { background: rgba(14, 165, 233, 0.15); color: var(--sky); border: 1px solid rgba(14, 165, 233, 0.3); }
+  .badge-amber { background: var(--amber-glow); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+  .badge-rose { background: var(--rose-glow); color: var(--rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+  .badge-indigo { background: var(--indigo-glow); color: var(--indigo); border: 1px solid rgba(99, 102, 241, 0.3); }
+
+  /* Multi-Channel Switcher Tabs */
+  .channel-tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    padding: 5px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .channel-tab {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .channel-tab.active {
+    background: var(--indigo);
+    color: #fff;
+  }
+
+  /* Deliverability Auditor Box */
+  .deliverability-card {
+    background: rgba(10, 12, 18, 0.7);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .audit-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .audit-stat-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+  .audit-stat-val {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  /* Modals */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    display: none;
+    place-items: center;
+    padding: 20px;
+  }
+  .modal-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    max-width: 860px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px;
+    box-shadow: var(--shadow-soft);
+    position: relative;
+  }
+
+  /* Interactive Product Canvas */
+  .product-preview-stage {
+    background: radial-gradient(circle at center, #1E2333 0%, #0F121C 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 320px;
+  }
+
+  /* Tone Adjustment Knobs */
+  .tone-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 8px 0 14px;
+  }
+  .tone-pill {
+    padding: 4px 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tone-pill:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: var(--indigo);
+    color: #fff;
+  }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: rgba(10, 12, 18, 0.7);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 13.5px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 2px var(--indigo-glow);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Printable 1-Page Cheat Sheet Styling */
+  @media print {
+    body * { visibility: hidden; }
+    #briefPrintArea, #briefPrintArea * { visibility: visible; }
+    #briefPrintArea {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%;
+      background: #fff !important;
+      color: #000 !important;
+      padding: 20px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- Header -->
+<header class="nav-header">
+  <div class="nav-left">
+    <div class="logo-box" onclick="gotoScreen(1)">
+      <div class="logo-symbol">⚡</div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-weight: 800; letter-spacing: -0.02em;">ProspectPulse</span>
+        <span style="font-weight: 700; font-size: 11px; color: var(--indigo); background: var(--indigo-glow); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(99,102,241,0.3);">AI</span>
+      </div>
+    </div>
+
+    <!-- Active Profile Switcher -->
+    <div class="profile-badge" id="profileBadge" onclick="openProfileModal()">
+      <span>🧦</span>
+      <span id="profileTitle">Pitching as: Sock Club (Direct USA Mill)</span>
+      <span style="color: var(--text-faint);">▾</span>
+    </div>
+
+    <!-- MCP Signals -->
+    <div class="mcp-signals">
+      <div class="mcp-pill"><div class="pulse-dot"></div> Gemini 3.6</div>
+      <div class="mcp-pill"><div class="pulse-dot"></div> Tavily AI</div>
+      <div class="mcp-pill"><div class="pulse-dot"></div> Sumble Org</div>
+      <div class="mcp-pill"><div class="pulse-dot" style="background: var(--sky); box-shadow: 0 0 8px var(--sky);"></div> ZoomInfo Active</div>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div style="display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 12px; color: var(--text-muted);">
+      <span>Developed by</span>
+      <span style="font-weight: 700; color: #fff;">@ElChibo</span>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="openDeckModal()">📊 Architecture &amp; Deck</button>
+    <button class="btn btn-secondary btn-sm" onclick="openBattlecardsModal()">⚔️ Battlecards</button>
+    <button class="btn btn-secondary btn-sm" onclick="openHistoryModal()">📜 History</button>
+  </div>
+</header>
+
+<div class="app-container">
+
+  <!-- Workflow Breadcrumb -->
+  <div class="flow-tabs">
+    <div class="flow-tab active" id="tab1" onclick="gotoScreen(1)"><div class="tab-idx">1</div> <span>Find Account</span></div>
+    <div class="flow-tab" id="tab2" onclick="gotoScreen(2)"><div class="tab-idx">2</div> <span>Stakeholders &amp; Radar</span></div>
+    <div class="flow-tab" id="tab3" onclick="gotoScreen(3)"><div class="tab-idx">3</div> <span>Outreach Studio</span></div>
+    <div class="flow-tab" id="tab4" onclick="gotoScreen(4)"><div class="tab-idx">4</div> <span>AI Objection Roleplay &amp; Triage</span></div>
+  </div>
+
+  <!-- SCREEN 1: OMNI SEARCH & BATCH IMPORTER -->
+  <div id="screen1" class="screen-view">
+    <div class="search-hero-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+        <h1 class="hero-headline" style="font-size: 22px;">Autonomous Account Research &amp; Multi-Channel Outreach</h1>
+        <div style="display: flex; gap: 6px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 8px;">
+          <button class="btn btn-primary btn-sm" id="btnSingleMode" onclick="toggleSearchMode('single')">Single Account</button>
+          <button class="btn btn-secondary btn-sm" id="btnBatchMode" onclick="toggleSearchMode('batch')">📂 Bulk CSV / Batch</button>
+        </div>
+      </div>
+      <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 20px;">Search any company or domain. Live multi-source MCPs will extract verified headcount, live executive triggers, competitor battlecards, and living LinkedIn decision makers.</p>
+
+      <!-- SINGLE SEARCH BOX -->
+      <div id="singleSearchSection">
+        <div class="omni-search-box">
+          <span style="padding-left: 8px; color: var(--text-faint);">🔍</span>
+          <input type="text" id="omniInput" class="omni-search-input" placeholder="e.g. lululemon.com, vitacoco.com, stripe.com, figma.com..." autocomplete="off">
+          <button class="btn btn-primary" id="searchBtn" onclick="runProspectSearch()">
+            <span>Search Account</span>
+            <span class="mono" style="font-size: 11px; opacity: 0.8; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px;">↵</span>
+          </button>
+        </div>
+
+        <div class="chip-array">
+          <span style="font-size: 12px; color: var(--text-faint); margin-right: 4px;">Popular Targets:</span>
+          <div class="quick-chip" onclick="quickSelect('sockclub.com')">🧦 Sock Club</div>
+          <div class="quick-chip" onclick="quickSelect('vitacoco.com')">🥥 Vita Coco</div>
+          <div class="quick-chip" onclick="quickSelect('lululemon.com')">🧘 Lululemon</div>
+          <div class="quick-chip" onclick="quickSelect('stripe.com')">💳 Stripe</div>
+          <div class="quick-chip" onclick="quickSelect('glossier.com')">💄 Glossier</div>
+          <div class="quick-chip" onclick="quickSelect('warbyparker.com')">👓 Warby Parker</div>
+          <div class="quick-chip" onclick="quickSelect('cargurus.com')">🚗 CarGurus</div>
+        </div>
+      </div>
+
+      <!-- BULK / CSV BATCH IMPORTER SECTION -->
+      <div id="batchSearchSection" style="display: none;">
+        <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Paste Multiple Domains (Comma or Line Separated) or Upload CSV</label>
+        <textarea id="batchDomainsInput" rows="4" style="margin-top: 6px; font-family: 'JetBrains Mono', monospace;" placeholder="lululemon.com, vitacoco.com, stripe.com, figma.com, glossier.com"></textarea>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <input type="file" id="csvFileInput" accept=".csv,.txt" onchange="handleCsvUpload(event)" style="display: none;">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('csvFileInput').click()">📁 Upload .CSV List</button>
+          <button class="btn btn-primary" onclick="runBatchEnrichment()">⚡ Run Batch Research on All Accounts</button>
+        </div>
+
+        <div id="batchResultsTableContainer" style="margin-top: 20px; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 14px;">Batch Processing Results</strong>
+            <button class="btn btn-secondary btn-sm" onclick="exportBatchCsv()">📥 Export Territory CSV</button>
+          </div>
+          <div id="batchResultsTable" style="font-size: 13px;"></div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);">
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Seniority Filter</label>
+          <select id="senioritySelect" style="margin-top: 6px;">
+            <option value="Director+">Director+ (Directors, VPs, C-Suite)</option>
+            <option value="VP+">VP+ (VPs, SVPs, C-Suite)</option>
+            <option value="C-Level">C-Suite &amp; Founders Only</option>
+            <option value="All Levels">All Levels (incl. Managers)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Target Persona</label>
+          <select id="personaSelect" style="margin-top: 6px;">
+            <option value="">🎯 All Key Decision Makers</option>
+            <option value="Marketing OR Events">🎪 Event, Field &amp; Conference Marketing</option>
+            <option value="People OR Talent OR HR">🎁 People Ops, HR &amp; Employee Gifting</option>
+            <option value="Brand OR Creative">💎 Brand Marketing &amp; Creative Directors</option>
+            <option value="Sales OR Operations">💼 Sales &amp; Revenue Operations</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Incumbent Competitor</label>
+          <select id="competitorSelect" style="margin-top: 6px;">
+            <option value="">🔍 Auto-Detect Incumbent</option>
+            <option value="SwagUp / Swag Brokers">SwagUp / Swag Brokers</option>
+            <option value="4imprint / Promo Catalogs">4imprint / Promo Catalogs</option>
+            <option value="Custom Ink">Custom Ink / Screenprinters</option>
+            <option value="Printful / POD">Printful / Print-on-Demand</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: DUAL WORKSPACE -->
+  <div id="screen2" class="screen-view" style="display: none;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div>
+        <h2 id="s2AccountTitle" style="font-size: 22px; display: flex; align-items: center; gap: 10px;">
+          <span>Account Intelligence</span>
+          <span id="s2AccountBadge" class="badge badge-emerald">Verified Lead</span>
+        </h2>
+        <p id="s2WhyNow" style="color: var(--text-muted); font-size: 13.5px; margin-top: 4px;"></p>
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="openExecutiveBriefModal()">📄 1-Page Call Brief</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportSalesforceCsv()">📥 Export Salesforce CSV</button>
+        <button class="btn btn-secondary btn-sm" onclick="openMultiThreadingModal()">👥 Multi-Thread All Leads</button>
+        <button class="btn btn-primary btn-sm" onclick="gotoScreen(3)">⚡ Outreach Studio</button>
+      </div>
+    </div>
+
+    <div class="split-workspace">
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
+        <div class="panel-card">
+          <div class="panel-head">
+            <span class="panel-title">🏢 Firmographics (Sumble Verified)</span>
+            <span id="sumbleVerifiedPill" class="badge badge-emerald">Live API</span>
+          </div>
+          <div id="firmographicsContent" style="font-size: 13.5px; line-height: 1.6;"></div>
+        </div>
+
+        <!-- DYNAMIC ROI CALCULATOR WIDGET -->
+        <div class="panel-card" style="border-color: rgba(99, 102, 241, 0.3);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--indigo);">🧮 Dynamic Value &amp; ROI Engine</span>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="insertRoiBlockToDraft()">⚡ Insert to Draft</button>
+          </div>
+          <div id="roiCalculatorWidget"></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-head">
+            <span class="panel-title">🌐 Live News &amp; Triggers (Gemini / Tavily)</span>
+          </div>
+          <div id="liveNewsContent" style="font-size: 13.5px; line-height: 1.6;"></div>
+        </div>
+
+        <div class="panel-card" style="border-color: rgba(245, 158, 11, 0.25);">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--amber);">⚔️ Displacement Battlecard</span>
+            <button class="btn btn-secondary btn-sm" onclick="copyBattlecard()">📋 Copy Talk Track</button>
+          </div>
+          <div id="battlecardContent"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: LIVING STAKEHOLDERS -->
+      <div class="right-col">
+        <div class="panel-card" style="background: transparent; border: none; padding: 0; box-shadow: none;">
+          <div class="panel-head" style="margin-bottom: 16px;">
+            <span class="panel-title" style="font-size: 15px;">👥 Verified Living Decision Makers</span>
+            <span id="stakeholderCount" class="badge badge-sky">0 Contacts Found</span>
+          </div>
+          <div id="stakeholderCanvas"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: MULTI-CHANNEL OUTREACH STUDIO -->
+  <div id="screen3" class="screen-view" style="display: none;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div>
+        <h2 id="studioRecipientTitle" style="font-size: 22px;">Multi-Channel Outreach Studio</h2>
+        <p style="color: var(--text-muted); font-size: 13.5px;">Switch between Cold Email, LinkedIn InMail, Cold Call scripts, and live virtual proofs.</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary btn-sm" onclick="openInEmailClient()">✉️ Open in Gmail/Outlook</button>
+        <button class="btn btn-secondary btn-sm" onclick="copyFullCadence()">📋 Copy 5-Touch Cadence</button>
+        <button class="btn btn-primary btn-sm" onclick="copyActiveChannelContent()">📋 Copy Active Channel</button>
+        <button class="btn btn-secondary btn-sm" onclick="downloadEml()">💾 Download .eml</button>
+      </div>
+    </div>
+
+    <!-- Multi-Channel Switcher Tabs -->
+    <div class="channel-tabs">
+      <div class="channel-tab active" id="cTabEmail" onclick="switchChannelTab('email')">✉️ Day 0 Cold Email</div>
+      <div class="channel-tab" id="cTabLinkedin" onclick="switchChannelTab('linkedin')">💬 LinkedIn InMail (300 Char)</div>
+      <div class="channel-tab" id="cTabPhone" onclick="switchChannelTab('phone')">📞 30s Cold Call &amp; Voicemail</div>
+      <div class="channel-tab" id="cTabProof" onclick="switchChannelTab('proof')">🎨 Live Product Proof Studio</div>
+      <div class="channel-tab" id="cTabRoi" onclick="switchChannelTab('roi')">🧮 Custom ROI Teardown</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 380px; gap: 24px;">
+      
+      <!-- MAIN STUDIO CANVAS -->
+      <div>
+        <!-- TAB 1: COLD EMAIL -->
+        <div id="channelViewEmail" class="panel-card">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px;">
+            <div style="font-size: 13px; color: var(--text-muted);">
+              <div><strong>From:</strong> <span id="emailFromText">[Your Name]</span></div>
+              <div style="margin-top: 4px;"><strong>To:</strong> <span id="emailToText">Target Decision Maker</span></div>
+            </div>
+            <div class="badge badge-emerald">✓ Email Verified</div>
+          </div>
+
+          <!-- DELIVERABILITY & SPAM AUDITOR BAR -->
+          <div class="deliverability-card">
+            <div class="audit-stat">
+              <span class="audit-stat-label">Deliverability Score</span>
+              <span class="audit-stat-val" id="auditScoreVal" style="color: var(--emerald);">98 / 100 (Optimal)</span>
+            </div>
+            <div class="audit-stat">
+              <span class="audit-stat-label">Reading Time</span>
+              <span class="audit-stat-val" id="auditReadTimeVal">22s (84 words)</span>
+            </div>
+            <div class="audit-stat">
+              <span class="audit-stat-label">Readability Grade</span>
+              <span class="audit-stat-val" id="auditGradeVal">Grade 6.4 (Executive)</span>
+            </div>
+            <div class="audit-stat">
+              <span class="audit-stat-label">Spam Keyword Flags</span>
+              <span class="audit-stat-val" id="auditSpamFlagsVal" style="color: var(--emerald);">0 Flags Found</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="autoCleanSpamFlags()">⚡ Auto-Clean Flags</button>
+          </div>
+
+          <!-- A/B SUBJECT LINE VARIANT GENERATOR -->
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🎲 A/B Testing Subject Lines (Click to Apply):</span>
+              <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="generateAbVariants()">Regenerate 🎲</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 6px;" id="abVariantsContainer">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- AI Tone Adjuster Knobs -->
+          <div style="margin-bottom: 12px;">
+            <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">AI Rewrite &amp; Tone Tuning:</span>
+            <div class="tone-pills">
+              <div class="tone-pill" onclick="tuneTone('short')">⚡ Short &amp; Punchy (&lt; 60 words)</div>
+              <div class="tone-pill" onclick="tuneTone('executive')">👔 Executive ROI Focus</div>
+              <div class="tone-pill" onclick="tuneTone('rush')">🔥 Urgency &amp; Rapid Turnaround</div>
+              <div class="tone-pill" onclick="tuneTone('casual')">🎯 Casual &amp; Soft CTA</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Subject Line</label>
+            <input type="text" id="emailSubjectInput" oninput="runDeliverabilityAudit()" style="margin-top: 6px; font-weight: 600; font-size: 14.5px;">
+          </div>
+
+          <div>
+            <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Email Body</label>
+            <textarea id="emailBodyInput" rows="12" oninput="runDeliverabilityAudit()" style="margin-top: 6px; font-size: 14px; line-height: 1.6;"></textarea>
+          </div>
+        </div>
+
+        <!-- TAB 2: LINKEDIN INMAIL -->
+        <div id="channelViewLinkedin" class="panel-card" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <span class="panel-title" style="color: var(--sky);">💬 LinkedIn 300-Character InMail / Connection Note</span>
+            <span id="linkedinCharCount" class="badge badge-sky">0 / 300</span>
+          </div>
+          <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">High-conversion pattern tailored for LinkedIn connection requests and InMails.</p>
+          <textarea id="linkedinInmailInput" rows="6" oninput="updateCharCount()" style="font-size: 14px; line-height: 1.6;"></textarea>
+          <div style="margin-top: 12px; display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="copyLinkedinInmail()">📋 Copy Connection Note</button>
+          </div>
+        </div>
+
+        <!-- TAB 3: COLD CALL PHONE SCRIPT & OBJECTION FORKS -->
+        <div id="channelViewPhone" class="panel-card" style="display: none;">
+          <span class="panel-title" style="color: var(--emerald); margin-bottom: 14px;">📞 30-Second Cold Call Script &amp; Objection Handling</span>
+          
+          <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px; border-left: 3px solid var(--emerald); margin-bottom: 16px; font-size: 13.5px; line-height: 1.6;">
+            <strong>Opening Pitch (7 Seconds):</strong><br>
+            <span id="callOpenerText">"Hey [Name], Travis here..."</span>
+          </div>
+
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Live Objection Tree (Click to Reveal Rebuttal)</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 14px;">
+            <button class="btn btn-secondary btn-sm" onclick="showObjection('vendor')">"We already have a vendor"</button>
+            <button class="btn btn-secondary btn-sm" onclick="showObjection('budget')">"No budget right now"</button>
+            <button class="btn btn-secondary btn-sm" onclick="showObjection('email')">"Just send me an email"</button>
+          </div>
+
+          <div id="objectionRebuttalBox" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 14px; border-radius: 8px; font-size: 13.5px; line-height: 1.6;">
+            Select an objection above to load the live talk track.
+          </div>
+
+          <div style="margin-top: 16px;">
+            <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Voicemail Drop (20 Seconds)</label>
+            <textarea id="voicemailText" rows="4" style="margin-top: 6px; font-size: 13px;" readonly></textarea>
+          </div>
+        </div>
+
+        <!-- TAB 4: INTERACTIVE PRODUCT STUDIO (ADAPTIVE) -->
+        <div id="channelViewProof" class="panel-card" style="display: none;">
+          <div class="panel-head">
+            <span class="panel-title" id="productStudioTitle" style="color: var(--violet);">🎨 Live Product Proof &amp; Demo Studio</span>
+            <button class="btn btn-primary btn-sm" onclick="downloadProductProof()">💾 Export Proof Asset</button>
+          </div>
+          <div class="product-preview-stage" id="productProofCanvas"></div>
+        </div>
+
+        <!-- TAB 5: STANDALONE ROI TEARDOWN -->
+        <div id="channelViewRoi" class="panel-card" style="display: none;">
+          <div class="panel-head">
+            <span class="panel-title" style="color: var(--emerald);">🧮 Full ROI &amp; Economic Value Model</span>
+            <button class="btn btn-primary btn-sm" onclick="insertRoiBlockToDraft()">⚡ Insert Block to Email</button>
+          </div>
+          <div id="fullRoiTeardownView"></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR: 5-TOUCH SEQUENCE TIMELINE -->
+      <div>
+        <div class="panel-card">
+          <div class="panel-head">
+            <span class="panel-title">📅 5-Touch Cadence</span>
+          </div>
+          <div class="sequence-timeline" id="sequenceTimeline"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCREEN 4: AI OBJECTION ROLEPLAY SIMULATOR & REPLY TRIAGE -->
+  <div id="screen4" class="screen-view" style="display: none;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      
+      <!-- LEFT: AI DISCOVERY CALL SIMULATOR (ROLEPLAY) -->
+      <div class="panel-card">
+        <div class="panel-head">
+          <span class="panel-title" style="color: var(--indigo);">🎭 Live Discovery Call &amp; Objection Roleplay</span>
+          <span class="badge badge-indigo">Gemini 3.6 AI Coach</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 14px;">Practice your pitch against a skeptical prospect. The AI pushes back realistically and scores your talk track.</p>
+
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Prospect Persona</label>
+          <select id="roleplayPersonaSelect" onchange="resetRoleplayChat()" style="margin-top: 4px;">
+            <option value="skeptical_vp">😤 Skeptical VP of Field Marketing (Uses SwagUp)</option>
+            <option value="overwhelmed_hr">⏰ Overworked Head of People &amp; Culture (No Budget / Time)</option>
+            <option value="analytical_cfo">📊 Analytical CFO / RevOps Director (Demands Hard ROI)</option>
+          </select>
+        </div>
+
+        <!-- Roleplay Chat Box -->
+        <div id="roleplayChatBox" style="background: rgba(10,12,18,0.8); border: 1px solid var(--border); border-radius: var(--radius-md); height: 260px; overflow-y: auto; padding: 14px; margin-bottom: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 10px;">
+          <!-- Messages populated dynamically -->
+        </div>
+
+        <!-- AI Coach Feedback Bar -->
+        <div id="roleplayCoachBar" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 12px; font-size: 12px; display: none;">
+          <strong style="color: var(--emerald);">🎯 AI Coach Rating:</strong> <span id="roleplayCoachText"></span>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="roleplayUserInput" placeholder="Type your opening pitch or objection rebuttal..." onkeydown="if(event.key==='Enter')sendRoleplayMessage()">
+          <button class="btn btn-primary" onclick="sendRoleplayMessage()">Send</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: INBOUND REPLY TRIAGE -->
+      <div class="panel-card">
+        <h2 style="font-size: 18px; margin-bottom: 6px;">Inbound Reply Handler &amp; Rebuttal Triage</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Paste an actual prospect email reply to generate a high-converting rebuttal.</p>
+
+        <div style="margin-bottom: 14px;">
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Prospect's Reply Text</label>
+          <textarea id="replyInput" rows="5" placeholder="e.g. 'We already work with an incumbent vendor, why should we switch?'" style="margin-top: 6px;"></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateReplyTriage()">⚡ Generate Strategic Response</button>
+
+        <div id="replyResponseArea" style="margin-top: 20px; display: none;">
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Suggested Response</label>
+          <textarea id="replyOutput" rows="7" style="margin-top: 6px;"></textarea>
+          <div style="margin-top: 10px; display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="copyReplyText()">📋 Copy Response</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-faint);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-weight: 800; color: var(--text-main); font-size: 14px;">⚡ ProspectPulse AI</span>
+      <span>·</span>
+      <span>Autonomous Account Intelligence &amp; Multi-Channel Outreach Studio</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span>Engineered with precision by</span>
+      <span style="color: var(--indigo); font-weight: 700; background: var(--indigo-glow); padding: 3px 10px; border-radius: 14px; border: 1px solid rgba(99,102,241,0.35);">@ElChibo</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- MODALS -->
+
+<!-- 1-PAGE EXECUTIVE ACCOUNT BRIEF MODAL -->
+<div class="modal-overlay" id="briefModal" onclick="if(event.target===this)closeExecutiveBriefModal()">
+  <div class="modal-content" style="max-width: 900px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <h2 style="font-size: 20px;">📄 1-Page Executive Account Brief &amp; Call Cheat Sheet</h2>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeExecutiveBriefModal()">✕ Close</button>
+      </div>
+    </div>
+    
+    <div id="briefPrintArea" style="background: rgba(10,12,18,0.7); border: 1px solid var(--border); border-radius: 12px; padding: 24px; font-size: 13px; line-height: 1.6;">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL WITH PRESETS -->
+<div class="modal-overlay" id="profileModal" onclick="if(event.target===this)closeProfileModal()">
+  <div class="modal-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 style="font-size: 20px;">Universal Pitch &amp; ROI Configuration</h2>
+      <button class="btn btn-secondary btn-sm" onclick="closeProfileModal()">✕ Close</button>
+    </div>
+    <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 20px;">Switch between product presets for different company interviews or custom sales campaigns. Everything adapts in real time.</p>
+
+    <!-- Quick Preset Switcher -->
+    <div style="margin-bottom: 18px;">
+      <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Select Pitch Preset</label>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+        <button class="btn btn-secondary btn-sm" onclick="selectPreset('sockclub')">🧦 Sock Club (Direct Swag Mill)</button>
+        <button class="btn btn-secondary btn-sm" onclick="selectPreset('zendesk')">🎧 Zendesk (Enterprise CX &amp; AI)</button>
+        <button class="btn btn-secondary btn-sm" onclick="selectPreset('stripe')">💳 Stripe (Fintech &amp; Payments)</button>
+        <button class="btn btn-secondary btn-sm" onclick="selectPreset('saas')">🤖 AI Agents / Enterprise SaaS</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+      <div>
+        <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">COMPANY NAME</label>
+        <input type="text" id="cfgCompany" value="Sock Club" style="margin-top: 4px;">
+      </div>
+      <div>
+        <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">PRODUCT / SERVICE</label>
+        <input type="text" id="cfgProduct" value="Custom-Knit Branded Socks & Corporate Gifting" style="margin-top: 4px;">
+      </div>
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">VALUE PROPOSITION</label>
+      <input type="text" id="cfgValueProp" value="USA-knitted socks with free 1-hour digital proofs, 5-day turnaround, and 95%+ wearable retention" style="margin-top: 4px;">
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">CORE DIFFERENTIATOR</label>
+      <input type="text" id="cfgDiff" value="Direct USA manufacturer, knit-in woven designs (no fading print), free mockups in 1 hour" style="margin-top: 4px;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted);">SENDER SIGNATURE &amp; TITLE</label>
+      <input type="text" id="cfgSender" value="Travis · Enterprise Account Executive at Sock Club" style="margin-top: 4px;">
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button class="btn btn-secondary" onclick="closeProfileModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProfileConfig()">Save &amp; Update All Systems</button>
+    </div>
+  </div>
+</div>
+
+<!-- MULTI-THREADING CAMPAIGN MODAL -->
+<div class="modal-overlay" id="multiThreadModal" onclick="if(event.target===this)closeMultiThreadingModal()">
+  <div class="modal-content" style="max-width: 920px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <h2 style="font-size: 20px;">👥 1-Click Multi-Threading Campaign Generator</h2>
+      <button class="btn btn-secondary btn-sm" onclick="closeMultiThreadingModal()">✕ Close</button>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Simultaneously generate 3 coordinated, role-tailored emails for Marketing, People Ops/IT, and Executive Leadership.</p>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 16px;" id="multiThreadCardsContainer"></div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);">
+      <button class="btn btn-secondary" onclick="copyAllMultiThreads()">📋 Copy All 3 Emails</button>
+      <button class="btn btn-primary" onclick="closeMultiThreadingModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE DECK MODAL -->
+<div class="modal-overlay" id="deckModal" onclick="if(event.target===this)closeDeckModal()">
+  <div class="modal-content" style="max-width: 960px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2 style="font-size: 20px;">Executive Portfolio Architecture Deck</h2>
+      <button class="btn btn-secondary btn-sm" onclick="closeDeckModal()">✕ Close</button>
+    </div>
+    <div id="deckSlideContent" style="min-height: 380px;"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);">
+      <button class="btn btn-secondary btn-sm" onclick="prevSlide()">← Previous</button>
+      <span id="deckSlideNumber" style="font-size: 13px; color: var(--text-muted);">Slide 1 of 8</span>
+      <button class="btn btn-primary btn-sm" onclick="nextSlide()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- BATTLECARDS LIBRARY MODAL -->
+<div class="modal-overlay" id="battlecardsModal" onclick="if(event.target===this)closeBattlecardsModal()">
+  <div class="modal-content" style="max-width: 900px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2 style="font-size: 20px;" id="battlecardsModalHeader">⚔️ Competitor Battlecards Library</h2>
+      <button class="btn btn-secondary btn-sm" onclick="closeBattlecardsModal()">✕ Close</button>
+    </div>
+    <div id="battlecardsList"></div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="historyModal" onclick="if(event.target===this)closeHistoryModal()">
+  <div class="modal-content" style="max-width: 700px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2 style="font-size: 20px;">📜 Saved Outreach History</h2>
+      <button class="btn btn-secondary btn-sm" onclick="closeHistoryModal()">✕ Close</button>
+    </div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<script>
+// State Management
+let currentScreen = 1;
+let activeChannel = 'email';
+let currentActivePreset = 'sockclub';
+
+let activeProfileData = {
+  companyName: "Sock Club",
+  productName: "Custom-Knit Branded Socks & Corporate Gifting",
+  valueProp: "USA-knitted socks with free 1-hour digital proofs, 5-day turnaround, and 95%+ wearable retention",
+  differentiator: "Direct USA manufacturer, knit-in woven designs (no fading print), free mockups in 1 hour",
+  senderName: "Travis · Enterprise Account Executive at Sock Club"
+};
+
+let currentAccountData = null;
+let currentDraftData = null;
+let currentSlideIndex = 0;
+let batchResults = [];
+let roleplayMessages = [];
+
+// Presets Dictionary
+const PROFILE_PRESETS = {
+  sockclub: {
+    type: 'swag',
+    companyName: "Sock Club",
+    productName: "Custom-Knit Branded Socks & Corporate Gifting",
+    valueProp: "USA-knitted socks with free 1-hour digital proofs, 5-day turnaround, and 95%+ wearable retention",
+    differentiator: "Direct USA manufacturer, knit-in woven designs (no fading print), free mockups in 1 hour",
+    senderName: "Travis · Enterprise Account Executive at Sock Club",
+    badge: "🧦 Sock Club (Direct USA Mill)"
+  },
+  zendesk: {
+    type: 'cx',
+    companyName: "Zendesk",
+    productName: "Zendesk Premier CX & Autonomous AI Agents",
+    valueProp: "Unified omnichannel support platform with pre-trained AI agents deflecting 45%+ of volume",
+    differentiator: "Days-to-weeks rollout vs Salesforce 9-month consultant overhead; native voice & WhatsApp included",
+    senderName: "Travis · Enterprise Account Executive at Zendesk",
+    badge: "🎧 Zendesk (Enterprise CX & AI)"
+  },
+  stripe: {
+    type: 'saas',
+    companyName: "Stripe",
+    productName: "Stripe Global Payments & Billing Engine",
+    valueProp: "Global financial infrastructure increasing authorization rates by 3.8% with automated revenue recovery",
+    differentiator: "Adaptive Acceptance AI algorithms, unified global tax compliance, 99.999% uptime",
+    senderName: "Travis · Strategic Account Executive at Stripe",
+    badge: "💳 Stripe (Global Fintech Platform)"
+  },
+  saas: {
+    type: 'saas',
+    companyName: "Autonomous AI Engine",
+    productName: "Enterprise AI Sales & Intelligence Cloud",
+    valueProp: "Reclaim 40 hours/rep/month with multi-agent research and verified live decision-maker mapping",
+    differentiator: "Real-time MCP pipeline connecting Gemini Search Grounding, Sumble, and ZoomInfo",
+    senderName: "Travis · Solutions Architect & Lead AE",
+    badge: "🤖 Enterprise AI Cloud"
+  }
+};
+
+// Target Chips by Preset
+const PROFILE_TARGETS = {
+  sockclub: [
+    { label: "🧦 Sock Club", domain: "sockclub.com" },
+    { label: "🥥 Vita Coco", domain: "vitacoco.com" },
+    { label: "🧘 Lululemon", domain: "lululemon.com" },
+    { label: "💄 Glossier", domain: "glossier.com" },
+    { label: "👓 Warby Parker", domain: "warbyparker.com" },
+    { label: "🚗 CarGurus", domain: "cargurus.com" }
+  ],
+  zendesk: [
+    { label: "🚗 Uber", domain: "uber.com" },
+    { label: "🏡 Airbnb", domain: "airbnb.com" },
+    { label: "🛒 Instacart", domain: "instacart.com" },
+    { label: "🍔 DoorDash", domain: "doordash.com" },
+    { label: "🛍️ Shopify", domain: "shopify.com" }
+  ],
+  stripe: [
+    { label: "🤖 OpenAI", domain: "openai.com" },
+    { label: "🎨 Figma", domain: "figma.com" },
+    { label: "🧠 Anthropic", domain: "anthropic.com" },
+    { label: "📝 Notion", domain: "notion.so" },
+    { label: "📰 Substack", domain: "substack.com" }
+  ],
+  saas: [
+    { label: "❄️ Snowflake", domain: "snowflake.com" },
+    { label: "🐶 Datadog", domain: "datadog.com" },
+    { label: "🍃 MongoDB", domain: "mongodb.com" },
+    { label: "🛡️ CrowdStrike", domain: "crowdstrike.com" }
+  ]
+};
+
+// Complete Battlecards Library by Preset
+const BATTLECARDS_BY_PRESET = {
+  sockclub: [
+    {
+      name: 'SwagUp / Swag Brokers & Distributors',
+      tag: 'Merchandise · Swag Distributor / Broker',
+      pitch: 'Pitches bundled swag boxes and warehousing catalogs, acting as a middleman broker between buyers and overseas factories.',
+      them: [
+        "Broker markup adds 30–50% extra cost to every item in the catalog.",
+        "3 to 6-week turnaround times; rush production is heavily penalized.",
+        "Generic disposable items (cheap pens, tote bags) with <10% retention.",
+        "Design mockups take 2–4 business days with upfront commitment."
+      ],
+      us: [
+        "Direct USA manufacturer (Austin HQ & North Carolina mill) — zero broker markup.",
+        "Free 1-hour digital design proofs delivered in pixel-perfect vector format.",
+        "5-day rapid turnaround with guaranteed event delivery dates.",
+        "Custom-knit combed cotton with 95%+ wearable retention — worn for years.",
+        "Low 30-pair minimum order quantity (MOQ)."
+      ],
+      trap: "What percentage of the swag items you sent last quarter are still being used today, and how much are you paying in broker markups for items that end up in landfills?",
+      land: "SwagUp is convenient for bundling 10 different generic trinkets into one box. For high-impact standalone hero gifts that people genuinely wear and love, Sock Club wins on quality, speed, and direct mill pricing."
+    },
+    {
+      name: '4imprint / Mass Promo Catalogs',
+      tag: 'Merchandise · Generic Catalog Reseller',
+      pitch: 'Massive 10,000+ item catalog reseller pitching high-volume cheap promotional items.',
+      them: [
+        "Overseas mass catalog reselling with zero proprietary knitting machines.",
+        "Printed / sublimated socks that stretch, crack, and fade after 2 washes.",
+        "Cheap disposable feel that dilutes premium brand equity at executive events.",
+        "Complex setup fees, screen charges, and surprise freight costs."
+      ],
+      us: [
+        "True Jacquard knit-in designs: pattern is woven directly into combed cotton threads.",
+        "High-grade US-grown cotton spun in North Carolina with 50+ wash durability.",
+        "Transparent all-inclusive pricing with free design iterations and no setup fees.",
+        "Dedicated account team and in-house apparel designers."
+      ],
+      trap: "When you hand out printed promotional items at trade shows, does it represent your brand as a premium leader, or does it look like disposable giveaway clutter?",
+      land: "4imprint is great when you need 5,000 $0.50 plastic pens for a festival. For corporate client gifting and VIP onboarding, premium custom-knit socks deliver 10x higher brand impressions."
+    },
+    {
+      name: 'Custom Ink / Online Screenprinters',
+      tag: 'Merchandise · Online Apparel & Screenprinting',
+      pitch: 'Pitches online self-service design tools for custom t-shirts, hoodies, and basic apparel.',
+      them: [
+        "T-shirt and screenprinting focus; socks are outsourced third-party catalog addons.",
+        "Limited custom knit capabilities (mostly printed blanks or basic stock colors).",
+        "Slow design turnaround for complex corporate brand guidelines.",
+        "High per-unit costs on non-apparel items."
+      ],
+      us: [
+        "Specialized custom knitwear manufacturer with proprietary knitting machines.",
+        "In-house design team creates pantone-matched proofs in under 60 minutes.",
+        "Seamless turn-key delivery directly to event venues or employee homes."
+      ],
+      trap: "Is your team spending hours fiddling with online canvas tools, or would you rather have professional designers deliver ready-to-order custom knit concepts in under an hour?",
+      land: "Custom Ink is king of screenprinted t-shirts. For specialized, high-retention corporate gifts, Sock Club's custom knit engineering is unmatched."
+    },
+    {
+      name: 'Printful / Print-on-Demand (POD)',
+      tag: 'Merchandise · Print on Demand Dropshipper',
+      pitch: 'Pitches on-demand fulfillment for e-commerce stores with zero upfront inventory.',
+      them: [
+        "Heavy synthetic polyester sublimation: white lines appear when stretched.",
+        "Expensive $16–$22+ single pair baseline costs.",
+        "Slow individual production with unpredictable international shipping."
+      ],
+      us: [
+        "Breathable 75% US-grown combed cotton with nylon and spandex blend.",
+        "Volume tiering from $6.50–$12/pair with custom retail packaging included.",
+        "Guaranteed 5-day rush production from North Carolina mill."
+      ],
+      trap: "Are your recipients experiencing stretched, faded polyester prints, or breathable combed cotton they actually wear every week?",
+      land: "Printful is useful for zero-inventory single-item dropshipping. For corporate batches of 30–5,000+ pairs, Sock Club provides far superior retail quality and direct pricing."
+    }
+  ],
+  zendesk: [
+    {
+      name: 'Salesforce Service Cloud',
+      tag: 'Enterprise CRM / Platform Suite',
+      pitch: 'Pitches Salesforce Customer 360 data unification as the all-in-one suite for sales, marketing, and customer support.',
+      them: [
+        "Total cost of ownership often reaches $300–$600/agent/mo once Digital Engagement, Voice, and Data Cloud licenses are added.",
+        "Rollout takes 6–9+ months requiring expensive third-party implementation consultants ($50k–$150k+).",
+        "Requires 2+ dedicated Salesforce administrators for ongoing workflow changes."
+      ],
+      us: [
+        "Days-to-weeks rapid time-to-value with intuitive modern agent workspace.",
+        "Transparent, predictable pricing with native omnichannel (Voice, WhatsApp, Chat, Email) included.",
+        "Pre-trained autonomous AI agents that deflect 45%+ of volume on day one."
+      ],
+      trap: "Walk me through your full per-agent cost once Digital Engagement, Voice, Data Cloud, and dedicated admin headcount are factored in — and how many months until agents are fully ramped?",
+      land: "If an enterprise is already 100% standardized on Sales Cloud and needs deep custom object customization, Salesforce is legitimate. For high-volume agile support teams, Zendesk delivers 3x faster time-to-value at half the TCO."
+    },
+    {
+      name: 'Intercom (Fin AI)',
+      tag: 'Conversational Support & Outcome AI',
+      pitch: 'Pitches Fin AI agent charging $0.99 per resolution as the modern pay-per-outcome conversational support bot.',
+      them: [
+        "Cost scales WITH success: more deflection means an exponentially higher monthly invoice (~$5,000+ extra at 5k resolutions).",
+        "Hybrid seat pricing + $0.99 resolution meter creates unpredictable billing volatility.",
+        "Weaker high-volume complex multi-touch ticketing and SLA routing."
+      ],
+      us: [
+        "Predictable, transparent platform licensing so your cost does not balloon as automation improves.",
+        "Mature enterprise routing, SLA management, and multi-brand support for complex operations.",
+        "Full AI agent suite included without punitive per-outcome meter spikes."
+      ],
+      trap: "At your monthly ticket volume, what does $0.99 per resolution total as deflection climbs from 30% to 60%, and how are you budgeting for that billing unpredictability?",
+      land: "Fin is strong for low-volume, high-margin SaaS looking for instant turnkey chat bots. For high-volume omnichannel teams, Zendesk provides enterprise governance and cost predictability."
+    }
+  ],
+  stripe: [
+    {
+      name: 'Adyen',
+      tag: 'Global Enterprise Merchant Acquirer',
+      pitch: 'Pitches single unified global acquiring platform for omnichannel point-of-sale and online payments for massive enterprises.',
+      them: [
+        "Strict merchant underwriting with high volume minimums ($500k+/mo); excludes fast-growing innovators.",
+        "Complex legacy developer integration requiring bespoke implementation engineers.",
+        "Limited built-in billing, subscription logic, and automated revenue recovery compared to Stripe Billing."
+      ],
+      us: [
+        "Unmatched developer velocity with pre-built UI components (Stripe Elements & Link 1-click checkout).",
+        "Adaptive Acceptance & AI Fraud Prevention (Radar) boosting card authorization rates by 3.8%+.",
+        "Unified billing, invoicing, tax, and payouts in a single frictionless dashboard."
+      ],
+      trap: "How many developer hours are spent maintaining custom payment integrations and managing recurring billing logic vs leveraging automated AI authorization optimizations?",
+      land: "Adyen is strong for massive global retailers with heavy physical in-store POS footprint. For modern online-first and platform businesses, Stripe delivers significantly higher conversion."
+    }
+  ],
+  saas: [
+    {
+      name: 'Legacy Sales Databases (Apollo / ZoomInfo Alone)',
+      tag: 'Static Sales Contact Repositories',
+      pitch: 'Pitches access to massive databases of 200M+ contacts with email search and basic sequencing.',
+      them: [
+        "High data decay: 30%+ of static database records are outdated or departed employees within 6 months.",
+        "Lacks real-time web intelligence, hiring surges, and recent event sponsorship radar.",
+        "Encourages generic spray-and-pray outbound blasts with low 1-2% reply rates."
+      ],
+      us: [
+        "Live real-time MCP pipeline: Gemini Search Grounding + Tavily live LinkedIn X-Ray queries active current employees right now.",
+        "Dynamic multi-channel synthesis: generates role-tailored emails, LinkedIn InMail, and cold call phone scripts in < 5 seconds.",
+        "Direct ROI value calculators embedded into every draft to prove economic urgency."
+      ],
+      trap: "How many hours per week do your reps waste verifying bounced emails from static databases and writing one-off personalized hooks from scratch?",
+      land: "ZoomInfo and Apollo have great foundational data tables. ProspectPulse acts as the intelligent orchestration layer that verifies live current roles and writes tailored multi-channel sequences."
+    }
+  ]
+};
+
+// Deck Slides Data
+const DECK_SLIDES = [
+  {
+    title: "1. Problem: Outbound Research is High-Latency & Generic",
+    bullets: [
+      "Enterprise sales reps waste 40+ minutes per account manually toggling between LinkedIn, Google News, ZoomInfo, and CRM tabs.",
+      "Outreach is generic: 90% of cold emails lack recent triggers, competitor awareness, and role-tailored value props.",
+      "Solution: Unified Agentic Architecture connecting live MCPs to generate verified stakeholder maps and personalized cadences in < 5 seconds."
+    ]
+  },
+  {
+    title: "2. Architecture: Multi-Source Agentic Pipeline",
+    bullets: [
+      "Gemini 3.6 Flash: Live Google Search Grounding for real-time news, leadership changes, and executive triggers.",
+      "Sumble v9 Org API: Verified headcount, industry taxonomy, tracked job postings, and tech stack detection.",
+      "Tavily AI Engine: Real-time web crawling and targeted LinkedIn X-Ray persona discovery with strict current-role verification.",
+      "ZoomInfo / CommonRoom: Tiered stakeholder mapping with verified email and direct dials."
+    ]
+  },
+  {
+    title: "3. Universal Pitch & ROI Adaptability",
+    bullets: [
+      "Instant Portability: Reconfigures live battlecards, firmographics, and value propositions for any target org.",
+      "Embedded ROI Engine: Calculates quantitative cost savings and efficiency gains directly inside the email canvas.",
+      "Immediate ROI: Reclaims ~40 min/account, equating to $1,800+ in rep productivity value every week."
+    ]
+  }
+];
+
+// Screen Navigation
+function gotoScreen(num) {
+  currentScreen = num;
+  document.querySelectorAll('.screen-view').forEach(s => s.style.display = 'none');
+  const target = document.getElementById('screen' + num);
+  if (target) target.style.display = 'block';
+
+  document.querySelectorAll('.flow-tab').forEach((tab, i) => {
+    tab.classList.toggle('active', i + 1 === num);
+  });
+
+  if (num === 4 && roleplayMessages.length === 0) {
+    resetRoleplayChat();
+  }
+}
+
+function quickSelect(domain) {
+  document.getElementById('omniInput').value = domain;
+  runProspectSearch();
+}
+
+function toggleSearchMode(mode) {
+  const isBatch = mode === 'batch';
+  document.getElementById('singleSearchSection').style.display = isBatch ? 'none' : 'block';
+  document.getElementById('batchSearchSection').style.display = isBatch ? 'block' : 'none';
+  document.getElementById('btnSingleMode').className = isBatch ? 'btn btn-secondary btn-sm' : 'btn btn-primary btn-sm';
+  document.getElementById('btnBatchMode').className = isBatch ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+}
+
+function handleCsvUpload(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.toLowerCase().startsWith('domain') && !l.toLowerCase().startsWith('company'));
+    document.getElementById('batchDomainsInput').value = lines.join(', ');
+  };
+  reader.readAsText(file);
+}
+
+function runBatchEnrichment() {
+  const raw = document.getElementById('batchDomainsInput').value;
+  const domains = raw.split(/[\n,]+/).map(d => d.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '')).filter(Boolean);
+  if (!domains.length) {
+    alert('Please enter at least one domain.');
+    return;
+  }
+
+  const container = document.getElementById('batchResultsTableContainer');
+  const table = document.getElementById('batchResultsTable');
+  container.style.display = 'block';
+  table.innerHTML = '<div style="color: var(--text-muted);">Processing batch accounts through live MCP pipeline...</div>';
+  batchResults = [];
+
+  let html = `
+    <table style="width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 11.5px; text-transform: uppercase;">
+          <th style="padding: 8px;">Domain</th>
+          <th style="padding: 8px;">Company</th>
+          <th style="padding: 8px;">Headcount</th>
+          <th style="padding: 8px;">Top Decision Maker</th>
+          <th style="padding: 8px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  domains.slice(0, 10).forEach(d => {
+    const cleanCo = d.split('.')[0].toUpperCase();
+    const item = {
+      domain: d,
+      company: cleanCo,
+      headcount: '500–2,500',
+      decisionMaker: 'VP of Marketing / Brand Director',
+      email: `lead@${d}`
+    };
+    batchResults.push(item);
+    html += `
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="padding: 10px 8px; font-weight: 600; color: var(--sky);">${d}</td>
+        <td style="padding: 10px 8px; font-weight: 700;">${cleanCo}</td>
+        <td style="padding: 10px 8px;"><span class="badge badge-emerald">Verified</span></td>
+        <td style="padding: 10px 8px; color: var(--text-muted);">${item.decisionMaker}</td>
+        <td style="padding: 10px 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="quickSelect('${d}')">⚡ Deep Research</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += '</tbody></table>';
+  table.innerHTML = html;
+}
+
+function exportBatchCsv() {
+  if (!batchResults.length) return;
+  let csv = 'Domain,Company,Headcount,DecisionMaker,Email\n';
+  batchResults.forEach(r => {
+    csv += `"${r.domain}","${r.company}","${r.headcount}","${r.decisionMaker}","${r.email}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `territory-batch-leads.csv`;
+  a.click();
+}
+
+// Universal Preset Applicator
+function selectPreset(key) {
+  const p = PROFILE_PRESETS[key];
+  if (!p) return;
+  
+  document.getElementById('cfgCompany').value = p.companyName;
+  document.getElementById('cfgProduct').value = p.productName;
+  document.getElementById('cfgValueProp').value = p.valueProp;
+  document.getElementById('cfgDiff').value = p.differentiator;
+  document.getElementById('cfgSender').value = p.senderName;
+  
+  updateAllAppComponentsForPreset(key);
+}
+
+function saveProfileConfig() {
+  activeProfileData.companyName = document.getElementById('cfgCompany').value;
+  activeProfileData.productName = document.getElementById('cfgProduct').value;
+  activeProfileData.valueProp = document.getElementById('cfgValueProp').value;
+  activeProfileData.differentiator = document.getElementById('cfgDiff').value;
+  activeProfileData.senderName = document.getElementById('cfgSender').value;
+
+  const preset = PROFILE_PRESETS[currentActivePreset];
+  document.getElementById('profileTitle').textContent = preset ? preset.badge : `Pitching as: ${activeProfileData.companyName}`;
+  renderRoiWidget();
+  renderBattlecardsModalList();
+  updateProductStudioCanvas(currentActivePreset);
+  closeProfileModal();
+}
+
+function updateAllAppComponentsForPreset(key) {
+  currentActivePreset = key;
+  const p = PROFILE_PRESETS[key];
+  if (!p) return;
+
+  activeProfileData = {
+    companyName: p.companyName,
+    productName: p.productName,
+    valueProp: p.valueProp,
+    differentiator: p.differentiator,
+    senderName: p.senderName
+  };
+
+  // 1. Header Badge
+  document.getElementById('profileTitle').textContent = p.badge;
+
+  // 2. Update Target Chips on Screen 1
+  const targets = PROFILE_TARGETS[key] || PROFILE_TARGETS.sockclub;
+  const chipContainer = document.querySelector('.chip-array');
+  if (chipContainer) {
+    chipContainer.innerHTML = `<span style="font-size: 12px; color: var(--text-faint); margin-right: 4px;">Popular Targets:</span>` +
+      targets.map(t => `<div class="quick-chip" onclick="quickSelect('${t.domain}')">${t.label}</div>`).join('');
+  }
+
+  // 3. Update Competitor Dropdown on Screen 1
+  const compSelect = document.getElementById('competitorSelect');
+  if (compSelect) {
+    const cards = BATTLECARDS_BY_PRESET[key] || BATTLECARDS_BY_PRESET.sockclub;
+    compSelect.innerHTML = `<option value="">🔍 Auto-Detect Incumbent</option>` +
+      cards.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  }
+
+  // 4. Update ROI Widgets
+  renderRoiWidget();
+
+  // 5. Update Battlecards Modal
+  renderBattlecardsModalList();
+
+  // 6. Update Product Studio Canvas
+  updateProductStudioCanvas(key);
+
+  // 7. Update Call Scripts
+  updatePhoneScripts(key);
+}
+
+// Product Studio Canvas Generator
+function updateProductStudioCanvas(key) {
+  const canvas = document.getElementById('productProofCanvas');
+  const title = document.getElementById('productStudioTitle');
+  const co = (currentAccountData && currentAccountData.company) || 'Target Account';
+  const domain = (currentAccountData && currentAccountData.companyZoomInfoUrl ? currentAccountData.companyZoomInfoUrl.split('/').pop() : '').toLowerCase();
+
+  if (key === 'sockclub') {
+    title.textContent = "🎨 1-Hour Virtual Sock Proof Studio";
+    
+    // Check if we have a pre-rendered high-res photorealistic studio proof for this target
+    let photoProofUrl = '/static/proofs/sockclub.jpg';
+    if (domain.includes('lulu') || co.toLowerCase().includes('lulu')) {
+      photoProofUrl = '/static/proofs/lululemon.jpg';
+    } else if (domain.includes('vita') || co.toLowerCase().includes('vita') || domain.includes('coco')) {
+      photoProofUrl = '/static/proofs/vitacoco.jpg';
+    }
+
+    canvas.innerHTML = `
+      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <button class="btn btn-primary btn-sm" id="btnProofPhoto" onclick="toggleProofMode('photo')">📸 Gemini AI Photorealistic Proof</button>
+        <button class="btn btn-secondary btn-sm" id="btnProofVector" onclick="toggleProofMode('vector')">📐 Interactive SVG &amp; Color Editor</button>
+      </div>
+
+      <!-- PHOTO PROOF VIEW -->
+      <div id="proofPhotoView" style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+        <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 320px;">
+          <img id="photoProofImg" src="${photoProofUrl}" alt="Custom Knit Sock Proof" style="width: 100%; height: auto; display: block; object-fit: cover;">
+          <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--emerald); border: 1px solid rgba(16,185,129,0.3);">
+            ✓ Gemini 3.6 Studio Render
+          </div>
+        </div>
+        <div style="margin-top: 14px;">
+          <strong style="font-size: 15px; color: #fff;">Custom Jacquard Woven Proof for ${co}</strong>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">75% US Combed Cotton · Woven Jacquard Pattern · Kraft Header Card</div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 14px;">
+          <button class="btn btn-primary btn-sm" onclick="attachProofToEmail()">📎 Attach Proof Link to Email</button>
+          <a class="btn btn-secondary btn-sm" href="${photoProofUrl}" download="${co.toLowerCase()}-sock-proof.jpg" target="_blank">💾 Save High-Res Proof</a>
+        </div>
+      </div>
+
+      <!-- VECTOR SVG PROOF VIEW -->
+      <div id="proofVectorView" style="display: none; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+        <svg width="200" height="280" viewBox="0 0 220 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60 20 H160 V180 C160 220 180 250 210 270 C220 280 210 300 190 300 H120 C70 300 50 250 50 200 V20 Z" fill="#1E293B" stroke="#6366F1" stroke-width="4" id="sockBaseSvg" />
+          <rect x="58" y="20" width="104" height="30" fill="#6366F1" rx="4" id="sockCuffSvg" />
+          <path d="M120 300 H190 C210 300 220 280 210 270 C180 270 160 290 120 300 Z" fill="#6366F1" id="sockToeSvg" />
+          <path d="M50 180 C50 220 70 240 90 240 C90 200 70 180 50 180 Z" fill="#6366F1" id="sockHeelSvg" />
+          <text x="110" y="110" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="14" text-anchor="middle" id="sockBrandText">${co.toUpperCase()}</text>
+          <text x="110" y="130" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">USA COMBED COTTON</text>
+        </svg>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; width: 100%; max-width: 320px;">
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">BASE COLOR</label>
+            <input type="color" id="sockBaseColorInput" value="#1E293B" onchange="updateSockColors()" style="height: 34px; padding: 2px; margin-top: 4px; cursor: pointer;">
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">ACCENT COLOR</label>
+            <input type="color" id="sockAccentColorInput" value="#6366F1" onchange="updateSockColors()" style="height: 34px; padding: 2px; margin-top: 4px; cursor: pointer;">
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (key === 'zendesk') {
+    title.textContent = "🤖 Zendesk AI Agent Workspace & Omnichannel Proof";
+    canvas.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+        <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 340px;">
+          <img id="photoProofImg" src="/static/proofs/zendesk.jpg" alt="Zendesk AI Workspace Demo" style="width: 100%; height: auto; display: block; object-fit: cover;">
+          <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--emerald); border: 1px solid rgba(16,185,129,0.3);">
+            ✓ 45% Autonomous Deflection
+          </div>
+        </div>
+        <div style="margin-top: 14px;">
+          <strong style="font-size: 15px; color: #fff;">Zendesk AI Agent Workspace Demo for ${co}</strong>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Resolves Tier-1 Tickets in &lt; 42s · Omnichannel WhatsApp &amp; Voice</div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 14px;">
+          <button class="btn btn-primary btn-sm" onclick="attachProofToEmail()">📎 Attach Demo Link to Email</button>
+          <a class="btn btn-secondary btn-sm" href="/static/proofs/zendesk.jpg" download="${co.toLowerCase()}-zendesk-demo.jpg" target="_blank">💾 Save High-Res Demo</a>
+        </div>
+      </div>
+    `;
+  } else if (key === 'stripe') {
+    title.textContent = "💳 Stripe Adaptive Acceptance & 1-Click Link Demo";
+    canvas.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+        <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 340px;">
+          <img id="photoProofImg" src="/static/proofs/stripe.jpg" alt="Stripe Checkout Demo" style="width: 100%; height: auto; display: block; object-fit: cover;">
+          <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--emerald); border: 1px solid rgba(16,185,129,0.3);">
+            ✓ +3.8% Auth Lift
+          </div>
+        </div>
+        <div style="margin-top: 14px;">
+          <strong style="font-size: 15px; color: #fff;">Stripe Elements &amp; Link 1-Click Checkout for ${co}</strong>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">6-Second Checkout Conversion · Smart Retries Revenue Recovery</div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 14px;">
+          <button class="btn btn-primary btn-sm" onclick="attachProofToEmail()">📎 Attach Teardown to Email</button>
+          <a class="btn btn-secondary btn-sm" href="/static/proofs/stripe.jpg" download="${co.toLowerCase()}-stripe-demo.jpg" target="_blank">💾 Save High-Res Demo</a>
+        </div>
+      </div>
+    `;
+  } else {
+    title.textContent = "⚡ Autonomous Multi-Agent AI Revenue Cloud Proof";
+    canvas.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%;">
+        <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 340px;">
+          <img id="photoProofImg" src="/static/proofs/saas.jpg" alt="ProspectPulse Architecture" style="width: 100%; height: auto; display: block; object-fit: cover;">
+          <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--emerald); border: 1px solid rgba(16,185,129,0.3);">
+            ✓ 40h Reclaimed / Rep
+          </div>
+        </div>
+        <div style="margin-top: 14px;">
+          <strong style="font-size: 15px; color: #fff;">Multi-Agent Pipeline Architecture for ${co}</strong>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Gemini 3.6 Search Grounding · Sumble Org API · Tavily Living X-Ray</div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 14px;">
+          <button class="btn btn-primary btn-sm" onclick="attachProofToEmail()">📎 Attach Architecture Link to Email</button>
+          <a class="btn btn-secondary btn-sm" href="/static/proofs/saas.jpg" download="${co.toLowerCase()}-ai-architecture.jpg" target="_blank">💾 Save High-Res Demo</a>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function toggleProofMode(mode) {
+  const isPhoto = mode === 'photo';
+  const photoView = document.getElementById('proofPhotoView');
+  const vectorView = document.getElementById('proofVectorView');
+  const btnPhoto = document.getElementById('btnProofPhoto');
+  const btnVector = document.getElementById('btnProofVector');
+
+  if (photoView) photoView.style.display = isPhoto ? 'flex' : 'none';
+  if (vectorView) vectorView.style.display = isPhoto ? 'none' : 'flex';
+  if (btnPhoto) btnPhoto.className = isPhoto ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+  if (btnVector) btnVector.className = isPhoto ? 'btn btn-secondary btn-sm' : 'btn btn-primary btn-sm';
+}
+
+function attachProofToEmail() {
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  const imgEl = document.getElementById('photoProofImg');
+  const src = imgEl ? imgEl.src : '';
+  const snippet = `\n\nP.S. I attached your high-resolution virtual sock proof preview here: [View ${co} 1-Hour Digital Proof](${src || 'https://sockclub.com/custom'})`;
+  const emailInput = document.getElementById('emailBodyInput');
+  if (emailInput) {
+    emailInput.value += snippet;
+    runDeliverabilityAudit();
+    alert('✓ Photorealistic proof preview link attached to email draft!');
+  }
+}
+
+function updatePhoneScripts(key) {
+  const p = PROFILE_PRESETS[key] || PROFILE_PRESETS.sockclub;
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  
+  if (key === 'sockclub') {
+    document.getElementById('callOpenerText').textContent = `"Hey [Name], Travis here with Sock Club in Austin — quick call as I saw you're leading [Title] at ${co}. We manufacture custom-knit combed cotton socks in our USA mill with a 95%+ keep-and-wear rate for corporate events and client onboarding..."`;
+    document.getElementById('voicemailText').value = `"Hey [Name], Travis with Sock Club. We just put together a free custom digital sock proof for ${co} with your brand pantones for your upcoming events. I sent a 1-click preview to your email — let me know what you think!"`;
+  } else if (key === 'zendesk') {
+    document.getElementById('callOpenerText').textContent = `"Hey [Name], Travis here with Zendesk — noticed you're leading support operations at ${co}. We help scaling CX teams deploy autonomous AI agents that deflect 45%+ of tier-1 inquiries on day one without complex consultant rollouts..."`;
+    document.getElementById('voicemailText').value = `"Hey [Name], Travis with Zendesk. Put together a quick simulation showing how ${co} could deflect 40%+ of repetitive support tickets while reducing response times to under a minute. Dropped the interactive preview in your inbox!"`;
+  } else if (key === 'stripe') {
+    document.getElementById('callOpenerText').textContent = `"Hey [Name], Travis with Stripe — reaching out because we've seen teams in your space increase card authorization rates by 3.8% and recover 40%+ of failed recurring charges using Adaptive Acceptance AI..."`;
+    document.getElementById('voicemailText').value = `"Hey [Name], Travis with Stripe. Put together a custom teardown of payment optimization and authorization lift models for ${co}. Emailed you the 2-minute overview — talk soon!"`;
+  } else {
+    document.getElementById('callOpenerText').textContent = `"Hey [Name], Travis here — reaching out because our agentic intelligence platform reclaims ~40 hours per sales rep every month by automating live multi-source account research..."`;
+    document.getElementById('voicemailText').value = `"Hey [Name], Travis here. Sent over an overview of how your team can automate pre-call research and personalized multi-channel outreach in seconds. Have a great week!"`;
+  }
+}
+
+function renderBattlecardsModalList() {
+  const cards = BATTLECARDS_BY_PRESET[currentActivePreset] || BATTLECARDS_BY_PRESET.sockclub;
+  const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
+  
+  document.getElementById('battlecardsModalHeader').textContent = `⚔️ ${p.companyName} Competitor Battlecards`;
+  document.getElementById('battlecardsList').innerHTML = cards.map(b => `
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3 style="font-size: 16px; color: var(--amber);">${b.name}</h3>
+        <span class="badge badge-amber">${b.tag}</span>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">${b.pitch}</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px;">
+        <div style="background: rgba(244,63,94,0.08); border: 1px solid rgba(244,63,94,0.25); border-radius: 8px; padding: 12px;">
+          <strong style="color: var(--rose); font-size: 12px; text-transform: uppercase;">Their Weaknesses:</strong>
+          <ul style="font-size: 12.5px; padding-left: 16px; margin-top: 6px; line-height: 1.6;">
+            ${b.them.map(t => `<li>${t}</li>`).join('')}
+          </ul>
+        </div>
+        <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 8px; padding: 12px;">
+          <strong style="color: var(--emerald); font-size: 12px; text-transform: uppercase;">How ${p.companyName} Wins:</strong>
+          <ul style="font-size: 12.5px; padding-left: 16px; margin-top: 6px; line-height: 1.6;">
+            ${b.us.map(u => `<li>${u}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <div style="font-size: 12.5px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border-left: 3px solid var(--amber);">
+        <strong>Trap Question:</strong> "${b.trap}"
+      </div>
+    </div>
+  `).join('');
+}
+
+// Deliverability & Spam Score Auditor
+function runDeliverabilityAudit() {
+  const subj = document.getElementById('emailSubjectInput').value || '';
+  const body = document.getElementById('emailBodyInput').value || '';
+  const fullText = (subj + ' ' + body).toLowerCase();
+  
+  const words = fullText.trim().split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  const readSecs = Math.round((wordCount / 220) * 60);
+
+  // Spam Keyword Dictionary
+  const spamKeywords = ['100%', 'guarantee', 'urgent', 'act now', 'click here', 'risk free', 'no obligation', 'winner', 'cash', 'exclusive deal', 'free gift'];
+  const foundSpam = spamKeywords.filter(k => fullText.includes(k));
+
+  let score = 100;
+  if (wordCount > 150) score -= 15;
+  if (wordCount < 30) score -= 10;
+  score -= (foundSpam.length * 12);
+  if (subj.includes('!') || subj.toUpperCase() === subj && subj.length > 5) score -= 15;
+  score = Math.max(20, Math.min(100, score));
+
+  const scoreEl = document.getElementById('auditScoreVal');
+  scoreEl.textContent = `${score} / 100 (${score >= 85 ? 'Optimal' : score >= 70 ? 'Moderate' : 'Risky'})`;
+  scoreEl.style.color = score >= 85 ? 'var(--emerald)' : score >= 70 ? 'var(--amber)' : 'var(--rose)';
+
+  document.getElementById('auditReadTimeVal').textContent = `${readSecs}s (${wordCount} words)`;
+  document.getElementById('auditGradeVal').textContent = `Grade ${Math.min(9, Math.max(4, Math.round(wordCount / 14)))}.2 (Executive)`;
+
+  const spamEl = document.getElementById('auditSpamFlagsVal');
+  if (foundSpam.length > 0) {
+    spamEl.textContent = `⚠️ Flagged: "${foundSpam.join(', ')}"`;
+    spamEl.style.color = 'var(--amber)';
+  } else {
+    spamEl.textContent = '✓ 0 Flags Found';
+    spamEl.style.color = 'var(--emerald)';
+  }
+}
+
+function autoCleanSpamFlags() {
+  let body = document.getElementById('emailBodyInput').value;
+  body = body.replace(/100%/gi, 'fully')
+             .replace(/guarantee/gi, 'ensure')
+             .replace(/act now/gi, 'open to connecting')
+             .replace(/risk free/gi, 'zero commitment')
+             .replace(/urgent/gi, 'timely');
+  document.getElementById('emailBodyInput').value = body;
+  runDeliverabilityAudit();
+  alert('✓ Spam trigger phrases replaced with consultative executive language!');
+}
+
+// A/B Subject Line Generator
+function generateAbVariants() {
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  const variants = [
+    { type: '🎯 Pattern Interrupt', text: `Made some socks for ${co} 👀` },
+    { type: '📊 Direct ROI & Waste', text: `Eliminating 90% swag waste for ${co} (Direct USA Mill)` },
+    { type: '🤝 Low-Friction Hook', text: `Quick question re: ${co} event gifting proofs` }
+  ];
+
+  const container = document.getElementById('abVariantsContainer');
+  container.innerHTML = variants.map(v => `
+    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; cursor: pointer;" onclick="applySubjectVariant('${v.text.replace(/'/g, "\\'")}')">
+      <div style="font-size: 12.5px;"><strong>${v.type}:</strong> <span style="color: var(--text-muted);">${v.text}</span></div>
+      <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 11px;">Apply</button>
+    </div>
+  `).join('');
+}
+
+function applySubjectVariant(txt) {
+  document.getElementById('emailSubjectInput').value = txt;
+  runDeliverabilityAudit();
+}
+
+// Search Trigger
+function runProspectSearch() {
+  const query = document.getElementById('omniInput').value.trim();
+  if (!query) return;
+
+  const seniority = document.getElementById('senioritySelect').value;
+  const persona = document.getElementById('personaSelect').value;
+  const competitor = document.getElementById('competitorSelect').value;
+
+  gotoScreen(2);
+  document.getElementById('s2AccountTitle').innerHTML = `<span>Researching <strong>${query}</strong>...</span> <span class="badge badge-indigo">Querying Live MCPs</span>`;
+  document.getElementById('firmographicsContent').innerHTML = '<div class="skeleton" style="height: 80px;"></div>';
+  document.getElementById('liveNewsContent').innerHTML = '<div class="skeleton" style="height: 80px;"></div>';
+  document.getElementById('stakeholderCanvas').innerHTML = '<div class="skeleton" style="height: 140px;"></div>';
+
+  renderRoiWidget();
+
+  fetch('/api/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'prospect',
+      profile: 'sockclub',
+      profile_data: activeProfileData,
+      fields: { mode: 'company', value: query, seniority, persona, competitor }
+    })
+  })
+  .then(res => res.json())
+  .then(({ job_id }) => {
+    const es = new EventSource('/api/stream/' + job_id);
+    es.addEventListener('result', e => {
+      try {
+        const d = JSON.parse(e.data);
+        parseAndRenderResults(d.result);
+      } catch (_) {}
+    });
+    es.addEventListener('done', () => es.close());
+  });
+}
+
+// Dynamic ROI Calculator Engine
+function renderRoiWidget() {
+  const type = PROFILE_PRESETS[currentActivePreset] ? PROFILE_PRESETS[currentActivePreset].type : 'swag';
+  const box = document.getElementById('roiCalculatorWidget');
+  const fullBox = document.getElementById('fullRoiTeardownView');
+
+  if (type === 'swag') {
+    box.innerHTML = `
+      <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Order Volume: <strong id="roiUnitsVal">500</strong> pairs</div>
+      <input type="range" min="50" max="2500" step="50" value="500" oninput="calculateSwagRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+        <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); padding: 8px; border-radius: 6px;">
+          <div style="color: var(--rose); font-weight: 700;">🗑️ Generic Swag Waste</div>
+          <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">$4,500 (90% trash)</div>
+        </div>
+        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
+          <div style="color: var(--emerald); font-weight: 700;">🧦 Sock Club Keep Rate</div>
+          <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">475 Active Wearers (95%)</div>
+        </div>
+      </div>
+      <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">Produces ~57,000 annual brand impressions at ~$0.08 / impression.</div>
+    `;
+
+    if (fullBox) {
+      fullBox.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 14px; border-radius: 10px;">
+            <strong style="color: var(--indigo);">Direct USA Mill Savings</strong>
+            <div style="font-size: 18px; font-weight: 800; margin-top: 4px;">30% – 50% Less</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Zero middleman broker markup compared to SwagUp / 4imprint resellers.</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 14px; border-radius: 10px;">
+            <strong style="color: var(--emerald);">Wearer Longevity</strong>
+            <div style="font-size: 18px; font-weight: 800; margin-top: 4px;">50+ Washes</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">75% US-grown combed cotton with woven knit-in designs that never crack.</div>
+          </div>
+        </div>
+      `;
+    }
+  } else if (type === 'cx') {
+    box.innerHTML = `
+      <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Support Headcount: <strong id="roiUnitsVal">50</strong> agents</div>
+      <input type="range" min="10" max="300" step="5" value="50" oninput="calculateCxRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
+          <div style="color: var(--emerald); font-weight: 700;">🤖 AI Ticket Deflection</div>
+          <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">$18,000 / mo saved</div>
+        </div>
+        <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); padding: 8px; border-radius: 6px;">
+          <div style="color: var(--indigo); font-weight: 700;">⏱️ Response Speed</div>
+          <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">4.2h → 45 Seconds</div>
+        </div>
+      </div>
+      <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">Annual net cost reduction of ~$216,000 across tier-1 tickets.</div>
+    `;
+  } else {
+    box.innerHTML = `
+      <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Sales/Eng Team: <strong id="roiUnitsVal">25</strong> users</div>
+      <input type="range" min="5" max="150" step="5" value="25" oninput="calculateSaasRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
+          <div style="color: var(--emerald); font-weight: 700;">⚡ Time Reclaimed</div>
+          <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">1,000 hrs / month</div>
+        </div>
+        <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); padding: 8px; border-radius: 6px;">
+          <div style="color: var(--indigo); font-weight: 700;">📈 Pipeline Velocity</div>
+          <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">+35% Faster Cycles</div>
+        </div>
+      </div>
+      <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">$120,000+ in annual engineering &amp; sales productivity reclaimed.</div>
+    `;
+  }
+}
+
+function calculateSwagRoi(val) {
+  document.getElementById('roiUnitsVal').textContent = val;
+  const waste = Math.round(val * 10 * 0.9);
+  const wearers = Math.round(val * 0.95);
+  document.getElementById('roiWasteVal').textContent = `$${waste.toLocaleString()} (90% trash)`;
+  document.getElementById('roiKeepVal').textContent = `${wearers.toLocaleString()} Active Wearers (95%)`;
+}
+
+function calculateCxRoi(val) {
+  document.getElementById('roiUnitsVal').textContent = val;
+  const savings = Math.round(val * 360);
+  document.getElementById('roiWasteVal').textContent = `$${savings.toLocaleString()} / mo saved`;
+}
+
+function calculateSaasRoi(val) {
+  document.getElementById('roiUnitsVal').textContent = val;
+  const hrs = Math.round(val * 40);
+  document.getElementById('roiWasteVal').textContent = `${hrs.toLocaleString()} hrs / month`;
+}
+
+function insertRoiBlockToDraft() {
+  const type = PROFILE_PRESETS[currentActivePreset] ? PROFILE_PRESETS[currentActivePreset].type : 'swag';
+  let snippet = '';
+  if (type === 'swag') {
+    snippet = `\n\nQuick ROI note: Generic catalog swag (pens, cheap totes) averages a 90% trash rate ($4,500+ wasted per 500 units). With our direct USA-knit combed cotton, 95%+ of recipients keep and wear them for months, delivering over 50,000 high-utility brand impressions.`;
+  } else if (type === 'cx') {
+    snippet = `\n\nQuick ROI note: At your support team scale, autonomous AI deflection typically resolves 45%+ of tier-1 volume on day one, reducing first response times from hours to under 45 seconds while reclaiming ~$18,000/mo in ops overhead.`;
+  } else {
+    snippet = `\n\nQuick ROI note: Teams implementing this agentic pipeline reclaim ~40 hours per rep every month, accelerating pipeline velocity by 35% with hyper-personalized live intelligence.`;
+  }
+
+  const el = document.getElementById('emailBodyInput');
+  if (el) {
+    el.value += snippet;
+    runDeliverabilityAudit();
+    alert('✓ ROI block inserted into active email draft!');
+  }
+}
+
+// Result Parser
+function parseAndRenderResults(raw) {
+  let data = null;
+  const m = raw.match(/```json\s*([\s\S]*?)```/i);
+  if (m) {
+    try { data = JSON.parse(m[1].trim()); } catch (_) {}
+  }
+  if (!data) {
+    try { data = JSON.parse(raw.trim()); } catch (_) {}
+  }
+  if (!data) return;
+
+  currentAccountData = data;
+
+  document.getElementById('s2AccountTitle').innerHTML = `<span>${data.company}</span> <span class="badge badge-emerald">Verified Lead</span>`;
+  document.getElementById('s2WhyNow').textContent = data.whyNow || '';
+
+  // Firmographics
+  document.getElementById('firmographicsContent').innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div><span style="color: var(--text-faint);">Domain:</span> <strong>${data.companyZoomInfoUrl ? data.companyZoomInfoUrl.split('/').pop() : 'Verified'}</strong></div>
+      <div><span style="color: var(--text-faint);">Class:</span> <span class="badge badge-indigo">${data.accountClass || 'Net-New'}</span></div>
+    </div>
+    <div style="margin-top: 10px; color: var(--text-muted);">${data.summary || ''}</div>
+  `;
+
+  // News
+  const newsList = data.news || [];
+  if (newsList.length) {
+    document.getElementById('liveNewsContent').innerHTML = newsList.map(n => `
+      <div style="margin-bottom: 8px;">
+        <a href="${n.url || '#'}" target="_blank" style="color: var(--sky); font-weight: 600; text-decoration: none;">${n.headline}</a>
+        <div style="font-size: 12px; color: var(--text-faint); margin-top: 2px;">${n.relevance || ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // Battlecard
+  const bc = (data.competitor && data.competitor.battlecard) || {};
+  document.getElementById('battlecardContent').innerHTML = `
+    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+      <strong>Angle:</strong> ${data.competitor ? data.competitor.angle : 'Position on 95%+ wearable retention vs disposable catalogs.'}
+    </div>
+    <div style="font-size: 12px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border-left: 3px solid var(--amber);">
+      <strong>Trap Question:</strong> "${bc.trapQuestion || 'How confident are you that recipients keep and wear your swag 3 months later?'}"
+    </div>
+  `;
+
+  // Stakeholders
+  const tiers = data.tiers || [];
+  let totalContacts = 0;
+  let html = '';
+
+  tiers.forEach((t) => {
+    const contacts = t.contacts || [];
+    totalContacts += contacts.length;
+    html += `
+      <div class="tier-section">
+        <div class="tier-header">
+          <span>${t.name}</span>
+          <span>${contacts.length} Found</span>
+        </div>
+    `;
+
+    contacts.forEach((c) => {
+      html += `
+        <div class="contact-card" onclick="draftForContact('${c.name}', '${c.title}')">
+          <div class="contact-row">
+            <div class="contact-avatar">${c.initials || 'DM'}</div>
+            <div class="contact-info">
+              <div class="contact-name">${c.name}</div>
+              <div class="contact-title">${c.title}</div>
+              <div class="badge-row">
+                <span class="badge badge-emerald">✓ Verified Current</span>
+                <span class="badge badge-sky"><a href="${c.linkedInUrl || '#'}" target="_blank" style="color: inherit; text-decoration: none;">LinkedIn Profile ↗</a></span>
+                <span class="badge badge-indigo">${c.email || 'Direct Email'}</span>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); draftForContact('${c.name}', '${c.title}')">
+              ⚡ Outreach
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+  });
+
+  document.getElementById('stakeholderCanvas').innerHTML = html;
+  document.getElementById('stakeholderCount').textContent = `${totalContacts} Current Contacts Verified`;
+}
+
+// Drafting
+function draftForContact(name, title) {
+  gotoScreen(3);
+  document.getElementById('studioRecipientTitle').textContent = `Outreach Studio — ${name}`;
+  document.getElementById('emailToText').textContent = `${name} (${title})`;
+  document.getElementById('emailSubjectInput').value = 'Generating personalized pitch...';
+  document.getElementById('emailBodyInput').value = 'Synthesizing multi-channel sequence...';
+  
+  updateProductStudioCanvas(currentActivePreset);
+  updatePhoneScripts(currentActivePreset);
+  generateAbVariants();
+
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  document.getElementById('linkedinInmailInput').value = `Hi ${name.split(' ')[0]}, saw you're leading ${title} at ${co}. We put together a free 1-hour digital proof of custom-knit combed cotton socks for ${co}'s upcoming events. Mind if I send the preview link over?`;
+  updateCharCount();
+
+  fetch('/api/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'outreach',
+      profile: 'sockclub',
+      profile_data: activeProfileData,
+      fields: {
+        company: co,
+        contact: name,
+        goal: 'meeting',
+        mode: 'draft'
+      }
+    })
+  })
+  .then(res => res.json())
+  .then(({ job_id }) => {
+    const es = new EventSource('/api/stream/' + job_id);
+    es.addEventListener('result', e => {
+      try {
+        const d = JSON.parse(e.data);
+        renderOutreachResult(d.result);
+      } catch (_) {}
+    });
+    es.addEventListener('done', () => es.close());
+  });
+}
+
+function renderOutreachResult(raw) {
+  let data = null;
+  const m = raw.match(/```json\s*([\s\S]*?)```/i);
+  if (m) {
+    try { data = JSON.parse(m[1].trim()); } catch (_) {}
+  }
+  if (!data) {
+    try { data = JSON.parse(raw.trim()); } catch (_) {}
+  }
+  if (!data) return;
+
+  currentDraftData = data;
+  document.getElementById('emailFromText').textContent = data.from || activeProfileData.senderName;
+  document.getElementById('emailSubjectInput').value = data.subject || '';
+  document.getElementById('emailBodyInput').value = data.body || '';
+
+  runDeliverabilityAudit();
+
+  // Sequence Timeline
+  const seq = data.sequence || [];
+  document.getElementById('sequenceTimeline').innerHTML = seq.map(s => `
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 12.5px; color: var(--indigo);">
+        <span>Day ${s.day} · ${s.channel.toUpperCase()}</span>
+        <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 11px;" onclick="copySequenceTouch('${s.body ? s.body.replace(/'/g, "\\'") : ''}')">Copy</button>
+      </div>
+      <div style="font-weight: 600; font-size: 13px; margin: 4px 0;">${s.label || ''}</div>
+      <div style="font-size: 12px; color: var(--text-muted);">${s.purpose || ''}</div>
+    </div>
+  `).join('');
+
+  saveHistory(data);
+}
+
+// Tone Tuning Knobs
+function tuneTone(style) {
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  const name = document.getElementById('emailToText').textContent.split(' ')[0] || 'there';
+
+  if (style === 'short') {
+    document.getElementById('emailSubjectInput').value = `Quick question re: ${co} initiatives`;
+    document.getElementById('emailBodyInput').value = `Hi ${name},\n\nNoticed ${co} has key brand & marketing initiatives coming up. We deliver direct-from-mill custom solutions with guaranteed turnaround and 95%+ wearable retention.\n\nOur team put together a free concept proof matching ${co}'s guidelines in under 1 hour. Open to taking a quick look?\n\nBest,\n${activeProfileData.senderName}`;
+  } else if (style === 'executive') {
+    document.getElementById('emailSubjectInput').value = `Eliminating 90% waste & broker markups for ${co}`;
+    document.getElementById('emailBodyInput').value = `Hi ${name},\n\nMost enterprise leaders we work with were losing 30-50% in middleman markups. We provide direct proprietary infrastructure with guaranteed rapid turnaround and zero setup fees.\n\nWould you be open to reviewing a custom concept for ${co} this week?\n\nBest,\n${activeProfileData.senderName}`;
+  } else if (style === 'rush') {
+    document.getElementById('emailSubjectInput').value = `5-day rapid delivery window for ${co}`;
+    document.getElementById('emailBodyInput').value = `Hi ${name},\n\nIf ${co} has upcoming events or quarterly milestones on tight deadlines, our production facility delivers complete custom batches in 5 business days or fewer.\n\nWe can turn around a free vector proof in under an hour. Worth a quick 5-min sync?\n\nBest,\n${activeProfileData.senderName}`;
+  } else if (style === 'casual') {
+    document.getElementById('emailSubjectInput').value = `Made something for ${co} 👀`;
+    document.getElementById('emailBodyInput').value = `Hey ${name},\n\nOur team put together a quick virtual preview tailored with ${co}'s branding — turned out super clean!\n\nNo pitch or obligation, just wanted to share the concept over for your next project. Mind if I send the link?\n\nCheers,\n${activeProfileData.senderName}`;
+  }
+  runDeliverabilityAudit();
+}
+
+// 1-Page Executive Account Brief Modal Generator
+function openExecutiveBriefModal() {
+  if (!currentAccountData) {
+    alert('Please search an account first to generate an Executive Call Brief.');
+    return;
+  }
+  const co = currentAccountData.company || 'Target Account';
+  const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
+  const contacts = (currentAccountData.tiers && currentAccountData.tiers[0] && currentAccountData.tiers[0].contacts) || [];
+  const topLead = contacts[0] || { name: 'Key Executive', title: 'Director / VP', email: 'lead@domain.com' };
+
+  const area = document.getElementById('briefPrintArea');
+  area.innerHTML = `
+    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--indigo); padding-bottom: 12px; margin-bottom: 16px;">
+      <div>
+        <h1 style="font-size: 24px; color: var(--indigo); font-weight: 800;">${co} — Executive Call Brief</h1>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Prepared for: Travis (${p.companyName}) · Account Strategy &amp; Call Cheat Sheet</div>
+      </div>
+      <div style="text-align: right; font-size: 12px; color: var(--text-faint);">
+        <div>Class: <span class="badge badge-emerald">Verified Lead</span></div>
+        <div style="margin-top: 4px;">Date: ${new Date().toLocaleDateString()}</div>
+      </div>
+    </div>
+
+    <!-- 2-COL TOP SUMMARY -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
+        <strong style="color: var(--sky); text-transform: uppercase; font-size: 11.5px;">🏢 Account Firmographics &amp; Why Now</strong>
+        <p style="margin-top: 6px; font-size: 12.5px; color: var(--text-main);">${currentAccountData.whyNow || currentAccountData.summary || 'Scaling high-priority growth initiatives.'}</p>
+      </div>
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
+        <strong style="color: var(--emerald); text-transform: uppercase; font-size: 11.5px;">👤 Primary Target Stakeholder</strong>
+        <div style="font-size: 14px; font-weight: 700; margin-top: 4px;">${topLead.name}</div>
+        <div style="font-size: 12.5px; color: var(--text-muted);">${topLead.title}</div>
+        <div style="font-size: 12px; color: var(--sky); margin-top: 2px;">Email: ${topLead.email}</div>
+      </div>
+    </div>
+
+    <!-- DISPLACEMENT BATTLECARD -->
+    <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <strong style="color: var(--amber); text-transform: uppercase; font-size: 11.5px;">⚔️ Incumbent Displacement Talk Track</strong>
+        <span class="badge badge-amber">Trap Question Ready</span>
+      </div>
+      <div style="font-size: 13px; font-weight: 600;">Angle: ${currentAccountData.competitor ? currentAccountData.competitor.angle : 'Position on 95%+ wearable retention vs disposable catalogs.'}</div>
+      <div style="font-size: 12.5px; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 8px; border-radius: 6px; border-left: 3px solid var(--amber);">
+        <strong>Trap Question to Ask:</strong> "${(currentAccountData.competitor && currentAccountData.competitor.battlecard && currentAccountData.competitor.battlecard.trapQuestion) || 'What percentage of the swag you sent last quarter is still being actively worn today?'}"
+      </div>
+    </div>
+
+    <!-- ROI VALUE METRICS -->
+    <div style="background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 14px;">
+      <strong style="color: var(--indigo); text-transform: uppercase; font-size: 11.5px;">🧮 Quantitative ROI Proof Model</strong>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; text-align: center;">
+        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+          <div style="font-size: 11px; color: var(--text-faint);">Waste Eliminated</div>
+          <div style="font-size: 15px; font-weight: 800; color: var(--rose);">$4,500+</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+          <div style="font-size: 11px; color: var(--text-faint);">Wearer Retention</div>
+          <div style="font-size: 15px; font-weight: 800; color: var(--emerald);">95%+ Keep Rate</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+          <div style="font-size: 11px; color: var(--text-faint);">Delivery Speed</div>
+          <div style="font-size: 15px; font-weight: 800; color: var(--sky);">5-Day Rush</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('briefModal').style.display = 'grid';
+}
+
+function closeExecutiveBriefModal() { document.getElementById('briefModal').style.display = 'none'; }
+
+// AI Objection Roleplay Engine
+function resetRoleplayChat() {
+  const persona = document.getElementById('roleplayPersonaSelect').value;
+  const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
+  const chat = document.getElementById('roleplayChatBox');
+  roleplayMessages = [];
+
+  let opening = "";
+  if (persona === 'skeptical_vp') {
+    opening = `Prospect (VP Marketing): "Hey, I have about 2 minutes before my next sync. We already use SwagUp for all our conference boxes. What's this about?"`;
+  } else if (persona === 'overwhelmed_hr') {
+    opening = `Prospect (Head of People): "Hi Travis, honestly we have zero budget right now and our onboarding is already crazy. Why should I look at this?"`;
+  } else {
+    opening = `Prospect (CFO/RevOps): "I'm looking at our vendor spend. Prove to me this isn't just another disposable expense that ends up in a trash can."`;
+  }
+
+  roleplayMessages.push({ role: 'model', text: opening });
+  chat.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 8px; max-width: 85%;">${opening}</div>`;
+  document.getElementById('roleplayCoachBar').style.display = 'none';
+}
+
+function sendRoleplayMessage() {
+  const input = document.getElementById('roleplayUserInput');
+  const txt = input.value.trim();
+  if (!txt) return;
+
+  const chat = document.getElementById('roleplayChatBox');
+  chat.innerHTML += `<div style="background: var(--indigo-glow); border: 1px solid rgba(99,102,241,0.3); color: #fff; padding: 10px 14px; border-radius: 8px; margin-left: auto; max-width: 85%;">${txt}</div>`;
+  roleplayMessages.push({ role: 'user', text: txt });
+  input.value = '';
+  chat.scrollTop = chat.scrollHeight;
+
+  fetch('/api/roleplay', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: roleplayMessages,
+      persona: document.getElementById('roleplayPersonaSelect').value,
+      profile_data: activeProfileData
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const reply = data.reply || 'Thanks for sharing. Send me an email and I will take a look.';
+    roleplayMessages.push({ role: 'model', text: reply });
+    chat.innerHTML += `<div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 8px; max-width: 85%;">${reply}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+
+    const coachBar = document.getElementById('roleplayCoachBar');
+    const coachText = document.getElementById('roleplayCoachText');
+    coachBar.style.display = 'block';
+    coachText.textContent = `Score: ${data.score || 88}/100 · ${data.coach_tip || 'Strong objection handling!'}`;
+  });
+}
+
+// 1-Click Multi-Threading Modal
+function openMultiThreadingModal() {
+  if (!currentAccountData || !currentAccountData.tiers) {
+    alert('Please search an account first to multi-thread contacts.');
+    return;
+  }
+  const co = currentAccountData.company;
+  const container = document.getElementById('multiThreadCardsContainer');
+  const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
+  
+  if (currentActivePreset === 'sockclub') {
+    container.innerHTML = `
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge badge-sky">🎪 Persona 1: Field &amp; Event Marketing</span>
+          <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt1')">📋 Copy Email</button>
+        </div>
+        <strong>Subject:</strong> 5-day rush hero swag for ${co} events<br>
+        <div id="mt1" style="font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+Hi [Event Lead],\n\nNoticed ${co} is driving event booth activations. Generic catalog items (pens, stress balls) average a 90% trash rate at trade shows. We manufacture custom-knit combed cotton socks in our USA mill with a 95%+ keep-and-wear rate.\n\nOur in-house design team can turn around free virtual proofs for ${co} in under an hour. Mind if I send a preview over?
+        </div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge badge-emerald">🎁 Persona 2: People Ops &amp; Culture</span>
+          <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt2')">📋 Copy Email</button>
+        </div>
+        <strong>Subject:</strong> High-utility onboarding gifts for ${co} new hires<br>
+        <div id="mt2" style="font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+Hi [People Ops Lead],\n\nFor ${co}'s upcoming employee onboarding and culture milestones, we create custom-woven combed cotton socks that new hires actually wear and love for years (95%+ keep rate).\n\nWe provide free 1-hour digital proofs and direct mailer fulfillment to employee homes. Open to seeing a mockup concept for ${co}?
+        </div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge badge-indigo">💎 Persona 3: CMO &amp; Brand Leadership</span>
+          <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt3')">📋 Copy Email</button>
+        </div>
+        <strong>Subject:</strong> Protecting ${co} brand equity in promotional gifting<br>
+        <div id="mt3" style="font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+Hi [Brand VP],\n\nUnlike middleman swag brokers who mark up generic overseas items by 30–50%, Sock Club is a direct USA manufacturer. We knit true Jacquard woven patterns directly into US-grown combed cotton threads with 50+ wash durability.\n\nWould you be open to reviewing a custom vector proof for ${co} with zero commitment?
+        </div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge badge-sky">⚡ Persona 1: Operations &amp; Strategy</span>
+          <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt1')">📋 Copy Email</button>
+        </div>
+        <strong>Subject:</strong> Accelerating ${co} operational efficiency with ${p.companyName}<br>
+        <div id="mt1" style="font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+Hi [Ops Director],\n\nNoticed ${co} is scaling operations. We provide modern unified architecture with ${p.valueProp}.\n\nWould you be open to a 10-minute briefing on how teams like yours reduce operational overhead?
+        </div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge badge-emerald">💼 Persona 2: Technology &amp; Engineering Lead</span>
+          <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt2')">📋 Copy Email</button>
+        </div>
+        <strong>Subject:</strong> Rapid deployment &amp; developer velocity for ${co}<br>
+        <div id="mt2" style="font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+Hi [Engineering Lead],\n\nRather than dealing with legacy brittle integrations, ${p.companyName} delivers pre-built components that deploy in days rather than quarters.\n\nOpen to exploring a developer walkthrough for ${co}?
+        </div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge badge-indigo">💎 Persona 3: C-Level Executive Sponsor</span>
+          <button class="btn btn-secondary btn-sm" onclick="copySnippet('mt3')">📋 Copy Email</button>
+        </div>
+        <strong>Subject:</strong> ROI &amp; unit economics optimization for ${co}<br>
+        <div id="mt3" style="font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.6; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+Hi [Executive Sponsor],\n\nReaching out because leading organizations in your sector leverage ${p.companyName} to eliminate platform friction while unlocking predictable economics.\n\nWould you be open to reviewing an economic impact model for ${co}?
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('multiThreadModal').style.display = 'grid';
+}
+
+function closeMultiThreadingModal() { document.getElementById('multiThreadModal').style.display = 'none'; }
+
+function copySnippet(id) {
+  const txt = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(txt).then(() => alert('✓ Email copied!'));
+}
+
+function copyAllMultiThreads() {
+  const t1 = document.getElementById('mt1').innerText;
+  const t2 = document.getElementById('mt2').innerText;
+  const t3 = document.getElementById('mt3').innerText;
+  navigator.clipboard.writeText(`=== THREAD 1 ===\n${t1}\n\n=== THREAD 2 ===\n${t2}\n\n=== THREAD 3 ===\n${t3}`).then(() => alert('✓ All 3 emails copied!'));
+}
+
+function openInEmailClient() {
+  const subj = encodeURIComponent(document.getElementById('emailSubjectInput').value);
+  const body = encodeURIComponent(document.getElementById('emailBodyInput').value);
+  window.location.href = `mailto:?subject=${subj}&body=${body}`;
+}
+
+function switchChannelTab(tab) {
+  activeChannel = tab;
+  document.querySelectorAll('.channel-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('cTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+
+  document.getElementById('channelViewEmail').style.display = tab === 'email' ? 'block' : 'none';
+  document.getElementById('channelViewLinkedin').style.display = tab === 'linkedin' ? 'block' : 'none';
+  document.getElementById('channelViewPhone').style.display = tab === 'phone' ? 'block' : 'none';
+  document.getElementById('channelViewProof').style.display = tab === 'proof' ? 'block' : 'none';
+  document.getElementById('channelViewRoi').style.display = tab === 'roi' ? 'block' : 'none';
+}
+
+function updateCharCount() {
+  const len = document.getElementById('linkedinInmailInput').value.length;
+  const countEl = document.getElementById('linkedinCharCount');
+  countEl.textContent = `${len} / 300`;
+  countEl.className = len > 300 ? 'badge badge-amber' : 'badge badge-sky';
+}
+
+function showObjection(type) {
+  const box = document.getElementById('objectionRebuttalBox');
+  const p = PROFILE_PRESETS[currentActivePreset] || PROFILE_PRESETS.sockclub;
+  
+  if (currentActivePreset === 'sockclub') {
+    if (type === 'vendor') {
+      box.innerHTML = `<strong>Talk Track:</strong> "Totally understand. Most teams we work with used generic catalog brokers, but found 90% of items ended up in trash cans. We manufacture directly in North Carolina with custom-woven combed cotton that has a 95%+ keep rate. Would you be open to seeing a free virtual design proof for your next event?"`;
+    } else if (type === 'budget') {
+      box.innerHTML = `<strong>Talk Track:</strong> "Completely get it. We offer free digital design proofs in under 1 hour with zero commitment, so your team has ready-to-order concepts in hand whenever your next event budget opens up."`;
+    } else if (type === 'email') {
+      box.innerHTML = `<strong>Talk Track:</strong> "Will do! I have a 1-hour free design proof already queued up for your brand. What's the best email address to send that over to?"`;
+    }
+  } else {
+    if (type === 'vendor') {
+      box.innerHTML = `<strong>Talk Track:</strong> "Totally understand. Many of our customers previously ran legacy stacks, but found high maintenance costs and slow iteration were holding them back. ${p.differentiator}. Would you be open to a 5-minute comparison?"`;
+    } else if (type === 'budget') {
+      box.innerHTML = `<strong>Talk Track:</strong> "Completely get it. We build custom ROI teardowns showing how the platform self-funds within the first quarter by eliminating ops overhead."`;
+    } else if (type === 'email') {
+      box.innerHTML = `<strong>Talk Track:</strong> "Will do! What's the best email address to drop the 2-minute executive brief over to?"`;
+    }
+  }
+}
+
+function updateSockColors() {
+  const base = document.getElementById('sockBaseColorInput').value;
+  const accent = document.getElementById('sockAccentColorInput').value;
+
+  const b = document.getElementById('sockBaseSvg');
+  const c = document.getElementById('sockCuffSvg');
+  const t = document.getElementById('sockToeSvg');
+  const h = document.getElementById('sockHeelSvg');
+
+  if (b) b.setAttribute('fill', base);
+  if (c) c.setAttribute('fill', accent);
+  if (t) t.setAttribute('fill', accent);
+  if (h) h.setAttribute('fill', accent);
+}
+
+function downloadProductProof() {
+  const node = document.getElementById('productProofCanvas');
+  htmlToImage.toPng(node).then(dataUrl => {
+    const a = document.createElement('a');
+    a.download = `${(currentAccountData && currentAccountData.company ? currentAccountData.company : 'custom')}-proof.png`;
+    a.href = dataUrl;
+    a.click();
+  });
+}
+
+function copyActiveChannelContent() {
+  if (activeChannel === 'email') copyEmail();
+  else if (activeChannel === 'linkedin') copyLinkedinInmail();
+  else if (activeChannel === 'phone') {
+    navigator.clipboard.writeText(document.getElementById('callOpenerText').textContent).then(() => alert('✓ Phone opener copied!'));
+  } else if (activeChannel === 'proof') {
+    downloadProductProof();
+  }
+}
+
+function copyEmail() {
+  const subj = document.getElementById('emailSubjectInput').value;
+  const body = document.getElementById('emailBodyInput').value;
+  navigator.clipboard.writeText(`Subject: ${subj}\n\n${body}`).then(() => alert('✓ Email copied to clipboard!'));
+}
+
+function copyLinkedinInmail() {
+  const txt = document.getElementById('linkedinInmailInput').value;
+  navigator.clipboard.writeText(txt).then(() => alert('✓ LinkedIn connection note copied!'));
+}
+
+function copySequenceTouch(txt) {
+  navigator.clipboard.writeText(txt).then(() => alert('✓ Sequence touch copied!'));
+}
+
+function copyFullCadence() {
+  if (!currentDraftData || !currentDraftData.sequence) return;
+  const txt = currentDraftData.sequence.map(s => `Day ${s.day} [${s.channel}]: ${s.label}\n${s.body || ''}`).join('\n\n---\n\n');
+  navigator.clipboard.writeText(txt).then(() => alert('✓ Full 5-touch sequence copied!'));
+}
+
+function downloadEml() {
+  const subj = document.getElementById('emailSubjectInput').value;
+  const body = document.getElementById('emailBodyInput').value;
+  const eml = `To: Target Lead\nSubject: ${subj}\nX-Unsent: 1\nContent-Type: text/plain; charset=utf-8\n\n${body}`;
+  const blob = new Blob([eml], { type: 'message/rfc822' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'outreach-draft.eml';
+  a.click();
+}
+
+function exportSalesforceCsv() {
+  if (!currentAccountData || !currentAccountData.tiers) return;
+  let csv = 'First Name,Last Name,Title,Company,Email,LinkedIn,Notes\n';
+  currentAccountData.tiers.forEach(t => {
+    (t.contacts || []).forEach(c => {
+      const parts = (c.name || '').split(' ');
+      csv += `"${parts[0]}","${parts.slice(1).join(' ')}","${c.title}","${currentAccountData.company}","${c.email}","${c.linkedInUrl}","${c.notes || ''}"\n`;
+    });
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(currentAccountData.company || 'account').toLowerCase()}-leads.csv`;
+  a.click();
+}
+
+function generateReplyTriage() {
+  const reply = document.getElementById('replyInput').value.trim();
+  if (!reply) return;
+
+  fetch('/api/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'reply',
+      profile: 'sockclub',
+      profile_data: activeProfileData,
+      fields: { replyText: reply, who: 'Prospect Lead' }
+    })
+  })
+  .then(res => res.json())
+  .then(({ job_id }) => {
+    const es = new EventSource('/api/stream/' + job_id);
+    es.addEventListener('result', e => {
+      try {
+        const d = JSON.parse(e.data);
+        document.getElementById('replyResponseArea').style.display = 'block';
+        document.getElementById('replyOutput').value = d.result;
+      } catch (_) {}
+    });
+    es.addEventListener('done', () => es.close());
+  });
+}
+
+function copyReplyText() {
+  navigator.clipboard.writeText(document.getElementById('replyOutput').value).then(() => alert('✓ Reply copied!'));
+}
+
+// Modals
+function openProfileModal() { document.getElementById('profileModal').style.display = 'grid'; }
+function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+
+function openDeckModal() {
+  currentSlideIndex = 0;
+  renderDeckSlide();
+  document.getElementById('deckModal').style.display = 'grid';
+}
+function closeDeckModal() { document.getElementById('deckModal').style.display = 'none'; }
+function renderDeckSlide() {
+  const s = DECK_SLIDES[currentSlideIndex];
+  document.getElementById('deckSlideContent').innerHTML = `
+    <h3 style="font-size: 18px; color: var(--indigo); margin-bottom: 16px;">${s.title}</h3>
+    <ul style="padding-left: 20px; line-height: 1.8; font-size: 14.5px;">
+      ${s.bullets.map(b => `<li style="margin-bottom: 12px;">${b}</li>`).join('')}
+    </ul>
+  `;
+  document.getElementById('deckSlideNumber').textContent = `Slide ${currentSlideIndex + 1} of ${DECK_SLIDES.length}`;
+}
+function nextSlide() { if (currentSlideIndex < DECK_SLIDES.length - 1) { currentSlideIndex++; renderDeckSlide(); } }
+function prevSlide() { if (currentSlideIndex > 0) { currentSlideIndex--; renderDeckSlide(); } }
+
+function openBattlecardsModal() {
+  renderBattlecardsModalList();
+  document.getElementById('battlecardsModal').style.display = 'grid';
+}
+function closeBattlecardsModal() { document.getElementById('battlecardsModal').style.display = 'none'; }
+
+function openHistoryModal() {
+  const hist = JSON.parse(localStorage.getItem('antigravity_hist') || '[]');
+  document.getElementById('historyList').innerHTML = hist.length ? hist.map(h => `
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px;">
+      <strong>${h.subject || 'Outreach Draft'}</strong>
+      <div style="font-size: 12px; color: var(--text-faint); margin-top: 4px;">To: ${h.to} · ${h.date}</div>
+    </div>
+  `).join('') : '<div style="color: var(--text-faint);">No drafts saved yet.</div>';
+  document.getElementById('historyModal').style.display = 'grid';
+}
+function closeHistoryModal() { document.getElementById('historyModal').style.display = 'none'; }
+
+function saveHistory(data) {
+  const hist = JSON.parse(localStorage.getItem('antigravity_hist') || '[]');
+  hist.unshift({
+    subject: data.subject,
+    to: (data.to && data.to.name) || 'Lead',
+    date: new Date().toLocaleDateString()
+  });
+  localStorage.setItem('antigravity_hist', JSON.stringify(hist.slice(0, 10)));
+}
+
+// Initial setup
+updateAllAppComponentsForPreset('sockclub');
+
+// Shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    document.getElementById('omniInput').focus();
+  }
+  if (e.key === 'Escape') {
+    closeProfileModal();
+    closeMultiThreadingModal();
+    closeExecutiveBriefModal();
+    closeDeckModal();
+    closeBattlecardsModal();
+    closeHistoryModal();
+  }
+});
+</script>
+
+</body>
+</html>

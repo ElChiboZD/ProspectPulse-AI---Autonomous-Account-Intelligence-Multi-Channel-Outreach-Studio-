@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prospect &amp; Outreach Console</title>
+<style>
+  :root{
+    /* Zendesk palette: Kale (#03363D) backgrounds, Zendesk green (#00A656) accent,
+       product blue (#1F73B7) secondary, with Garden-derived support colors. */
+    --bg:#022b30;--panel:#03363D;--panel2:#0a444b;--line:#155c63;
+    --txt:#eef3f2;--muted:#9bb3b3;--accent:#00A656;--accent2:#1F73B7;
+    --warn:#ED8F1C;--bad:#E34F32;--good:#00A656;--chip:#0e4a51;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--txt);font-size:14px;line-height:1.45}
+  header.top{display:flex;align-items:center;justify-content:space-between;
+    padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .logo{width:26px;height:26px;display:grid;place-items:center;color:var(--accent)}
+  .logo svg{width:24px;height:24px;display:block}
+  .who{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+  .who .dot{width:8px;height:8px;border-radius:50%;background:var(--good)}
+  .steps{display:flex;gap:6px;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .step{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;
+    padding:6px 12px;border-radius:20px;border:1px solid transparent}
+  .step .num{width:20px;height:20px;border-radius:50%;background:var(--chip);
+    display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted)}
+  .step.active{color:var(--txt);border-color:var(--line);background:var(--panel2)}
+  .step.active .num{background:var(--accent);color:#fff}
+  .step.done .num{background:var(--good);color:#fff}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 20px 90px}
+  .screen{display:none}.screen.show{display:block}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.04em}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+    color:var(--txt);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit}
+  textarea{resize:vertical;min-height:240px;line-height:1.5;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+  .row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 18px;
+    font-weight:700;font-size:14px;cursor:pointer;transition:.15s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  .btn.blue{background:var(--accent2);color:#fff}
+  .btn.danger{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .toggle{display:flex;gap:8px;flex-wrap:wrap}
+  .toggle .opt{padding:8px 14px;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--muted)}
+  .toggle .opt.on{border-color:var(--accent);color:var(--txt);background:var(--panel2)}
+  .footbar{display:flex;justify-content:space-between;margin-top:20px;align-items:center}
+  .muted{color:var(--muted)}
+  .note{font-size:12px;color:var(--muted);margin-top:4px}
+  .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px}
+  .badge.gn{background:rgba(0,166,86,.15);color:var(--good)}
+  .badge.bl{background:rgba(31,115,183,.15);color:var(--accent2)}
+  .emailhead{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin-bottom:14px}
+  .emailhead .k{color:var(--muted)}
+  /* live activity log */
+  .activity{background:#0b0d11;border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    max-height:340px;overflow:auto;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+  .ev{padding:3px 0;border-bottom:1px solid #1a1d24;display:flex;gap:8px}
+  .ev:last-child{border:none}
+  .ev .tag{flex:none;width:74px;color:var(--muted);text-transform:uppercase;font-size:10px;padding-top:2px}
+  .ev.tool .tag{color:var(--accent2)}
+  .ev.text .tag{color:var(--accent)}
+  .ev.err .tag{color:var(--bad)}
+  .ev .body{white-space:pre-wrap;word-break:break-word;flex:1}
+  .spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--line);
+    border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .output{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:16px;
+    word-break:break-word;font-size:13.5px}
+  .output a{color:var(--accent2);text-decoration:underline;word-break:break-all}
+  .output a:hover{color:var(--accent)}
+  .output h3{font-size:15px;margin:14px 0 6px}
+  .output h4{font-size:13px;color:var(--accent);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.03em}
+  .output hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+  .output code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px}
+  .cost{font-size:12px;color:var(--muted)}
+  /* stakeholder cards */
+  .whynow{border:1px solid var(--good);background:rgba(0,166,86,.08);color:#7fe3b0;
+    border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13.5px}
+  .progress{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+  .prog-head{display:flex;align-items:center;gap:10px;font-weight:600}
+  .prog-timer{margin-left:auto;color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums}
+  .prog-steps{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+  .pstep{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+  .pstep .ic{width:16px;text-align:center;flex:none}
+  .pstep.done{color:var(--txt)} .pstep.done .ic{color:var(--good)}
+  .pstep.active .ic{color:var(--accent)}
+  .intel{border:1px solid var(--line);background:var(--panel);border-radius:10px;
+    padding:14px 16px;margin-bottom:18px;font-size:13.5px}
+  .intel h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent2)}
+  .intel .summary{color:var(--txt);margin-bottom:12px;line-height:1.5}
+  .intel .news-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 8px}
+  .intel .nitem{padding:8px 0;border-top:1px solid var(--line)}
+  .intel .nitem .nh{font-weight:600}
+  .intel .nitem .nd{color:var(--muted);font-size:11px;margin-left:6px}
+  .intel .nitem .nr{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .intel a{color:var(--accent2);text-decoration:underline;word-break:break-all}
+  .intel a:hover{color:var(--accent)}
+  .compbox{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:var(--panel2)}
+  .compbox .cdet{font-weight:600;margin-left:4px}
+  .compbox .csrc{font-size:11px;color:var(--muted);margin-top:4px}
+  .compbox .cangle{font-size:12.5px;color:var(--muted);margin-top:4px}
+  /* competitive battlecard */
+  .battlecard{border:1px solid var(--accent2);border-radius:8px;padding:10px 12px;margin-top:10px;background:rgba(31,115,183,.07)}
+  .battlecard .bc-h{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;margin-bottom:8px}
+  .battlecard .bc-h .bc-copy{margin-left:auto}
+  .battlecard .bc-pt{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+  .battlecard .bc-pt:first-of-type{border-top:none}
+  .battlecard .bc-them,.battlecard .bc-us{font-size:12px}
+  .battlecard .bc-them .lbl{color:var(--warn);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;display:block}
+  .battlecard .bc-us .lbl{color:var(--good);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;display:block}
+  .battlecard .bc-extra{font-size:12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+  .battlecard .bc-extra .k{color:var(--accent2);font-weight:600}
+  .battlecard .bc-extra.landmine .k{color:var(--warn)}
+  .tier{margin-bottom:18px}
+  .tier h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);
+    margin:0 0 10px}.tier h3 .ct{color:var(--muted);font-weight:500}
+  .person{background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    margin-bottom:9px;overflow:hidden;transition:border-color .15s}
+  .person:hover{border-color:#3a4150}
+  .person.open{border-color:var(--accent)}
+  .prow{display:flex;align-items:center;gap:13px;padding:12px 14px;cursor:pointer}
+  .av{width:38px;height:38px;border-radius:50%;background:var(--chip);display:grid;
+    place-items:center;font-weight:700;color:var(--muted);flex:none;font-size:13px}
+  .pinfo{flex:1;min-width:0}
+  .pnm{font-weight:600}
+  .pti{color:var(--muted);font-size:13px}
+  .pmeta{display:flex;gap:7px;margin-top:5px;flex-wrap:wrap}
+  .chip{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--chip);color:var(--muted);white-space:nowrap}
+  .chip.zi{color:var(--good)} .chip.cr{color:var(--accent2)} .chip.tv{color:var(--warn)}
+  .chip.intent{background:rgba(3,194,164,.12);color:var(--accent);border:1px solid var(--accent)}
+  .pout{flex:none}
+  .pdetail{display:none;padding:0 14px 14px 65px;font-size:13px;color:var(--txt)}
+  .person.open .pdetail{display:block}
+  .pdetail .drow{margin:6px 0}
+  .pdetail .k{color:var(--muted);display:inline-block;min-width:74px}
+  .pdetail a{color:var(--accent2);text-decoration:underline;word-break:break-all}
+  .pdetail a:hover{color:var(--accent)}
+  .caret{color:var(--muted);transition:transform .15s;flex:none}
+  .person.open .caret{transform:rotate(90deg)}
+  /* outreach options */
+  .opttarget{font-size:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .opttarget .who{font-weight:600}
+  .optgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:680px){.optgrid{grid-template-columns:repeat(2,1fr)}}
+  .optextra{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--txt);text-transform:none;letter-spacing:0;cursor:pointer}
+  .chk input{width:auto}
+  /* "AI on their site" mockup */
+  .demohead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .browser{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f4f6f8;position:relative;min-height:340px}
+  .browser .bar{display:flex;align-items:center;gap:8px;background:#e3e8ec;padding:8px 12px;border-bottom:1px solid #d0d7dd}
+  .browser .dots{display:flex;gap:6px}
+  .browser .dots i{width:11px;height:11px;border-radius:50%;display:block}
+  .browser .dots .r{background:#ff5f57}.browser .dots .y{background:#febc2e}.browser .dots .g{background:#28c840}
+  .browser .url{flex:1;background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;color:#5a6470;border:1px solid #d0d7dd}
+  .browser .page{padding:26px 22px;color:#2b3640;min-height:300px;position:relative}
+  .browser .page h2{margin:0 0 6px;font-size:20px;color:#1a2730}
+  .browser .page p{margin:0 0 14px;color:#5a6470;font-size:13px;max-width:60%}
+  .browser .hero{height:120px;border-radius:10px;background:linear-gradient(135deg,#03363D,#00A656);opacity:.9;margin-bottom:16px;display:flex;align-items:center;padding:0 22px;color:#fff;font-weight:700;font-size:18px}
+  .browser .skel{height:10px;border-radius:5px;background:#dfe5ea;margin:8px 0;max-width:70%}
+  .browser .skel.s2{max-width:55%}.browser .skel.s3{max-width:62%}
+  /* chat widget */
+  .cw{position:absolute;right:18px;bottom:18px;width:300px;max-width:80%;background:#fff;border-radius:14px;
+    box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden;border:1px solid #d0d7dd}
+  .cw .cwhead{background:#03363D;color:#fff;padding:11px 14px;font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px}
+  .cw .cwhead .ai{font-size:10px;font-weight:700;background:#00A656;color:#fff;padding:2px 7px;border-radius:10px}
+  .cw .cwbody{padding:12px;max-height:230px;overflow:auto;background:#f7f9fa}
+  .cw .msg{margin:6px 0;display:flex}
+  .cw .msg.bot{justify-content:flex-start}.cw .msg.customer{justify-content:flex-end}
+  .cw .bub{padding:8px 11px;border-radius:13px;font-size:12.5px;line-height:1.4;max-width:82%}
+  .cw .msg.bot .bub{background:#eef1f3;color:#23303a;border-bottom-left-radius:4px}
+  .cw .bub.typing{letter-spacing:2px;color:#9aa6af;animation:typeblink 1s infinite}
+  @keyframes typeblink{0%,100%{opacity:.4}50%{opacity:1}}
+  .cw .msg.customer .bub{background:#1F73B7;color:#fff;border-bottom-right-radius:4px}
+  .cw .cwfoot{display:flex;align-items:center;gap:8px;padding:9px 12px;border-top:1px solid #e3e8ec;background:#fff}
+  .cw .cwfoot .inp{flex:1;background:#f1f4f6;border-radius:16px;padding:7px 12px;font-size:12px;color:#9aa6af}
+  .cw .cwfoot .snd{width:28px;height:28px;border-radius:50%;background:#00A656;color:#fff;display:grid;place-items:center;font-size:13px}
+  .cw .powered{font-size:9px;color:#9aa6af;text-align:center;padding:4px 0 7px}
+  /* outreach email card */
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px}
+  .badge.gn{background:rgba(0,166,86,.15);color:var(--good)}
+  .badge.yl{background:rgba(237,143,28,.15);color:var(--warn)}
+  .badge.rd{background:rgba(227,79,50,.15);color:var(--bad)}
+  .badge.bl{background:rgba(31,115,183,.15);color:var(--accent2)}
+  .emailcard .emailhead{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;
+    font-size:13px;margin-bottom:14px;align-items:center}
+  .emailcard .emailhead .k{color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+  .emailcard .emailhead a{color:var(--accent2)}
+  .emailcard #ehSubject{margin:0}
+  .emailcard textarea{min-height:220px}
+  .draftmeta{margin-top:12px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+  .draftmeta .row{margin:5px 0}.draftmeta .k{color:var(--muted);display:inline-block;min-width:78px}
+  .draftmeta a{color:var(--accent2);text-decoration:underline;word-break:break-all}
+  .draftmeta .flag{color:var(--warn)}
+  .betterfit{margin-top:12px;border:1px dashed var(--accent2);border-radius:8px;padding:10px 12px;background:rgba(31,115,183,.08)}
+  .betterfit .bf-h{font-size:12.5px;color:var(--txt);margin-bottom:8px}
+  .betterfit .bf-row{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:6px 0;border-top:1px solid var(--line)}
+  .betterfit .bf-row:first-of-type{border-top:none}
+  .betterfit .bf-name{font-weight:600}
+  .betterfit .bf-why{font-size:12px;color:var(--muted);margin-top:2px}
+  .betterfit a{color:var(--accent2)}
+  /* follow-up cadence timeline */
+  .cadence{margin-top:14px}
+  .cadence .cad-h{font-size:13px;color:var(--txt);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .cadence .cad-h .pill{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:1px 8px}
+  .seq{position:relative;margin-left:8px;padding-left:22px;border-left:2px solid var(--line)}
+  .seq .touch{position:relative;padding:10px 0 14px}
+  .seq .touch::before{content:'';position:absolute;left:-30px;top:13px;width:14px;height:14px;border-radius:50%;
+    background:var(--bg);border:2px solid var(--accent2)}
+  .seq .touch.email::before{border-color:var(--accent2)}
+  .seq .touch.phone::before{border-color:var(--good)}
+  .seq .touch.linkedin-connect::before,.seq .touch.linkedin-message::before{border-color:#0a66c2}
+  .seq .t-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .seq .t-day{font-size:11px;font-weight:600;color:var(--muted);background:var(--card2,rgba(255,255,255,.04));border:1px solid var(--line);border-radius:6px;padding:1px 7px}
+  .seq .t-chan{font-size:12px;font-weight:600}
+  .seq .t-label{font-size:12.5px;color:var(--txt)}
+  .seq .t-purpose{font-size:11.5px;color:var(--muted);margin:3px 0 6px}
+  .seq .t-body{white-space:pre-wrap;font-size:12.5px;background:var(--card2,rgba(255,255,255,.03));border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;color:var(--txt);margin-top:4px}
+  .seq .t-subj{font-size:12px;color:var(--muted);margin-top:4px}
+  .seq .t-subj b{color:var(--txt)}
+  .seq .t-copy{margin-top:6px}
+  /* target list (accounts to attack) — ephemeral, client-side only */
+  .tlist{margin-top:8px}
+  .tlist .tl-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .tlist .tl-stats{font-size:12px;color:var(--muted);margin-left:auto}
+  .tl-queue{max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+  .tl-queue:empty{display:none}
+  .tl-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-top:1px solid var(--line);font-size:13px}
+  .tl-row:first-child{border-top:none}
+  .tl-row.next{background:rgba(31,115,183,.10)}
+  .tl-row.worked{opacity:.5}
+  .tl-row.skipped{opacity:.45;text-decoration:line-through}
+  .tl-row .tl-co{font-weight:600}
+  .tl-row .tl-meta{color:var(--muted);font-size:11.5px}
+  .tl-row .tl-st{margin-left:auto;font-size:11px;border:1px solid var(--line);border-radius:10px;padding:1px 8px;color:var(--muted)}
+  .tl-row .tl-st.pending{color:var(--accent2);border-color:var(--accent2)}
+  .tl-row .tl-st.worked{color:var(--good);border-color:var(--good)}
+  .tl-row .tl-st.skipped{color:var(--warn);border-color:var(--warn)}
+  .tl-row .tl-go{cursor:pointer}
+  .sent-check{width:48px;height:48px;border-radius:50%;background:var(--good);color:#fff;
+    display:grid;place-items:center;font-size:24px;margin:0 auto 12px}
+  #receiptCard{text-align:center}
+  #receiptBody{font-size:14px}
+  /* header controls */
+  .who{gap:12px}
+  .demotoggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt);
+    text-transform:none;letter-spacing:0;cursor:pointer;margin:0}
+  .demotoggle input{width:auto}
+  body.demo header.top{box-shadow:inset 0 -2px 0 var(--accent)}
+  .demobadge{display:none;font-size:10px;font-weight:700;background:var(--accent);color:#fff;
+    padding:2px 8px;border-radius:10px;margin-left:6px}
+  body.demo .demobadge{display:inline-block}
+  /* send locked + tooltip */
+  .sendwrap{position:relative;display:inline-block}
+  .btn.sendlocked{background:var(--chip);color:var(--muted);cursor:not-allowed}
+  .sendtip{display:none;position:absolute;right:0;bottom:calc(100% + 8px);width:250px;
+    background:#0b0d11;border:1px solid var(--line);color:var(--txt);font-size:12px;
+    padding:10px 12px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:5;font-weight:400}
+  .sendwrap.show .sendtip{display:block}
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:50}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;width:440px;max-width:92vw}
+  .modal input,.modal textarea{margin:0}
+  /* loading mini-game */
+  .gamewrap{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .game-head{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}
+  .game-head .gscore{color:var(--accent);font-weight:700}
+  .game-canvas{width:100%;height:200px;background:#022226;border:1px solid var(--line);
+    border-radius:10px;display:block;cursor:crosshair;touch-action:none}
+  .game-hint{font-size:11px;color:var(--muted);margin-top:6px;text-align:center}
+  .game-toggle{cursor:pointer;color:var(--accent2);font-size:11px}
+  .prototype-tag{position:fixed;bottom:10px;right:12px;font-size:11px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);padding:4px 10px;border-radius:20px}
+  code{background:var(--chip);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Zendesk"><path fill="currentColor" d="M12.914 2.904V16.29L24 2.905H12.914zM0 2.906C0 5.966 2.483 8.45 5.543 8.45s5.542-2.484 5.543-5.544H0zm11.086 4.807L0 21.096h11.086V7.713zm7.37 7.84c-3.063 0-5.542 2.48-5.542 5.543H24c0-3.063-2.48-5.543-5.543-5.543z"/></svg></div> Prospect &amp; Outreach Console <span class="demobadge">DEMO</span> <span style="font-weight:400;font-size:11px;color:var(--muted);margin-left:8px">developed by @ElChibo</span></div>
+  <div class="who">
+    <label class="demotoggle" title="Replays a saved sample instantly — no API calls, no credits"><input type="checkbox" id="demoMode" onchange="toggleDemo()"> Demo mode</label>
+    <button class="btn ghost sm" onclick="openReply()" title="Got a reply? Draft your response">↩ Handle a reply</button>
+    <button class="btn ghost sm" onclick="resetApp()">↺ Reset</button>
+    <button class="btn ghost sm" onclick="openFeedback()">💬 Feedback</button>
+    <span class="dot"></span> <span id="whoami">Demo · Zendesk profile · no account connected</span>
+  </div>
+</header>
+
+<!-- feedback modal -->
+<div class="modal-bg" id="fbModal" style="display:none">
+  <div class="modal">
+    <h3 style="margin:0 0 4px">Leave feedback</h3>
+    <p class="muted" style="margin:0 0 12px;font-size:13px">Saved locally for @ElChibo to review. What worked, what didn't, what's missing?</p>
+    <input id="fbName" placeholder="Your name (optional)" style="margin-bottom:10px">
+    <textarea id="fbText" placeholder="Your thoughts…" style="min-height:120px"></textarea>
+    <div class="actions">
+      <span id="fbStatus" class="muted" style="flex:1"></span>
+      <button class="btn ghost" onclick="closeFeedback()">Cancel</button>
+      <button class="btn" onclick="submitFeedback()">Save feedback</button>
+    </div>
+  </div>
+</div>
+
+<div class="steps">
+  <div class="step active" id="st1"><span class="num">1</span> Find prospects</div>
+  <div class="step" id="st2"><span class="num">2</span> Stakeholders</div>
+  <div class="step" id="st3"><span class="num">3</span> Draft &amp; send</div>
+</div>
+
+<div class="wrap">
+
+  <!-- SCREEN 1 -->
+  <section class="screen show" id="screen1">
+    <h1>Find prospects</h1>
+    <p class="sub">Choose what you're selling, then enter a company or contact to map stakeholders.</p>
+
+    <!-- Target list ("accounts to attack") — upload a CSV, work the queue. Ephemeral. -->
+    <div class="card tlist">
+      <label>Target list <span class="muted" style="text-transform:none;letter-spacing:0">— accounts to attack (optional)</span></label>
+      <div class="tl-controls">
+        <button class="btn ghost sm" onclick="document.getElementById('tlFile').click()">⬆ Upload CSV</button>
+        <input type="file" id="tlFile" accept=".csv,text/csv" style="display:none" onchange="loadTargetCsv(this)">
+        <button class="btn ghost sm" onclick="toggleTlPaste()">📋 Paste list</button>
+        <button class="btn ghost sm" id="tlWorkNext" onclick="workNextTarget()" disabled>Work next →</button>
+        <button class="btn ghost sm" id="tlClear" onclick="clearTargets()" disabled>Clear</button>
+        <span class="tl-stats" id="tlStats"></span>
+      </div>
+      <div id="tlPasteWrap" style="display:none;margin-bottom:8px">
+        <textarea id="tlPaste" placeholder="Paste one per line — company or domain, optional competitor after a comma:&#10;allbirds.com, Zendesk&#10;Citarella&#10;Jordan's Furniture, Salesforce Service Cloud" style="width:100%;min-height:80px;margin-bottom:6px"></textarea>
+        <button class="btn ghost sm" onclick="commitTlPaste()">Add to list</button>
+      </div>
+      <div class="tl-queue" id="tlQueue"></div>
+      <div class="note">CSV columns auto-detected: <code>company</code>/<code>domain</code> (required), optional <code>competitor</code>, <code>notes</code>, <code>priority</code>. This list stays in your browser only — it's wiped on Reset and on refresh, so each demo session starts clean. (In production this would be per-login.)</div>
+    </div>
+
+    <div class="card">
+      <label>Sales profile</label>
+      <div class="toggle" style="margin-bottom:18px">
+        <div class="opt on" data-profile="zendesk" onclick="setProfile(this)">Zendesk (full platform)</div>
+        <div class="opt" data-profile="forethought" onclick="setProfile(this)">Forethought (AI-first)</div>
+        <div class="opt" data-profile="cx" onclick="setProfile(this)">CX (customer service)</div>
+        <div class="opt" data-profile="it" onclick="setProfile(this)">IT (help desk / ITSM)</div>
+        <div class="opt" data-profile="hr" onclick="setProfile(this)">HR (employee service)</div>
+        <div class="opt" data-profile="contactcenter" onclick="setProfile(this)">Contact Center (voice)</div>
+      </div>
+      <div class="note" id="profileNote" style="margin-bottom:8px">Zendesk: full customer-service platform — leads with consolidation, automation, reporting (AI as upside).</div>
+      <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+      <label>Source</label>
+      <div class="toggle" style="margin-bottom:16px">
+        <div class="opt on" data-mode="company" onclick="srcMode(this)">Company</div>
+        <div class="opt" data-mode="contact" onclick="srcMode(this)">Contact name</div>
+      </div>
+      <div class="field" id="f-input">
+        <label id="f-label">Company name or domain</label>
+        <input id="srcValue" placeholder="e.g. allbirds.com">
+      </div>
+      <div class="field" id="f-competitor">
+        <label>Current/incumbent tool (if known)</label>
+        <select id="competitor">
+          <option value="">Unknown — let research find out</option>
+          <optgroup label="Helpdesk / CX platforms">
+            <option>Salesforce Service Cloud</option>
+            <option>Zendesk (no AI / legacy)</option>
+            <option>Freshdesk</option>
+            <option>Intercom</option>
+            <option>Kustomer</option>
+            <option>Gladly</option>
+            <option>Gorgias</option>
+            <option>ServiceNow</option>
+            <option>Jira Service Management</option>
+            <option>Help Scout</option>
+            <option>HubSpot Service Hub</option>
+          </optgroup>
+          <optgroup label="AI agents / automation">
+            <option>Salesforce Agentforce</option>
+            <option>Intercom Fin</option>
+            <option>Decagon</option>
+            <option>Sierra</option>
+            <option>Ada</option>
+            <option>Forethought (already a customer)</option>
+          </optgroup>
+          <option>None / manual workflows</option>
+        </select>
+        <div class="note" id="compNote" style="margin-top:6px">Drives competitive positioning in research &amp; the draft. Leave as Unknown to have the tools detect it (Sumble reads the live tech stack).</div>
+      </div>
+      <div class="row3">
+        <div class="field">
+          <label>Seniority floor</label>
+          <select id="seniority">
+            <option>Director and above (default)</option>
+            <option>C-Level only</option>
+            <option>All Support/IT/CX/AI</option>
+          </select>
+        </div>
+        <div class="field"><label>Limit</label><input id="limit" type="number" value="5"></div>
+        <div class="field">
+          <label>Exclude</label>
+          <select id="exclude">
+            <option>Customer Success + entry-level CS</option>
+            <option>Customer Success only</option>
+          </select>
+        </div>
+      </div>
+      <div class="note">ROE applied automatically: inbound leads owned by another rep are flagged LinkedIn-only. No Customer Success contacts.</div>
+    </div>
+    <div class="footbar">
+      <span class="muted" id="s1status"></span>
+      <button class="btn" id="runProspect" onclick="runProspect()">Research prospects →</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 2 -->
+  <section class="screen" id="screen2">
+    <h1 id="s2company">Stakeholders</h1>
+    <p class="sub">Click a stakeholder to expand full detail, then hit Outreach. <span id="run2spin"></span></p>
+
+    <div id="progress" class="progress" style="display:none">
+      <div class="prog-head"><span class="spinner"></span> <span id="progPhase">Researching…</span>
+        <span class="prog-timer" id="progTimer">0s</span></div>
+      <div class="prog-steps" id="progSteps"></div>
+      <div class="gamewrap" id="gamewrap-prospect"></div>
+    </div>
+
+    <div id="whyNowBanner" class="whynow" style="display:none"></div>
+    <div id="intelBubble" class="intel" style="display:none"></div>
+
+    <!-- rendered stakeholder cards -->
+    <div id="cards"></div>
+
+    <!-- live activity + raw output, collapsed by default -->
+    <details class="card" id="activityWrap">
+      <summary style="cursor:pointer;color:var(--muted)">Live activity &amp; raw output</summary>
+      <div class="activity" id="activity2" style="margin-top:10px"></div>
+      <div class="output" id="output2" style="margin-top:10px">—</div>
+      <div class="cost" id="cost2"></div>
+    </details>
+
+    <div class="footbar">
+      <button class="btn ghost" onclick="goto(1)">← Back</button>
+      <span class="muted" id="s2hint">Pick a stakeholder above, or draft for the whole company.</span>
+      <button class="btn ghost" id="toOutreach" onclick="runOutreach('')">Draft for company →</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3 -->
+  <section class="screen" id="screen3">
+    <h1 id="s3title">Draft &amp; send</h1>
+    <p class="sub">Pick how the email should read, then generate. The send is never automatic — review &amp; approve. POC = simulated send.</p>
+
+    <!-- outreach options -->
+    <div class="card" id="optionsPanel">
+      <div id="optTarget" class="opttarget"></div>
+      <div class="optgrid">
+        <div class="field">
+          <label>Email type</label>
+          <select id="optType">
+            <option value="cold intro">Cold intro (first touch)</option>
+            <option value="warm follow-up">Warm follow-up</option>
+            <option value="win-back / re-engagement">Win-back / re-engagement</option>
+            <option value="competitive displacement">Competitive displacement</option>
+            <option value="expansion (existing customer)">Expansion (existing customer)</option>
+            <option value="event / trigger-based">Event / trigger-based</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tone</label>
+          <select id="optTone">
+            <option value="professional">Professional</option>
+            <option value="warm &amp; conversational">Warm &amp; conversational</option>
+            <option value="direct &amp; punchy">Direct &amp; punchy</option>
+            <option value="consultative / expert">Consultative / expert</option>
+            <option value="casual">Casual</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Humor</label>
+          <select id="optHumor">
+            <option value="none">None</option>
+            <option value="light, self-deprecating">Light, self-deprecating</option>
+            <option value="witty one-liner">Witty one-liner</option>
+            <option value="playful">Playful</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Length</label>
+          <select id="optLength">
+            <option value="very short (50-75 words)">Very short (50–75w)</option>
+            <option value="short (75-120 words)" selected>Short (75–120w)</option>
+            <option value="medium (120-175 words)">Medium (120–175w)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Call to action</label>
+          <select id="optCta">
+            <option value="15-min meeting, soft Tue/Thu choice">15-min meeting (soft day choice)</option>
+            <option value="quick reply / interest check">Quick reply / interest check</option>
+            <option value="share a relevant resource or case study">Share a resource / case study</option>
+            <option value="ask for the right person">Ask for the right person</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Open with</label>
+          <select id="optHook">
+            <option value="best available signal">Best available signal (auto)</option>
+            <option value="recent company news">Recent company news</option>
+            <option value="the competitor / tech stack angle">Competitor / tech-stack angle</option>
+            <option value="a relevant customer proof point">Customer proof point</option>
+            <option value="a role/pain observation">Role / pain observation</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Follow-up cadence</label>
+          <select id="optCadence">
+            <option value="none">None — just this email</option>
+            <option value="light">Light · 3 touches / ~10 days</option>
+            <option value="balanced" selected>Balanced · 5 touches / ~2 weeks</option>
+            <option value="aggressive">Aggressive · 7 touches / ~2 weeks</option>
+          </select>
+        </div>
+      </div>
+      <div class="optextra">
+        <label class="chk"><input type="checkbox" id="optProof" checked> Include a proof point / metric</label>
+        <label class="chk"><input type="checkbox" id="optPersonalize" checked> Personalize from research (news, hooks)</label>
+        <label class="chk"><input type="checkbox" id="optSubjects"> Offer 3 subject-line options</label>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Anything specific to include? (optional)</label>
+        <input id="optNotes" placeholder="e.g. mention their Black Friday peak, reference their new Voice channel…">
+      </div>
+      <div class="actions">
+        <span style="flex:1"></span>
+        <button class="btn" id="genBtn" onclick="generateDraft()">Generate draft →</button>
+      </div>
+    </div>
+
+    <div id="draft3progress" class="progress" style="display:none">
+      <div class="prog-head"><span class="spinner"></span> <span id="draftPhase">Drafting…</span>
+        <span class="prog-timer" id="draftTimer">0s</span></div>
+      <div class="prog-steps" id="draftSteps"></div>
+      <div class="gamewrap" id="gamewrap-draft"></div>
+    </div>
+
+    <!-- status badges -->
+    <div id="draftBadges" class="badges" style="display:none"></div>
+
+    <!-- email card (prototype style) -->
+    <div class="card emailcard" id="emailCard" style="display:none">
+      <div class="emailhead">
+        <span class="k">From</span><span id="ehFrom"></span>
+        <span class="k">To</span><span id="ehTo"></span>
+        <span class="k">Subject</span><span><input id="ehSubject"></span>
+      </div>
+      <label>Body</label>
+      <textarea id="ehBody"></textarea>
+      <div id="draftMeta" class="draftmeta"></div>
+      <div class="actions">
+        <button class="btn blue" id="regenBtn" onclick="regen()" disabled>↻ Regenerate</button>
+        <button class="btn ghost" id="toneBtn" onclick="toneAdjust()" disabled>Adjust tone</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="copyBtn" onclick="copyEmail()" disabled>📋 Copy email</button>
+        <span class="sendwrap">
+          <button class="btn sendlocked" id="sendBtn" onclick="showSendTip()" disabled>Approve &amp; Send 🔒</button>
+          <span class="sendtip" id="sendTip">Will be possible in the final version. For now, use “Copy email” to share it via Slack or paste into your mail client.</span>
+        </span>
+      </div>
+      <div class="note" id="sendNote">Sending is disabled in this demo. Copy the email and send it through your own tools — the final version will send it for you.</div>
+    </div>
+
+    <!-- follow-up cadence timeline -->
+    <div class="card cadence" id="cadenceCard" style="display:none">
+      <div class="cad-h">📅 Follow-up sequence <span class="pill" id="cadPill"></span>
+        <span style="flex:1"></span>
+        <button class="btn ghost sm" onclick="copySequence()">📋 Copy full sequence</button>
+      </div>
+      <div class="seq" id="seqList"></div>
+      <div class="note">A multi-touch plan to the same contact. Day offsets are relative to sending the first email. Copy each touch when it's time, or the whole sequence at once.</div>
+    </div>
+
+    <!-- "AI on their site" mockup -->
+    <div class="card" id="demoCard" style="display:none">
+      <div class="demohead">
+        <label style="margin:0">Preview: AI on their site <span class="muted" style="text-transform:none;letter-spacing:0">— illustrative mockup, not their live site</span></label>
+        <button class="btn ghost sm" onclick="copyDemoNote()">Copy mockup note for email</button>
+      </div>
+      <div class="browser" id="demoBrowser"></div>
+      <div class="note">A sample of what the AI agent could look like on their site, built from their real support use cases. Screenshot this into your outreach to make it tangible.</div>
+    </div>
+
+    <!-- sent / simulated receipt -->
+    <div class="card" id="receiptCard" style="display:none">
+      <div class="sent-check">✓</div>
+      <div id="receiptBody"></div>
+    </div>
+
+    <details class="card" id="draftActivityWrap">
+      <summary style="cursor:pointer;color:var(--muted)">Live activity &amp; raw output</summary>
+      <div class="activity" id="activity3" style="margin-top:10px"></div>
+      <div class="output" id="output3" style="margin-top:10px">—</div>
+      <div class="cost" id="cost3"></div>
+    </details>
+
+    <div class="footbar">
+      <button class="btn ghost" onclick="goto(2)">← Stakeholders</button>
+      <span class="muted" id="s3status"></span>
+    </div>
+  </section>
+
+  <!-- SCREEN 4 — Reply handler (standalone entry point) -->
+  <section class="screen" id="screen4">
+    <h1>Handle a reply</h1>
+    <p class="sub">Paste what the prospect sent back, pick how to read it, and get your response drafted — no prior search needed.</p>
+
+    <div class="card" id="replyPanel">
+      <div class="field">
+        <label>Who replied? (name / title / company — optional but sharpens it)</label>
+        <input id="rpWho" placeholder="e.g. Scott Byrer, Dir. Customer Retention, Allbirds">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Their reply (paste it)</label>
+        <textarea id="rpText" style="min-height:120px" placeholder="Paste the prospect's email/LinkedIn reply here…"></textarea>
+      </div>
+      <div class="optgrid" style="margin-top:10px">
+        <div class="field">
+          <label>How do you read it?</label>
+          <select id="rpIntent">
+            <option value="interested">Interested — wants to talk</option>
+            <option value="not-now">Not now / bad timing</option>
+            <option value="objection">Objection / pushback</option>
+            <option value="wrong-person">Wrong person / redirect</option>
+            <option value="referral">Referred me to someone</option>
+            <option value="unsubscribe">Not interested / opt-out</option>
+            <option value="auto-reply">Out-of-office / auto-reply</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tone</label>
+          <select id="rpTone">
+            <option value="professional">Professional</option>
+            <option value="warm &amp; conversational">Warm &amp; conversational</option>
+            <option value="direct &amp; punchy">Direct &amp; punchy</option>
+            <option value="consultative / expert">Consultative / expert</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Your goal</label>
+          <select id="rpGoal">
+            <option value="book a 15-min meeting">Book a 15-min meeting</option>
+            <option value="keep the conversation alive">Keep it alive / nurture</option>
+            <option value="get routed to the right person">Get the right person</option>
+            <option value="answer the objection and re-ask">Answer objection &amp; re-ask</option>
+            <option value="gracefully close out">Gracefully close out</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Anything to add? (optional)</label>
+        <input id="rpNotes" placeholder="e.g. they mentioned budget freeze until Q3; reference our Cotopaxi result">
+      </div>
+      <div class="actions">
+        <span style="flex:1"></span>
+        <button class="btn" id="rpGenBtn" onclick="generateReply()">Draft my response →</button>
+      </div>
+      <div class="note">Drafts a reply you can edit and copy. The send is never automatic — this is a POC, so use Copy and send from your own tools.</div>
+    </div>
+
+    <div id="reply4progress" class="progress" style="display:none">
+      <div class="prog-head"><span class="spinner"></span> <span id="rpPhase">Reading the reply…</span>
+        <span class="prog-timer" id="rpTimer">0s</span></div>
+    </div>
+
+    <div id="rpBadges" class="badges" style="display:none"></div>
+
+    <!-- response email card (mirrors the draft card) -->
+    <div class="card emailcard" id="rpCard" style="display:none">
+      <div class="emailhead">
+        <span class="k">To</span><span id="rpTo"></span>
+        <span class="k">Subject</span><span><input id="rpSubject"></span>
+      </div>
+      <label>Body</label>
+      <textarea id="rpBody"></textarea>
+      <div id="rpMeta" class="draftmeta"></div>
+      <div class="actions">
+        <button class="btn blue" onclick="generateReply()">↻ Regenerate</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="rpCopyBtn" onclick="copyReply()">📋 Copy response</button>
+      </div>
+      <div class="note">Sending is disabled in this demo. Copy and send it from your own tools.</div>
+    </div>
+
+    <details class="card" id="rpActivityWrap">
+      <summary style="cursor:pointer;color:var(--muted)">Live activity &amp; raw output</summary>
+      <div class="activity" id="activity4" style="margin-top:10px"></div>
+      <div class="output" id="output4" style="margin-top:10px">—</div>
+      <div class="cost" id="cost4"></div>
+    </details>
+
+    <div class="footbar">
+      <button class="btn ghost" onclick="goto(1)">← Find prospects</button>
+      <span class="muted" id="s4status"></span>
+    </div>
+  </section>
+
+</div>
+
+<div class="prototype-tag">POC · no personal data or email account · developed by @ElChibo</div>
+
+<script>
+let prospectSession = null;   // session from prospect run
+let outreachSession = null;   // session from outreach run (resumed to send)
+let outreachReady = false;
+let salesProfile = 'zendesk'; // zendesk | forethought | cx | it | hr | contactcenter
+let lastRawResult = '';       // raw text of the latest outreach result (for card parsing)
+
+const PROFILE_NOTES = {
+  zendesk: 'Zendesk: full customer-service platform — leads with consolidation, automation, reporting (AI as upside).',
+  forethought: 'Forethought: AI-first — leads with autonomous ticket deflection & resolution, expands to Zendesk.',
+  cx: 'CX: Zendesk customer service — targets VP/Dir of CX/Support/Care; leads with faster resolutions, CSAT, scale without headcount.',
+  it: 'IT: Zendesk internal help desk / ITSM — targets VP/Dir of IT/ITSM/Ops; leads with employee experience + deflecting repetitive IT tickets.',
+  hr: 'HR: Zendesk employee service — targets VP/Dir of HR/People Ops; leads with deflecting HR questions + smoother onboarding.',
+  contactcenter: 'Contact Center: Zendesk voice + digital — targets VP/Dir of Contact Center/Care; leads with consolidating phone+digital, AHT/CSAT, voice AI.'
+};
+const PROFILE_LABELS = {zendesk:'Zendesk',forethought:'Forethought',cx:'CX',it:'IT',hr:'HR',contactcenter:'Contact Center'};
+function setProfile(el){
+  el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+  salesProfile = el.dataset.profile;
+  document.getElementById('profileNote').textContent = PROFILE_NOTES[salesProfile];
+  document.getElementById('whoami').textContent='Demo · '+(PROFILE_LABELS[salesProfile]||salesProfile)+' profile · no account connected';
+}
+
+function goto(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show'));
+  document.getElementById('screen'+n).classList.add('show');
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById('st'+i);el.classList.remove('active','done');
+    if(i<n)el.classList.add('done'); if(i===n)el.classList.add('active');
+  });
+  window.scrollTo(0,0);
+}
+function srcMode(el){
+  el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+  const m=el.dataset.mode;
+  const lbl={company:'Company name or domain',contact:'Contact name'}[m];
+  const ph={company:'e.g. allbirds.com',contact:'e.g. Bob Land'}[m];
+  document.getElementById('f-label').textContent=lbl;
+  document.getElementById('srcValue').placeholder=ph;
+  document.getElementById('srcValue').dataset.mode=m;
+}
+
+function logEvent(elId, kind, tag, body){
+  const log=document.getElementById(elId);
+  const div=document.createElement('div');
+  div.className='ev '+kind;
+  div.innerHTML='<span class="tag"></span><span class="body"></span>';
+  div.querySelector('.tag').textContent=tag;
+  div.querySelector('.body').textContent=body;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
+}
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Competitive battlecard — "why us vs. them" talk track from the detected incumbent.
+function renderBattlecard(bc){
+  if(!bc) return '';
+  const pts=Array.isArray(bc.points)?bc.points.filter(p=>p&&(p.them||p.us)):[];
+  if(!pts.length && !bc.trapQuestion && !bc.landmine) return '';
+  let h='<div class="battlecard"><div class="bc-h">⚔️ Battlecard'+(bc.vsTool?' vs '+esc(bc.vsTool):'')+
+    '<button class="btn ghost sm bc-copy" onclick="copyBattlecard()">📋 Copy</button></div>';
+  pts.forEach(p=>{
+    h+='<div class="bc-pt"><div class="bc-them"><span class="lbl">Them</span>'+esc(p.them||'')+'</div>'+
+       '<div class="bc-us"><span class="lbl">Us</span>'+esc(p.us||'')+'</div></div>';
+  });
+  if(bc.trapQuestion) h+='<div class="bc-extra"><span class="k">Trap question:</span> '+esc(bc.trapQuestion)+'</div>';
+  if(bc.landmine) h+='<div class="bc-extra landmine"><span class="k">Don’t overreach:</span> '+esc(bc.landmine)+'</div>';
+  h+='</div>';
+  return h;
+}
+function copyBattlecard(){
+  const bc=(lastCompetitor&&lastCompetitor.battlecard)||null;
+  if(!bc) return;
+  const pts=Array.isArray(bc.points)?bc.points.filter(p=>p&&(p.them||p.us)):[];
+  let t='Battlecard'+(bc.vsTool?' vs '+bc.vsTool:'')+'\n'+'='.repeat(36)+'\n';
+  pts.forEach((p,i)=>{ t+='\n'+(i+1)+'. Them: '+(p.them||'')+'\n   Us:   '+(p.us||'')+'\n'; });
+  if(bc.trapQuestion) t+='\nTrap question: '+bc.trapQuestion+'\n';
+  if(bc.landmine) t+='Don’t overreach: '+bc.landmine+'\n';
+  _clip(t,'Battlecard copied — paste into your call notes.');
+}
+
+// Pull the trailing ```json block out of the prospect result and render cards.
+let lastCompany='';
+let lastCompetitor=null; // verified competitor object from the prospect step
+function renderCards(result){
+  const cont=document.getElementById('cards');
+  const banner=document.getElementById('whyNowBanner');
+  let data=null;
+  const m=result.match(/```json\s*([\s\S]*?)```/i);
+  if(m){ try{ data=JSON.parse(m[1].trim()); }catch(_){ } }
+  if(!data || !data.tiers){
+    cont.innerHTML='<div class="card muted">No structured stakeholder data returned. See raw output below.</div>';
+    banner.style.display='none';
+    document.getElementById('activityWrap').open=true;
+    return;
+  }
+  lastCompany=data.company||'';
+  lastCompetitor=data.competitor||null;
+  document.getElementById('s2company').textContent=data.company||'Stakeholders';
+  if(data.whyNow){banner.style.display='block';
+    banner.innerHTML='<strong>Why now:</strong> '+esc(data.whyNow)+
+      (data.accountClass&&data.accountClass!=='unknown'?'  ·  <span class="chip">'+esc(data.accountClass)+'</span>':'');}
+  else banner.style.display='none';
+
+  // Intelligence bubble: account summary + sales-relevant news
+  const intel=document.getElementById('intelBubble');
+  const news=Array.isArray(data.news)?data.news:[];
+  const comp=data.competitor||null;
+  const hasComp=comp && (comp.status&&comp.status!=='none-specified' || (comp.detected&&comp.detected.length));
+  const web=data.webCx||null;
+  const hasWeb=web && (web.chatWidget || web.helpCenter || web.observation);
+  if(data.summary || news.length || hasComp || hasWeb){
+    let ih='<h4>Account intelligence</h4>';
+    if(data.summary) ih+='<div class="summary">'+esc(data.summary)+'</div>';
+    if(hasComp){
+      const st=comp.status||'';
+      const cls={verified:'gn',contradicted:'rd',unverified:'yl'}[st]||'';
+      const det=(comp.detected&&comp.detected.length)?comp.detected.map(esc).join(', '):'none detected';
+      ih+='<div class="compbox"><span class="badge '+cls+'">Incumbent: '+esc(st||'unknown')+'</span> '+
+        '<span class="cdet">'+det+'</span>'+
+        (comp.userClaim?' <span class="muted">(you said: '+esc(comp.userClaim)+')</span>':'')+
+        (comp.source?'<div class="csrc">source: '+esc(comp.source)+'</div>':'')+
+        (comp.angle?'<div class="cangle">→ '+esc(comp.angle)+'</div>':'')+
+        renderBattlecard(comp.battlecard)+
+      '</div>';
+    }
+    if(hasWeb){
+      const bot=(web.isAiBot||'').toLowerCase();
+      const botcls=bot==='yes'?'yl':(bot==='no'?'gn':'');
+      const botlbl=bot==='yes'?'AI bot on site':(bot==='no'?'human/ticket only':'chat: unclear');
+      ih+='<div class="compbox"><span class="badge '+botcls+'">🌐 Website CX</span> '+
+        '<span class="cdet">'+esc(web.chatWidget||'unknown')+'</span> '+
+        '<span class="muted">· '+esc(botlbl)+'</span>'+
+        (web.helpCenter&&web.helpCenter!=='none found'?'<div class="csrc">help center: '+esc(web.helpCenter)+'</div>':'')+
+        (web.channels&&web.channels.length?'<div class="csrc">channels: '+web.channels.map(esc).join(', ')+'</div>':'')+
+        (web.observation?'<div class="cangle">→ '+esc(web.observation)+'</div>':'')+
+        (web.evidence?'<div class="csrc">evidence: '+esc(web.evidence)+'</div>':'')+
+      '</div>';
+    }
+    if(news.length){
+      ih+='<div class="news-h">Relevant news · '+news.length+'</div>';
+      news.forEach(n=>{
+        const head=n.url?'<a href="'+esc(n.url)+'" target="_blank" rel="noopener">'+esc(n.headline)+'</a>':esc(n.headline);
+        ih+='<div class="nitem"><div><span class="nh">'+head+'</span>'+
+          (n.date?'<span class="nd">'+esc(n.date)+'</span>':'')+'</div>'+
+          (n.relevance?'<div class="nr">→ '+esc(n.relevance)+'</div>':'')+'</div>';
+      });
+    }
+    intel.innerHTML=ih; intel.style.display='block';
+  } else intel.style.display='none';
+
+  let html='';
+  (data.tiers||[]).forEach((tier,ti)=>{
+    const cs=tier.contacts||[]; if(!cs.length)return;
+    html+='<div class="tier"><h3>'+esc(tier.name)+' <span class="ct">· '+cs.length+' found</span></h3>';
+    cs.forEach((c,ci)=>{
+      const id='c_'+ti+'_'+ci;
+      const chips=[];
+      (c.sources||[]).forEach(s=>{
+        const cl={ZoomInfo:'zi',CommonRoom:'cr',Tavily:'tv',Sumble:''}[s]||'';
+        chips.push('<span class="chip '+cl+'">'+esc(s)+(s==='ZoomInfo'&&c.emailVerified?' ✓ email':'')+'</span>');
+      });
+      (c.tags||[]).forEach(t=>chips.push('<span class="chip">'+esc(t)+'</span>'));
+      // detail rows
+      let det='';
+      if(c.notes) det+='<div class="drow">'+esc(c.notes)+'</div>';
+      if(c.zoomInfoUrl) det+='<div class="drow"><span class="k">ZoomInfo:</span> <a href="'+esc(c.zoomInfoUrl)+'" target="_blank" rel="noopener">'+esc(c.zoomInfoUrl)+'</a></div>';
+      if(c.linkedInUrl) det+='<div class="drow"><span class="k">LinkedIn:</span> <a href="'+esc(c.linkedInUrl)+'" target="_blank" rel="noopener">'+esc(c.linkedInUrl)+'</a></div>';
+      else { // no verified profile URL — give a clickable LinkedIn search instead
+        const q=encodeURIComponent((c.name||'')+' '+(lastCompany||''));
+        det+='<div class="drow"><span class="k">LinkedIn:</span> <a href="https://www.linkedin.com/search/results/people/?keywords='+q+'" target="_blank" rel="noopener">search LinkedIn ↗</a> <span class="muted">(no profile from CommonRoom/ZoomInfo — search fallback)</span></div>';
+      }
+      const emailSrc=(c.email&&c.emailSource)?' <span class="chip">'+esc(c.emailSource)+'</span>':'';
+      det+='<div class="drow"><span class="k">Email:</span> '+(c.email?esc(c.email)+(c.emailVerified?'':' <span class="chip tv">UNVERIFIED</span>')+emailSrc:'<span class="muted">unknown</span>')+'</div>';
+      // Phone (direct dial + mobile) from ZoomInfo or CommonRoom fallback; omit if none
+      if(c.phone||c.mobilePhone){
+        const parts=[];
+        if(c.phone) parts.push('<a href="tel:'+esc(c.phone.replace(/[^+0-9]/g,''))+'">'+esc(c.phone)+'</a> <span class="muted">(direct)</span>');
+        if(c.mobilePhone) parts.push('<a href="tel:'+esc(c.mobilePhone.replace(/[^+0-9]/g,''))+'">'+esc(c.mobilePhone)+'</a> <span class="muted">(mobile)</span>');
+        const src=c.phoneSource?' <span class="chip">'+esc(c.phoneSource)+'</span>':'';
+        det+='<div class="drow"><span class="k">Phone:</span> '+parts.join(' · ')+src+'</div>';
+      }
+      const who=esc((c.name||'')+(c.title?' — '+c.title:''));
+      html+='<div class="person" id="'+id+'">'+
+        '<div class="prow" onclick="toggleCard(\''+id+'\')">'+
+          '<div class="av">'+esc(c.initials||(c.name||'?').slice(0,2).toUpperCase())+'</div>'+
+          '<div class="pinfo"><div class="pnm">'+esc(c.name||'Unknown')+'</div>'+
+            '<div class="pti">'+esc(c.title||'')+'</div>'+
+            '<div class="pmeta">'+chips.join('')+'</div></div>'+
+          '<button class="btn sm pout" onclick="event.stopPropagation();draftFor('+JSON.stringify(who).replace(/"/g,'&quot;')+')">→ Outreach</button>'+
+          '<span class="caret">▶</span>'+
+        '</div>'+
+        '<div class="pdetail">'+det+'</div>'+
+      '</div>';
+    });
+    html+='</div>';
+  });
+  cont.innerHTML=html||'<div class="card muted">No stakeholders matched the filters.</div>';
+}
+function toggleCard(id){document.getElementById(id).classList.toggle('open');}
+function draftFor(who){ runOutreach(who); }
+// Re-draft for a recommended better-fit person, keeping the same options.
+function draftForInstead(who){
+  outreachTarget=(who||'').trim();
+  document.getElementById('s3title').textContent='Compose — '+outreachTarget;
+  generateDraft();  // works in demo (adaptDemoDraft) and live
+}
+
+// ---- progress tracker (makes the wait feel like visible progress) ----
+const PROG_MAP=[
+  {key:'zoominfo', label:'ZoomInfo — companies & contacts', match:/zoominfo/i},
+  {key:'commonroom', label:'CommonRoom — intent signals & profiles', match:/commonroom/i},
+  {key:'sumble', label:'Sumble — tech stack & hiring', match:/sumble/i},
+  {key:'tavily', label:'Tavily — web research & news', match:/tavily_search|tavily_research|tavily_map/i},
+  {key:'webcx', label:'Visiting website — fingerprinting CX tools', match:/tavily_extract|tavily_crawl|WebFetch/i},
+  {key:'web', label:'Reading web sources', match:/WebSearch/i},
+];
+let progTimer=null, progStart=0, progState={}, progCounts={};
+function progReset(){
+  progState={}; progCounts={};
+  const box=document.getElementById('progress'); box.style.display='block';
+  document.getElementById('progPhase').textContent='Researching…';
+  const steps=document.getElementById('progSteps');
+  steps.innerHTML=PROG_MAP.map(p=>'<div class="pstep" id="ps_'+p.key+'"><span class="ic">○</span><span>'+p.label+'</span></div>').join('');
+  progStart=performance.now();
+  clearInterval(progTimer);
+  progTimer=setInterval(()=>{document.getElementById('progTimer').textContent=Math.round((performance.now()-progStart)/1000)+'s';},250);
+  Game.start('gamewrap-prospect','deflect',salesProfile);
+}
+function progTool(name){
+  for(const p of PROG_MAP){ if(p.match.test(name)){
+    progCounts[p.key]=(progCounts[p.key]||0)+1;
+    const el=document.getElementById('ps_'+p.key); if(!el)return;
+    el.classList.add('done'); el.querySelector('.ic').textContent='✓';
+    el.querySelector('span:last-child').textContent=p.label+'  ('+progCounts[p.key]+')';
+    document.getElementById('progPhase').textContent='Gathering data…';
+    return;
+  }}
+}
+function progSynthesizing(){document.getElementById('progPhase').textContent='Synthesizing stakeholder map…';}
+function progDone(){
+  clearInterval(progTimer);
+  const t=Math.round((performance.now()-progStart)/1000);
+  document.getElementById('progPhase').textContent='Done in '+t+'s';
+  document.querySelector('#progress .spinner').style.display='none';
+  Game.stop();
+}
+
+// Minimal, safe markdown -> HTML. Escapes everything first, then re-introduces a
+// small whitelist: links, bare URLs (esp. ZoomInfo profile links), bold, headers, hr.
+// All links open in a new tab.
+function renderMarkdown(src){
+  let s=String(src)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // [text](url)
+  s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // bare URLs not already inside an href
+  s=s.replace(/(^|[\s(])(https?:\/\/[^\s)<]+)/g,
+    '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+  // headers ## / ###
+  s=s.replace(/^###\s+(.*)$/gm,'<h4>$1</h4>');
+  s=s.replace(/^##\s+(.*)$/gm,'<h3>$1</h3>');
+  s=s.replace(/^---\s*$/gm,'<hr>');
+  return s.replace(/\n/g,'<br>');
+}
+
+// Start a job and stream it. onResult(result, sessionId) fires at the end.
+// payload is either {fields:{...}} for a fresh turn or {prompt:"..."} for a resume.
+// Detect a transient API/overload failure that's worth auto-retrying.
+function isTransientError(text){
+  if(!text) return false;
+  const t=text.toLowerCase();
+  if(text.length>400) return false; // a real, long answer isn't a transient error
+  return /api error|unexpected error|overloaded|rate.?limit|try (your request )?again|529|503|timeout|timed out/.test(t);
+}
+function setPhase(kind,msg){
+  if(kind==='prospect') {const el=document.getElementById('progPhase'); if(el) el.textContent=msg;}
+  else {const el=document.getElementById('draftPhase'); if(el) el.textContent=msg;}
+}
+
+const MAX_RETRIES=2;
+function startJob(kind, payload, resumeSession, logId, outId, costId, onResult, onDone, attempt){
+  attempt = attempt||0;
+  fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({kind,profile:salesProfile,resume_session:resumeSession},payload))})
+  .then(r=>r.json()).then(({job_id})=>{
+    const es=new EventSource('/api/stream/'+job_id);
+    let gotResult=false, hardError=null;
+    es.addEventListener('status',e=>logEvent(logId,'','start','launching '+kind+'…'));
+    es.addEventListener('session',e=>{
+      const sid=JSON.parse(e.data).session_id;
+      if(kind==='outreach'){outreachSession=sid;
+        document.getElementById('sidLabel').textContent=sid.slice(0,8)+'…';}
+      else prospectSession=sid;
+    });
+    es.addEventListener('tool',e=>{
+      const d=JSON.parse(e.data);
+      logEvent(logId,'tool','tool',d.name+'  '+JSON.stringify(d.input).slice(0,120));
+      if(kind==='prospect') progTool(d.name);
+      if(kind==='outreach') draftTool(d.name);
+    });
+    es.addEventListener('text',e=>{
+      const t=JSON.parse(e.data).text;
+      logEvent(logId,'text','claude',t.slice(0,200));
+      if(kind==='prospect') progSynthesizing();
+    });
+    es.addEventListener('result',e=>{
+      gotResult=true;
+      const d=JSON.parse(e.data);
+      // Transient failure → auto-retry a fresh (non-resume) job.
+      if((d.is_error || isTransientError(d.result)) && !resumeSession && attempt<MAX_RETRIES){
+        es.close();
+        logEvent(logId,'err','retry','transient error — retrying ('+(attempt+1)+'/'+MAX_RETRIES+')…');
+        setPhase(kind,'Hit a hiccup — retrying ('+(attempt+1)+'/'+MAX_RETRIES+')…');
+        setTimeout(()=>startJob(kind,payload,resumeSession,logId,outId,costId,onResult,onDone,attempt+1), 1500);
+        return;
+      }
+      if(kind==='outreach'||kind==='reply') lastRawResult=d.result||'';
+      if(outId)document.getElementById(outId).innerHTML=renderMarkdown(d.result||'(no output)');
+      if(costId&&d.cost_usd)document.getElementById(costId).textContent='cost: $'+d.cost_usd.toFixed(4)+' · session '+(d.session_id||'').slice(0,8);
+      if(kind==='prospect'){ progDone(); renderCards(d.result||''); }
+      if(onResult)onResult(d.result, d.session_id);
+    });
+    es.addEventListener('error',e=>{
+      try{hardError=JSON.parse(e.data).message; logEvent(logId,'err','error',hardError);}catch(_){}
+    });
+    es.addEventListener('done',e=>{
+      es.close();
+      // Stream ended with no result at all (process died) → retry if we can.
+      if(!gotResult && !resumeSession && attempt<MAX_RETRIES){
+        logEvent(logId,'err','retry','no result — retrying ('+(attempt+1)+'/'+MAX_RETRIES+')…');
+        setPhase(kind,'Hit a hiccup — retrying ('+(attempt+1)+'/'+MAX_RETRIES+')…');
+        setTimeout(()=>startJob(kind,payload,resumeSession,logId,outId,costId,onResult,onDone,attempt+1), 1500);
+        return;
+      }
+      if(!gotResult){ // exhausted retries
+        setPhase(kind,'Failed after retries — please try again.');
+        if(kind==='prospect') document.getElementById('cards').innerHTML='<div class="card muted">⚠ The research call failed after '+MAX_RETRIES+' retries (transient API issue). Click “Research prospects” to try again.</div>';
+        else document.getElementById('s3status').textContent='⚠ Draft failed after retries — try again.';
+      }
+      if(onDone)onDone();
+    });
+  }).catch(err=>{
+    setPhase(kind,'Network error — is the server running?');
+  });
+}
+
+let demoKey=null; // which DEMO_DATA entry is active
+
+// ===== Target list ("accounts to attack") =====
+// In-memory ONLY. Never persisted to localStorage or the server, so it's gone on
+// Reset / refresh — keeps demos to different people isolated without a login system.
+let TARGETS=[];   // [{company, competitor, notes, priority, status:'pending'|'worked'|'skipped'}]
+
+function toggleTlPaste(){
+  const w=document.getElementById('tlPasteWrap');
+  w.style.display = w.style.display==='none' ? 'block' : 'none';
+  if(w.style.display==='block') document.getElementById('tlPaste').focus();
+}
+// Minimal CSV parser (handles quoted fields + commas inside quotes).
+function parseCsv(text){
+  const rows=[]; let row=[], field='', q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else q=false; }
+      else field+=c;
+    } else {
+      if(c==='"') q=true;
+      else if(c===','){ row.push(field); field=''; }
+      else if(c==='\n'||c==='\r'){ if(field!==''||row.length){ row.push(field); rows.push(row); row=[]; field=''; } if(c==='\r'&&text[i+1]==='\n') i++; }
+      else field+=c;
+    }
+  }
+  if(field!==''||row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.some(c=>c.trim()!==''));
+}
+function loadTargetCsv(input){
+  const f=input.files&&input.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ ingestTargets(parseCsvToTargets(r.result)); input.value=''; };
+  r.readAsText(f);
+}
+// Map CSV rows → target objects. Detects a header row; else treats col0=company, col1=competitor.
+function parseCsvToTargets(text){
+  const rows=parseCsv(text); if(!rows.length) return [];
+  const head=rows[0].map(h=>h.trim().toLowerCase());
+  const known=['company','domain','account','competitor','incumbent','notes','note','priority','tier'];
+  const hasHeader=head.some(h=>known.includes(h));
+  const idx=(names)=>{ for(const n of names){ const i=head.indexOf(n); if(i>=0)return i; } return -1; };
+  const ci=hasHeader?idx(['company','domain','account']):0;
+  const ki=hasHeader?idx(['competitor','incumbent']):1;
+  const ni=hasHeader?idx(['notes','note']):-1;
+  const pi=hasHeader?idx(['priority','tier']):-1;
+  const body=hasHeader?rows.slice(1):rows;
+  return body.map(r=>({
+    company:(r[ci>=0?ci:0]||'').trim(),
+    competitor:(ki>=0?(r[ki]||''):'').trim(),
+    notes:(ni>=0?(r[ni]||''):'').trim(),
+    priority:(pi>=0?(r[pi]||''):'').trim(),
+  })).filter(t=>t.company);
+}
+// Commit the pasted textarea into the queue.
+function commitTlPaste(){
+  const txt=document.getElementById('tlPaste').value;
+  ingestTargets(parseCsvToTargets(txt));
+}
+function ingestTargets(list){
+  if(!list||!list.length){ return; }
+  // priority sort: higher 'priority' number / 'high'/'1' first, else keep order
+  const rank=p=>{ p=(p||'').toLowerCase(); if(p==='high'||p==='1')return 0; if(p==='med'||p==='medium'||p==='2')return 1; if(p==='low'||p==='3')return 2; const n=parseInt(p,10); return isNaN(n)?5:n; };
+  list.forEach(t=>{ t.status='pending'; TARGETS.push(t); });
+  TARGETS.sort((a,b)=>rank(a.priority)-rank(b.priority));
+  document.getElementById('tlPaste').value='';
+  document.getElementById('tlPaste').style.display='none';
+  renderTargets();
+}
+function renderTargets(){
+  const q=document.getElementById('tlQueue');
+  const nextIdx=TARGETS.findIndex(t=>t.status==='pending');
+  q.innerHTML=TARGETS.map((t,i)=>{
+    const cls=t.status+(i===nextIdx?' next':'');
+    const meta=[t.competitor?'vs '+t.competitor:'',t.priority?'P:'+t.priority:'',t.notes].filter(Boolean).join(' · ');
+    return '<div class="tl-row '+cls+'">'+
+      '<span class="tl-co">'+esc(t.company)+'</span>'+
+      (meta?'<span class="tl-meta">'+esc(meta)+'</span>':'')+
+      '<span class="tl-st '+t.status+'">'+t.status+'</span>'+
+      (t.status==='pending'?'<span class="tl-go" title="Skip" onclick="skipTarget('+i+')">⏭</span>':'')+
+      '</div>';
+  }).join('');
+  const total=TARGETS.length, worked=TARGETS.filter(t=>t.status==='worked').length, pending=TARGETS.filter(t=>t.status==='pending').length;
+  document.getElementById('tlStats').textContent=total?(pending+' pending · '+worked+' worked · '+total+' total'):'';
+  document.getElementById('tlWorkNext').disabled=(nextIdx<0);
+  document.getElementById('tlClear').disabled=(total===0);
+}
+function skipTarget(i){ if(TARGETS[i]){ TARGETS[i].status='skipped'; renderTargets(); } }
+function clearTargets(){ TARGETS=[]; renderTargets(); }
+// Load the next pending target into the form and kick off research.
+function workNextTarget(){
+  const i=TARGETS.findIndex(t=>t.status==='pending');
+  if(i<0) return;
+  const t=TARGETS[i];
+  // fill the source field (company mode) + competitor if provided
+  document.querySelectorAll('[data-mode]').forEach(o=>o.classList.toggle('on',o.dataset.mode==='company'));
+  const sv=document.getElementById('srcValue'); sv.value=t.company; sv.dataset.mode='company';
+  if(t.competitor){
+    const sel=document.getElementById('competitor');
+    const opt=Array.from(sel.options).find(o=>o.value.toLowerCase()===t.competitor.toLowerCase()||o.text.toLowerCase()===t.competitor.toLowerCase());
+    sel.value=opt?opt.value:'';   // only set if it matches a known option; else let research detect
+  }
+  t.status='worked'; renderTargets();
+  runProspect();
+}
+
+function runProspect(){
+  // DEMO MODE: replay a saved sample, no API calls.
+  if(DEMO_ON){
+    demoKey=document.getElementById('demoPick').value;
+    const d=DEMO_DATA[demoKey];
+    // align profile toggle to the demo's profile
+    salesProfile=d.profile;
+    document.querySelectorAll('[data-profile]').forEach(o=>o.classList.toggle('on',o.dataset.profile===d.profile));
+    document.getElementById('cards').innerHTML='';
+    document.getElementById('whyNowBanner').style.display='none';
+    document.getElementById('intelBubble').style.display='none';
+    progReset();
+    goto(2);
+    // brief, fake "researching" beat so the game shows, then render instantly
+    document.getElementById('s2company').textContent='Loading demo: '+d.label;
+    setTimeout(()=>{ progDone(); lastRawResult=d.prospect; renderCards(d.prospect); }, 1200);
+    return;
+  }
+  const v=document.getElementById('srcValue').value.trim();
+  const mode=document.getElementById('srcValue').dataset.mode||'company';
+  const lim=document.getElementById('limit').value||5;
+  const sen=document.getElementById('seniority').value;
+  const exc=document.getElementById('exclude').value;
+  const comp=document.getElementById('competitor').value;
+  if(!v){document.getElementById('s1status').textContent='enter a value first';return;}
+  const fields={mode,value:v,limit:lim,seniority:sen,exclude:exc,competitor:comp};
+  document.getElementById('activity2').innerHTML='';
+  document.getElementById('output2').textContent='…';
+  document.getElementById('cards').innerHTML='';
+  document.getElementById('whyNowBanner').style.display='none';
+  document.getElementById('intelBubble').style.display='none';
+  document.querySelector('#progress .spinner').style.display='';
+  progReset();
+  document.getElementById('s2company').textContent='Researching '+(v||'')+'…';
+  document.getElementById('run2spin').innerHTML='<span class="spinner"></span>';
+  goto(2);
+  startJob('prospect', {fields}, null, 'activity2','output2','cost2', null, ()=>{
+    document.getElementById('run2spin').innerHTML='';
+  });
+}
+
+// ---- draft progress (mirror of the prospect tracker) ----
+let draftTimerH=null, draftStart=0;
+const DRAFT_STEPS=[
+  {key:'find', label:'Selecting best stakeholder', match:/search_contacts|FindMatchAndEnrichPeople|commonroom/i},
+  {key:'verify', label:'Verifying email', match:/enrich_contacts/i},
+  {key:'hook', label:'Gathering why-now hooks', match:/tavily|sumble|WebFetch|WebSearch/i},
+];
+function draftProgReset(){
+  const box=document.getElementById('draft3progress'); box.style.display='block';
+  box.querySelector('.spinner').style.display='';
+  document.getElementById('draftPhase').textContent='Drafting…';
+  document.getElementById('draftSteps').innerHTML=DRAFT_STEPS.map(p=>'<div class="pstep" id="ds_'+p.key+'"><span class="ic">○</span><span>'+p.label+'</span></div>').join('');
+  draftStart=performance.now(); clearInterval(draftTimerH);
+  draftTimerH=setInterval(()=>{document.getElementById('draftTimer').textContent=Math.round((performance.now()-draftStart)/1000)+'s';},250);
+  Game.start('gamewrap-draft','inbox',salesProfile);
+}
+function draftTool(name){
+  for(const p of DRAFT_STEPS){ if(p.match.test(name)){
+    const el=document.getElementById('ds_'+p.key); if(el){el.classList.add('done');el.querySelector('.ic').textContent='✓';}
+  }}
+}
+function draftProgDone(){clearInterval(draftTimerH);const box=document.getElementById('draft3progress');box.querySelector('.spinner').style.display='none';document.getElementById('draftPhase').textContent='Draft ready';Game.stop();}
+
+// Build the prototype-style email card from the JSON block in the result.
+function renderEmailCard(result){
+  let data=null;
+  const m=result.match(/```json\s*([\s\S]*?)```/i);
+  if(m){ try{ data=JSON.parse(m[1].trim()); }catch(_){ } }
+  if(!data || !data.subject){
+    // fall back to raw text in the collapsible section
+    document.getElementById('draftActivityWrap').open=true;
+    document.getElementById('s3status').textContent='Draft returned (see raw output) — could not parse structured card.';
+    return false;
+  }
+  currentDraft=data;
+  document.getElementById('s3title').textContent='Draft — '+((data.to&&data.to.name)||lastCompany||'outreach');
+
+  // badges
+  const b=[];
+  const acc={'net-new':'bl',active:'gn',dormant:'yl',churned:'rd',unknown:''}[data.accountClass]||'';
+  if(data.accountClass&&data.accountClass!=='unknown') b.push('<span class="badge '+acc+'">'+esc(data.accountClass)+'</span>');
+  const roe={clear:'gn','linkedin-only':'rd',unknown:'yl'}[data.roeStatus]||'yl';
+  b.push('<span class="badge '+roe+'">ROE: '+esc(data.roeStatus||'unknown')+'</span>');
+  b.push('<span class="badge '+(data.emailVerified?'gn':'yl')+'">'+(data.emailVerified?'EMAIL VERIFIED':'EMAIL UNVERIFIED')+'</span>');
+  const bd=document.getElementById('draftBadges'); bd.innerHTML=b.join(''); bd.style.display='flex';
+
+  // header
+  document.getElementById('ehFrom').textContent=data.from||'[Your name] / [Your company]';
+  const to=data.to||{};
+  const emailTxt=to.email?esc(to.email):'<span class="muted">unknown</span>';
+  document.getElementById('ehTo').innerHTML=esc(to.name||'')+(to.title?' — '+esc(to.title):'')+'  &lt;'+emailTxt+'&gt;';
+  document.getElementById('ehSubject').value=data.subject||'';
+  document.getElementById('ehBody').value=data.body||'';
+
+  // meta
+  let meta='';
+  if(data.rationale) meta+='<div class="row"><span class="k">Why them:</span> '+esc(data.rationale)+'</div>';
+  if(data.hooks&&data.hooks.length) meta+='<div class="row"><span class="k">Hooks:</span> '+data.hooks.map(esc).join(' · ')+'</div>';
+  if(data.roeNote) meta+='<div class="row"><span class="k">ROE:</span> '+esc(data.roeNote)+'</div>';
+  if(data.linkedInUrl) meta+='<div class="row"><span class="k">LinkedIn:</span> <a href="'+esc(data.linkedInUrl)+'" target="_blank" rel="noopener">'+esc(data.linkedInUrl)+'</a></div>';
+  if(data.zoomInfoUrl) meta+='<div class="row"><span class="k">ZoomInfo:</span> <a href="'+esc(data.zoomInfoUrl)+'" target="_blank" rel="noopener">'+esc(data.zoomInfoUrl)+'</a></div>';
+  if(data.flags&&data.flags.length) meta+='<div class="row flag"><span class="k">Flags:</span> ⚠ '+data.flags.map(esc).join(' · ')+'</div>';
+  // Better-fit recommendations (suggestion only — does not change who this email is to)
+  const bf=Array.isArray(data.betterFit)?data.betterFit.filter(p=>p&&p.name):[];
+  if(bf.length){
+    meta+='<div class="betterfit"><div class="bf-h">💡 You drafted for '+esc((data.to&&data.to.name)||'this contact')+'. The AI also sees a stronger fit:</div>';
+    bf.forEach(p=>{
+      const who=esc(p.name+(p.title?' — '+p.title:''));
+      meta+='<div class="bf-row"><div><span class="bf-name">'+esc(p.name)+'</span>'+(p.title?' <span class="muted">'+esc(p.title)+'</span>':'')+
+        (p.why?'<div class="bf-why">'+esc(p.why)+'</div>':'')+
+        (p.linkedInUrl?'<div><a href="'+esc(p.linkedInUrl)+'" target="_blank" rel="noopener">LinkedIn ↗</a></div>':'')+'</div>'+
+        '<button class="btn sm ghost" onclick="draftForInstead('+JSON.stringify(who).replace(/"/g,'&quot;')+')">Draft for them instead →</button></div>';
+    });
+    meta+='</div>';
+  }
+  document.getElementById('draftMeta').innerHTML=meta;
+
+  document.getElementById('emailCard').style.display='block';
+  document.getElementById('receiptCard').style.display='none';
+  document.getElementById('copyBtn').disabled=false;   // copy is the demo's send
+  renderSequence(data.sequence, (data.to&&data.to.name)||'');
+  renderDemo(data.demo);
+  return true;
+}
+
+// Render the multi-touch follow-up cadence as a vertical timeline.
+const CHAN_META={
+  'email':{icon:'✉️',label:'Email'},
+  'linkedin-connect':{icon:'🔗',label:'LinkedIn connect'},
+  'linkedin-message':{icon:'💬',label:'LinkedIn message'},
+  'phone':{icon:'📞',label:'Phone'}
+};
+function renderSequence(seq, toName){
+  const card=document.getElementById('cadenceCard');
+  const list=Array.isArray(seq)?seq.filter(s=>s&&s.channel):[];
+  if(!list.length){ card.style.display='none'; return; }
+  list.sort((a,b)=>(a.day||0)-(b.day||0)||(a.step||0)-(b.step||0));
+  document.getElementById('cadPill').textContent=list.length+' touches'+(toName?' · '+toName:'');
+  document.getElementById('seqList').innerHTML=list.map((s,i)=>{
+    const cm=CHAN_META[s.channel]||{icon:'•',label:s.channel||'touch'};
+    const dayTxt=(s.day===0||s.day==='0')?'Day 0':'Day '+esc(String(s.day));
+    let html='<div class="touch '+esc(s.channel||'')+'">';
+    html+='<div class="t-top"><span class="t-day">'+dayTxt+'</span>'+
+          '<span class="t-chan">'+cm.icon+' '+esc(cm.label)+'</span>'+
+          (s.label?'<span class="t-label">'+esc(s.label)+'</span>':'')+'</div>';
+    if(s.purpose) html+='<div class="t-purpose">'+esc(s.purpose)+'</div>';
+    if(s.subject) html+='<div class="t-subj"><b>Subject:</b> '+esc(s.subject)+'</div>';
+    if(s.body) html+='<div class="t-body">'+esc(s.body)+'</div>';
+    html+='<div class="t-copy"><button class="btn ghost sm" onclick="copyTouch('+i+')">📋 Copy this touch</button></div>';
+    html+='</div>';
+    return html;
+  }).join('');
+  card.style.display='block';
+}
+function _seqText(s){
+  const cm=CHAN_META[s.channel]||{label:s.channel||'touch'};
+  let t='Day '+(s.day||0)+' — '+cm.label+(s.label?' ('+s.label+')':'');
+  if(s.purpose) t+='\nPurpose: '+s.purpose;
+  if(s.subject) t+='\nSubject: '+s.subject;
+  if(s.body) t+='\n'+s.body;
+  return t;
+}
+function copyTouch(i){
+  const seq=(currentDraft&&currentDraft.sequence)||[];
+  const list=seq.filter(s=>s&&s.channel).slice().sort((a,b)=>(a.day||0)-(b.day||0)||(a.step||0)-(b.step||0));
+  const s=list[i]; if(!s)return;
+  _clip(_seqText(s),'Touch copied — paste into your sequencer or mail/LinkedIn.');
+}
+function copySequence(){
+  const seq=(currentDraft&&currentDraft.sequence)||[];
+  const list=seq.filter(s=>s&&s.channel).slice().sort((a,b)=>(a.day||0)-(b.day||0)||(a.step||0)-(b.step||0));
+  if(!list.length)return;
+  const who=(currentDraft.to&&currentDraft.to.name)||'contact';
+  const txt='Follow-up sequence for '+who+'\n'+'='.repeat(40)+'\n\n'+list.map(_seqText).join('\n\n'+'-'.repeat(40)+'\n\n');
+  _clip(txt,'Full sequence copied — paste into your sequencer.');
+}
+// shared clipboard helper with graceful fallback + status line
+function _clip(txt,msg){
+  const done=()=>{ document.getElementById('s3status').textContent=msg; };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,done); }
+  else { const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(_){} ta.remove(); done(); }
+}
+
+// Copy the (possibly edited) email to clipboard for Slack / mail client.
+function copyEmail(){
+  const to=(currentDraft&&currentDraft.to)||{};
+  const subj=document.getElementById('ehSubject').value;
+  const body=document.getElementById('ehBody').value;
+  const txt='To: '+(to.name||'')+(to.email?' <'+to.email+'>':'')+'\nSubject: '+subj+'\n\n'+body;
+  const done=()=>{ const b=document.getElementById('copyBtn'); const o=b.textContent; b.textContent='✓ Copied'; setTimeout(()=>b.textContent=o,1500);
+    document.getElementById('s3status').textContent='Email copied — paste into Slack or your mail client.'; };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,done); }
+  else { const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(_){} ta.remove(); done(); }
+}
+function showSendTip(){
+  const w=document.querySelector('.sendwrap'); if(!w)return;
+  w.classList.add('show');
+  setTimeout(()=>w.classList.remove('show'),3200);
+}
+
+// Render the "AI on their site" mockup (faux browser + chat widget).
+function renderDemo(demo){
+  const card=document.getElementById('demoCard');
+  if(!demo || !demo.conversation || !demo.conversation.length){ card.style.display='none'; return; }
+  const domain=esc(demo.domain||lastCompany||'their-site.com');
+  const brand=esc(demo.brandName||lastCompany||'Brand');
+  const title=esc(demo.widgetTitle||(brand+' Assistant'));
+  const a=demo.assets||{};
+  const brandColor=a.brandColor||'#03363D';
+  const heroImg=a.image||'';
+  // hero: real brand image if we have one, else brand-color block
+  const heroStyle=heroImg
+    ? 'background-image:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.35)),url(\''+heroImg.replace(/'/g,'')+'\');background-size:cover;background-position:center'
+    : 'background:'+brandColor;
+  document.getElementById('demoBrowser').innerHTML=
+    '<div class="bar"><div class="dots"><i class="r"></i><i class="y"></i><i class="g"></i></div>'+
+      '<div class="url">🔒 https://www.'+domain+'</div></div>'+
+    '<div class="page">'+
+      '<div class="hero" style="'+heroStyle+'">'+brand+'</div>'+
+      '<h2>'+brand+'</h2>'+
+      '<p>'+(demo.scenario?esc(demo.scenario):'Sample support experience')+'</p>'+
+      '<div class="skel"></div><div class="skel s2"></div><div class="skel s3"></div>'+
+      '<div class="cw">'+
+        '<div class="cwhead" style="background:'+brandColor+'">'+title+' <span class="ai">AI</span></div>'+
+        '<div class="cwbody" id="cwbody"></div>'+
+        '<div class="cwfoot"><div class="inp">Type your message…</div>'+
+          '<div class="snd" style="background:'+brandColor+'">➤</div></div>'+
+        '<div class="powered">⚡ Resolved by Zendesk AI agent · illustrative mockup</div>'+
+      '</div>'+
+    '</div>';
+  card.style.display='block';
+  // progressively reveal the conversation (typing feel) for realism
+  playConversation(demo.conversation, brandColor);
+}
+let demoConvTimer=null;
+function playConversation(conv, brandColor){
+  const body=document.getElementById('cwbody'); if(!body)return;
+  body.innerHTML=''; clearTimeout(demoConvTimer);
+  let i=0;
+  const step=()=>{
+    if(i>=conv.length) return;
+    const m=conv[i]; const who=(m.from==='customer')?'customer':'bot';
+    if(who==='bot'){
+      // show a typing indicator first, then the bubble
+      const typ=document.createElement('div'); typ.className='msg bot'; typ.innerHTML='<div class="bub typing">•••</div>';
+      body.appendChild(typ); body.scrollTop=body.scrollHeight;
+      demoConvTimer=setTimeout(()=>{
+        typ.querySelector('.bub').classList.remove('typing');
+        typ.querySelector('.bub').textContent=m.text;
+        body.scrollTop=body.scrollHeight; i++; demoConvTimer=setTimeout(step,700);
+      },650);
+    } else {
+      const d=document.createElement('div'); d.className='msg customer';
+      d.innerHTML='<div class="bub"></div>'; d.querySelector('.bub').textContent=m.text;
+      body.appendChild(d); body.scrollTop=body.scrollHeight; i++; demoConvTimer=setTimeout(step,600);
+    }
+  };
+  step();
+}
+function copyDemoNote(){
+  const d=(currentDraft&&currentDraft.demo)||{};
+  const note='[Mockup attached: a sample of what '+(d.brandName||lastCompany||'your')+'’s site could look like with a Zendesk AI agent handling '+(d.scenario||'common support questions')+' — illustrative, not your live site.]';
+  navigator.clipboard&&navigator.clipboard.writeText(note);
+  document.getElementById('s3status').textContent='Mockup note copied — paste into your email.';
+}
+
+let currentDraft=null;
+let outreachTarget=''; // "Name — Title" or '' for whole company
+
+// Card button → land on screen 3 showing the OPTIONS panel (no auto-draft).
+function runOutreach(who){
+  if(!lastCompany){alert('Run a prospect search first.');return;}
+  outreachTarget=(who||'').trim();
+  // reset card / receipt; show options
+  document.getElementById('emailCard').style.display='none';
+      document.getElementById('demoCard').style.display='none';
+      document.getElementById('cadenceCard').style.display='none';
+  document.getElementById('receiptCard').style.display='none';
+  document.getElementById('draftBadges').style.display='none';
+  document.getElementById('draft3progress').style.display='none';
+  document.getElementById('optionsPanel').style.display='block';
+  document.getElementById('s3status').textContent='';
+  document.getElementById('s3title').textContent='Compose — '+(outreachTarget||lastCompany);
+  // show who + verified competitor context
+  let tgt='<span class="who">'+esc(outreachTarget||('Best fit at '+lastCompany))+'</span>';
+  if(lastCompetitor && lastCompetitor.detected && lastCompetitor.detected.length)
+    tgt+=' <span class="muted">· incumbent: '+esc(lastCompetitor.detected.join(', '))+' ('+esc(lastCompetitor.status||'')+')</span>';
+  document.getElementById('optTarget').innerHTML=tgt;
+  goto(3);
+}
+
+// Collect options and generate the draft.
+// Per-person demo drafts — each contact gets a DISTINCT email tuned to their role.
+// Keyed by lowercased contact name. Merged onto the company's base draft (which keeps
+// the brand widget/assets). `body` uses \n for newlines.
+const DEMO_DRAFTS={
+  // --- Allbirds ---
+  'lindsay shumlas':{subject:"AI deflection as Allbirds goes all-in on e-commerce",
+    rationale:"CGO owns the DTC + CX outcome and budget — the economic buyer.",
+    body:"Hi Lindsay,\n\nAs Allbirds concentrates on e-commerce, support volume (WISMO, returns, sizing) is consolidating online — and that's exactly the repetitive load Forethought's AI agents resolve autonomously, layered on your existing Zendesk with no rip-out. Cotopaxi saw 168% ROI in 6 months.\n\nWorth 15 minutes Tuesday or Thursday to show the ROI math for a DTC team your size?\n\n[Your name]",
+    flags:["Economic buyer — lead with ROI, not features"]},
+  'scott byrer':{subject:"Cutting your WISMO + returns ticket load",
+    rationale:"Owns retention/CX; closest to the day-to-day repetitive-ticket pain.",
+    body:"Hi Scott,\n\nAs Allbirds leans into e-commerce, every WISMO, return, and sizing question lands digitally. Forethought layers onto your existing Zendesk (no rip-out) and auto-resolves up to 98% of those repetitive tickets before an agent touches them — YAZIO hit 80% deflection.\n\nWorth 15 minutes Tuesday or Thursday to see the fit?\n\n[Your name]",
+    flags:["Strong day-to-day champion into the CGO"]},
+  'clifford bradshaw':{subject:"Low-lift AI agents on your existing stack (no eng project)",
+    rationale:"Engineering evaluator — cares about integration effort and control.",
+    body:"Hi Clifford,\n\nMost AI-agent rollouts turn into an engineering project. Forethought doesn't: it sits on your existing Zendesk via APIs/MCP, pre-trains on historical tickets, and goes live in under 30 days — no rip-out, no decision-tree maintenance. Your team keeps control without owning the AI infrastructure.\n\nWorth 15 minutes Tuesday or Thursday to walk the architecture?\n\n[Your name]",
+    flags:["Technical evaluator — a CX/Support leader is usually the economic buyer"]},
+  // --- UH Athletics ---
+  'craig angelos':{subject:"Fan experience without growing game-day headcount",
+    rationale:"Athletic Director — owns the fan-experience mandate and budget.",
+    body:"Aloha Craig,\n\nEvery season, the same fan questions — tickets, parking, will-call, refunds — flood email and DMs on game day. Zendesk unifies that into one workspace with a fan help center and automation, so your team answers faster during the spike and fans self-serve the rest, without adding seasonal staff.\n\nWorth 15 minutes Tuesday or Thursday? Go 'Bows! 🌈\n\n[Your name]",
+    flags:["Top-level buyer — frame around fan experience + cost, not tooling"]},
+  'director of ticket operations':{subject:"Game-day ticketing questions, handled automatically",
+    rationale:"Runs ticketing ops day-to-day; feels the seasonal spike most directly.",
+    body:"Aloha,\n\nGame day means a wall of the same ticketing questions — where are my tickets, will-call, parking, transfers. Zendesk routes and auto-answers those in one place so your ticket-ops team isn't buried during the rush, with a fan help center for the easy stuff.\n\nWorth 15 minutes Tuesday or Thursday to see how other programs handle it? Go 'Bows! 🌈\n\n[Your name]",
+    flags:["Hands-on operational owner — strong champion"]}
+};
+
+// DEMO: synthesize a follow-up cadence from the drafted email so the timeline works
+// offline. Mirrors the server cadence rules (Day 0 email + LinkedIn connect, then
+// alternating phone/email, ending on an email break-up; LinkedIn message at aggressive).
+function buildDemoSequence(j, cadence){
+  if(!cadence || cadence==='none') return [];
+  const first=(((j.to&&j.to.name)||'').split(/\s+/)[0])||'there';
+  const subj=j.subject||'Quick idea';
+  const seq=[
+    {step:1,day:0,channel:'email',label:'Initial email',subject:subj,body:j.body||'',
+      purpose:'Open the conversation with the core value prop + a meeting ask.'},
+    {step:2,day:0,channel:'linkedin-connect',label:'Connection request',subject:null,
+      body:'Hi '+first+" — just sent you a note on "+(subj.toLowerCase())+". Would love to connect and trade notes on how teams like yours are handling support volume. No pitch.",
+      purpose:'Open a second channel and put a face to the email.'}
+  ];
+  const phone=(d,label,p)=>({step:0,day:d,channel:'phone',label:label,subject:null,
+    body:"Talk-track: Hi "+first+", it's [Your name] with [Your company] — I sent a note about "+subj.toLowerCase()+". I'll keep it to 30 seconds: teams like yours are auto-resolving the repetitive ticket load without a rip-out. Worth a quick look?\n\nVoicemail: Hi "+first+", [Your name] at [Your company] — following up on my email about "+subj.toLowerCase()+". I'll resend it so it's at the top of your inbox; a 15-min look could save your team real hours. Reach me at [phone].",
+    purpose:p});
+  const email=(d,label,body,p)=>({step:0,day:d,channel:'email',label:label,subject:'Re: '+subj,body:body,purpose:p});
+  const linkedinMsg=(d)=>({step:0,day:d,channel:'linkedin-message',label:'LinkedIn message',subject:null,
+    body:"Hi "+first+" — circling back here since LinkedIn might be easier. Happy to send a 2-min Loom showing what this looks like on a stack like yours. Want me to?",
+    purpose:'Lightweight nudge on the channel they may check most.'});
+  const breakup=(d)=>email(d,'Break-up email',
+    "Hi "+first+",\n\nI don't want to clutter your inbox, so I'll close the loop here. If reducing repetitive ticket volume isn't a priority this quarter, no worries at all — I'll leave the door open.\n\nIf it ever is, just reply and I'll pick it back up.\n\n[Your name]",
+    'Polite close-the-loop that often re-engages.');
+  if(cadence==='light'){
+    seq.push(phone(4,'Phone call','A friendly nudge by voice while the email is fresh.'));
+    seq.push(breakup(9));
+  } else if(cadence==='aggressive'){
+    seq.push(phone(2,'Phone call','Fast voice follow-up while the first touch is warm.'));
+    seq.push(email(4,'Value-add email',"Hi "+first+",\n\nQuick proof point: a comparable team cut first-response time ~40% in the first month. Happy to share the 1-pager — want it?\n\n[Your name]",'New angle: a concrete result, not a nag.'));
+    seq.push(phone(6,'Phone + voicemail','Second voice touch with a specific outcome to anchor on.'));
+    seq.push(linkedinMsg(9));
+    seq.push(phone(11,'Phone call','Last live attempt before the break-up.'));
+    seq.push(breakup(14));
+  } else { // balanced (default)
+    seq.push(phone(3,'Phone call','A friendly voice nudge while the email is fresh.'));
+    seq.push(email(6,'Follow-up email',"Hi "+first+",\n\nDifferent angle: most teams I talk to worry a rollout is an eng project. This isn't — it layers on your existing stack and goes live in under 30 days. Worth 15 minutes to see?\n\n[Your name]",'New angle: low lift / fast time-to-value.'));
+    seq.push(phone(9,'Phone + voicemail','Second voice touch with a specific outcome.'));
+    seq.push(breakup(13));
+  }
+  // renumber steps in order
+  seq.sort((a,b)=>a.day-b.day).forEach((s,i)=>s.step=i+1);
+  return seq;
+}
+
+// Adapt a saved demo draft so it's addressed to whoever the rep clicked, with a
+// DISTINCT per-person draft when we have one.
+function adaptDemoDraft(rawResult, target){
+  const m=rawResult.match(/```json\s*([\s\S]*?)```/i);
+  if(!m) return rawResult;
+  let j; try{ j=JSON.parse(m[1].trim()); }catch(_){ return rawResult; }
+
+  if(target){
+    const [name,...rest]=target.split('—');
+    const newName=(name||'').trim();
+    const newTitle=rest.join('—').trim();
+    const key=newName.toLowerCase();
+    const o=DEMO_DRAFTS[key];
+
+    j.to=j.to||{}; j.to.name=newName; if(newTitle)j.to.title=newTitle;
+    j.to.email=null; j.emailVerified=false;
+
+    if(o){
+      // distinct, role-tailored draft
+      if(o.subject) j.subject=o.subject;
+      if(o.body) j.body=o.body;
+      if(o.rationale) j.rationale=o.rationale;
+      j.flags=o.flags?o.flags.slice():[];
+    } else {
+      // fallback: at least fix the greeting so it's addressed to the right person
+      const oldFirst=((rawResult.match(/"name":"([^"]+)"/)||[])[1]||'').split(/\s+/)[0];
+      const newFirst=newName.split(/\s+/)[0]||newName;
+      if(j.body && oldFirst){ const re=new RegExp(oldFirst.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'); j.body=j.body.replace(re,newFirst); }
+      j.rationale='You chose '+newName+' directly (demo).';
+      j.flags=['Demo: no tailored draft for this contact — generic sample shown'];
+    }
+    // never recommend the person you're already writing to
+    if(Array.isArray(j.betterFit)) j.betterFit=j.betterFit.filter(p=>p&&p.name&&p.name.toLowerCase()!==key);
+  }
+
+  // Synthesize the follow-up cadence from the dropdown (demo has no live sequence).
+  const cadEl=document.getElementById('optCadence');
+  j.sequence=buildDemoSequence(j, cadEl?cadEl.value:'balanced');
+
+  const pre=rawResult.slice(0,m.index);
+  return pre+'```json\n'+JSON.stringify(j,null,1)+'\n```';
+}
+
+// ===== Reply handler (standalone entry point) =====
+let rpSession=null, rpTimerH=null, rpStart=0, replyDraft=null;
+function openReply(){
+  goto(4);
+  document.getElementById('rpCard').style.display='none';
+  document.getElementById('rpBadges').style.display='none';
+  document.getElementById('reply4progress').style.display='none';
+  document.getElementById('replyPanel').style.display='block';
+  document.getElementById('s4status').textContent='';
+}
+const RP_INTENT_LABEL={'interested':'Interested','not-now':'Not now','objection':'Objection',
+  'wrong-person':'Wrong person','referral':'Referral','unsubscribe':'Opt-out','auto-reply':'Auto-reply'};
+
+function generateReply(){
+  const text=document.getElementById('rpText').value.trim();
+  if(!text){ document.getElementById('s4status').textContent='Paste their reply first.'; return; }
+  const who=document.getElementById('rpWho').value.trim();
+  const intent=document.getElementById('rpIntent').value;
+  const tone=document.getElementById('rpTone').value;
+  const goal=document.getElementById('rpGoal').value;
+  const notes=document.getElementById('rpNotes').value.trim();
+  replyDraft=null;
+  document.getElementById('rpCard').style.display='none';
+  document.getElementById('rpBadges').style.display='none';
+  rpProgStart();
+
+  // DEMO MODE: synthesize a response instantly, no API call.
+  if(DEMO_ON){
+    setTimeout(()=>{ rpProgDone();
+      const raw=buildDemoReply({who,intent,tone,goal,notes,text});
+      lastRawResult=raw; renderReplyCard(raw);
+      document.getElementById('s4status').textContent='Demo response ready — copy it to send.';
+    }, 1000);
+    return;
+  }
+
+  const fields={who,intent,tone,goal,notes,replyText:text,profile:salesProfile};
+  document.getElementById('activity4').innerHTML='';
+  document.getElementById('output4').textContent='…';
+  startJob('reply', {fields, profile:salesProfile}, null, 'activity4','output4','cost4',
+    (result,sid)=>{ rpSession=sid||rpSession; },
+    ()=>{ rpProgDone(); renderReplyCard(lastRawResult);
+      document.getElementById('s4status').textContent='Response ready — edit if needed, then copy.'; });
+}
+function rpProgStart(){
+  const box=document.getElementById('reply4progress'); box.style.display='block';
+  box.querySelector('.spinner').style.display='';
+  document.getElementById('rpPhase').textContent='Reading the reply…';
+  rpStart=performance.now(); clearInterval(rpTimerH);
+  rpTimerH=setInterval(()=>{document.getElementById('rpTimer').textContent=Math.round((performance.now()-rpStart)/1000)+'s';},250);
+}
+function rpProgDone(){ clearInterval(rpTimerH);
+  const box=document.getElementById('reply4progress'); box.querySelector('.spinner').style.display='none';
+  document.getElementById('rpPhase').textContent='Response ready'; }
+
+function renderReplyCard(result){
+  let data=null;
+  const m=result.match(/```json\s*([\s\S]*?)```/i);
+  if(m){ try{ data=JSON.parse(m[1].trim()); }catch(_){ } }
+  if(!data || !data.subject){
+    document.getElementById('rpActivityWrap').open=true;
+    document.getElementById('s4status').textContent='Drafted (see raw output) — could not parse a structured card.';
+    return false;
+  }
+  replyDraft=data;
+  const to=data.to||{};
+  document.getElementById('rpTo').innerHTML=esc(to.name||document.getElementById('rpWho').value||'them')+(to.title?' — '+esc(to.title):'');
+  document.getElementById('rpSubject').value=data.subject||'';
+  document.getElementById('rpBody').value=data.body||'';
+  // badges: intent read + ROE if present
+  const b=[];
+  if(data.intentRead) b.push('<span class="badge bl">'+esc(data.intentRead)+'</span>');
+  if(data.roeStatus){ const roe={clear:'gn','linkedin-only':'rd',unknown:'yl'}[data.roeStatus]||'yl';
+    b.push('<span class="badge '+roe+'">ROE: '+esc(data.roeStatus)+'</span>'); }
+  const bd=document.getElementById('rpBadges'); bd.innerHTML=b.join(''); bd.style.display=b.length?'flex':'none';
+  let meta='';
+  if(data.strategy) meta+='<div class="row"><span class="k">Strategy:</span> '+esc(data.strategy)+'</div>';
+  if(data.flags&&data.flags.length) meta+='<div class="row flag"><span class="k">Flags:</span> ⚠ '+data.flags.map(esc).join(' · ')+'</div>';
+  document.getElementById('rpMeta').innerHTML=meta;
+  document.getElementById('rpCard').style.display='block';
+  return true;
+}
+function copyReply(){
+  const to=(replyDraft&&replyDraft.to)||{};
+  const subj=document.getElementById('rpSubject').value;
+  const body=document.getElementById('rpBody').value;
+  const txt='To: '+(to.name||document.getElementById('rpWho').value||'')+'\nSubject: '+subj+'\n\n'+body;
+  _clip(txt,'Response copied — paste into your mail client or LinkedIn.');
+  const b=document.getElementById('rpCopyBtn'); const o=b.textContent; b.textContent='✓ Copied'; setTimeout(()=>b.textContent=o,1500);
+}
+// DEMO: synthesize an on-strategy response per intent so it works offline.
+function buildDemoReply({who,intent,tone,goal,notes,text}){
+  const first=((who||'').split(/[ ,]/)[0])||'there';
+  const T={
+    'interested':{subject:"Great — let's grab 15 minutes",strategy:"They're warm: make booking effortless, offer concrete times, keep it short.",
+      body:"Hi "+first+",\n\nLove it — thanks for the quick reply. How about a quick 15 minutes Tuesday or Thursday afternoon? I'll come ready with the 2-3 things most relevant to your team, no generic demo.\n\nIf easier, send me a window that works and I'll adapt.\n\n[Your name]"},
+    'not-now':{subject:"No problem — circle back in Q3?",strategy:"Respect the timing, leave the door open, anchor a specific re-touch so it doesn't go cold.",
+      body:"Hi "+first+",\n\nTotally understand — timing is everything. Mind if I check back early Q3? In the meantime I'll send over one short case study so it's there when you're ready, not before.\n\nAppreciate the honesty.\n\n[Your name]"},
+    'objection':{subject:"Fair pushback — quick thought",strategy:"Acknowledge the objection directly, answer with one proof point, re-ask softly.",
+      body:"Hi "+first+",\n\nFair point, and I'd rather address it head-on than hand-wave. "+(notes?("On your note — "+notes+" — "):"")+"The teams who had the same concern usually found the lift was lower than expected because it layers onto their existing stack. Cotopaxi saw 168% ROI in 6 months without a rip-out.\n\nWorth 15 minutes to pressure-test whether that holds for your setup?\n\n[Your name]"},
+    'wrong-person':{subject:"Thanks — who's the right person?",strategy:"Don't push; ask for the warm redirect and make it easy to forward.",
+      body:"Hi "+first+",\n\nAppreciate you letting me know — I don't want to take your time on something outside your lane. Who owns this on your side? Happy to reach out directly, or feel free to forward this along.\n\nThanks either way.\n\n[Your name]"},
+    'referral':{subject:"Thanks for the intro",strategy:"Thank them, then send a clean note the referrer can forward to the new contact.",
+      body:"Hi "+first+",\n\nThank you — really appreciate the pointer. I'll reach out to them directly. If it's easy, a one-line intro from you would go a long way; if not, no worries at all.\n\nGrateful for the help.\n\n[Your name]"},
+    'unsubscribe':{subject:"Understood — I'll close the loop",strategy:"Honor it immediately and gracefully. No re-pitch. Protects the brand and ROE.",
+      body:"Hi "+first+",\n\nUnderstood, and thanks for telling me directly — I'll close this out and won't keep reaching out. If anything changes down the road, you know where to find me.\n\nAll the best,\n[Your name]"},
+    'auto-reply':{subject:"Re: connecting when you're back",strategy:"It's an OOO — don't burn a real touch. Note the return date and re-send then.",
+      body:"(Auto-reply detected — no need to send now.)\n\nWhen they're back, resend your last note with a light opener:\n\nHi "+first+",\n\nHope the time away was good — floating this back to the top of your inbox. Still think a quick 15 minutes could be worth it; happy to work around your catch-up week.\n\n[Your name]"}
+  };
+  const t=T[intent]||T['interested'];
+  const j={to:{name:who||null,title:null},intentRead:RP_INTENT_LABEL[intent]||intent,
+    roeStatus:(intent==='unsubscribe')?'linkedin-only':'clear',
+    subject:t.subject,body:t.body,strategy:t.strategy,
+    flags:(intent==='unsubscribe')?["Opt-out — do NOT re-contact; suppress per ROE"]:(intent==='auto-reply'?["Auto-reply — don't spend a real touch; re-send on their return date"]:[])};
+  return 'Demo response ('+(RP_INTENT_LABEL[intent]||intent)+').\n\n```json\n'+JSON.stringify(j,null,1)+'\n```';
+}
+
+function generateDraft(){
+  // DEMO MODE: replay the saved draft instantly, but ADDRESSED TO THE CLICKED PERSON.
+  if(DEMO_ON && demoKey && DEMO_DATA[demoKey]){
+    const d=DEMO_DATA[demoKey];
+    document.getElementById('optionsPanel').style.display='none';
+    document.getElementById('emailCard').style.display='none';
+    document.getElementById('demoCard').style.display='none';
+    document.getElementById('cadenceCard').style.display='none';
+    document.getElementById('receiptCard').style.display='none';
+    document.getElementById('draftBadges').style.display='none';
+    draftProgReset();
+    const adapted=adaptDemoDraft(d.outreach, outreachTarget);
+    setTimeout(()=>{ draftProgDone(); lastRawResult=adapted;
+      const ok=renderEmailCard(adapted);
+      document.getElementById('regenBtn').disabled=false;
+      document.getElementById('toneBtn').disabled=false;
+      if(ok) document.getElementById('s3status').textContent='Demo draft ready — copy it to share.';
+    }, 1200);
+    return;
+  }
+  const co=lastCompany, ct=outreachTarget;
+  // Prefer the VERIFIED competitor from the prospect step over the raw dropdown pick.
+  const picked=document.getElementById('competitor').value;
+  let comp=picked, compVerified='';
+  if(lastCompetitor && lastCompetitor.detected && lastCompetitor.detected.length){
+    comp=lastCompetitor.detected.join(', ');
+    compVerified=lastCompetitor.status||'';
+  }
+  const opts={
+    type:document.getElementById('optType').value,
+    tone:document.getElementById('optTone').value,
+    humor:document.getElementById('optHumor').value,
+    length:document.getElementById('optLength').value,
+    cta:document.getElementById('optCta').value,
+    hook:document.getElementById('optHook').value,
+    proof:document.getElementById('optProof').checked,
+    personalize:document.getElementById('optPersonalize').checked,
+    subjects:document.getElementById('optSubjects').checked,
+    cadence:document.getElementById('optCadence').value,
+    notes:document.getElementById('optNotes').value.trim(),
+  };
+  const fields={company:co,contact:ct,goal:'meeting',mode:'draft',
+    competitor:comp, competitorVerified:compVerified, competitorUserPick:picked,
+    options:opts};
+  outreachReady=false; outreachSession=null; currentDraft=null;
+  document.getElementById('optionsPanel').style.display='none';
+  document.getElementById('activity3').innerHTML='';
+  document.getElementById('output3').textContent='…';
+  document.getElementById('emailCard').style.display='none';
+      document.getElementById('demoCard').style.display='none';
+      document.getElementById('cadenceCard').style.display='none';
+  document.getElementById('receiptCard').style.display='none';
+  document.getElementById('draftBadges').style.display='none';
+  document.getElementById('sendBtn').disabled=true;
+  document.getElementById('regenBtn').disabled=true;
+  document.getElementById('toneBtn').disabled=true;
+  draftProgReset();
+  startJob('outreach', {fields}, null, 'activity3','output3','cost3',
+    (result,sid)=>{ outreachSession=sid||outreachSession; },
+    ()=>{
+      draftProgDone();
+      outreachReady=true;
+      const ok=renderEmailCard(lastRawResult);
+      document.getElementById('sendBtn').disabled=!ok;
+      document.getElementById('regenBtn').disabled=false;
+      document.getElementById('toneBtn').disabled=false;
+      if(ok) document.getElementById('s3status').textContent='Draft ready — edit if needed, then approve.';
+    });
+}
+
+function approveSend(){
+  if(!outreachSession){alert('No session to resume — re-run the draft.');return;}
+  if(!confirm('Approve this draft? (POC: SIMULATED send — no email account is connected.)'))return;
+  const btn=document.getElementById('sendBtn');
+  btn.disabled=true; btn.textContent='Approving…';
+  document.getElementById('regenBtn').disabled=true;
+  // send the EDITED subject/body so user tweaks are honored
+  const subj=document.getElementById('ehSubject').value;
+  const body=document.getElementById('ehBody').value;
+  startJob('outreach',
+    {prompt:'Approved. Mode = send. The final subject is:\n'+subj+'\n\nThe final body is:\n'+body+'\n\nPer POC rules do NOT actually send — return the SIMULATED receipt line and a fake message id.'},
+    outreachSession, 'activity3', 'output3', 'cost3',
+    null,
+    ()=>{
+      btn.textContent='Approved ✓';
+      const to=(currentDraft&&currentDraft.to)||{};
+      document.getElementById('emailCard').style.display='none';
+      document.getElementById('demoCard').style.display='none';
+      document.getElementById('cadenceCard').style.display='none';
+      document.getElementById('receiptCard').style.display='block';
+      document.getElementById('receiptBody').innerHTML=
+        '<h3 style="margin:0 0 6px">Approved — simulated send</h3>'+
+        '<div class="muted">To '+esc(to.name||'recipient')+' · '+esc(to.email||'no email')+'</div>'+
+        '<div class="muted" style="margin-top:6px">No email account is connected in this POC. In production this resumes the approved draft and sends via the signed-in user\'s own email, then stores the thread id as a receipt.</div>';
+      document.getElementById('s3status').textContent='Done (simulated).';
+    });
+}
+
+function regen(){
+  if(!outreachSession)return;
+  reDraft('Regenerate the draft: tighter and warmer, same JSON shape. Still Mode = draft — do not send.');
+}
+function toneAdjust(){
+  if(!outreachSession)return;
+  reDraft('Rewrite the draft with light, self-deprecating humor in the opener (a quick wink, never groveling), then pivot to value. Same JSON shape, Mode = draft, do not send.');
+}
+function reDraft(instr){
+  document.getElementById('regenBtn').disabled=true;
+  document.getElementById('toneBtn').disabled=true;
+  document.getElementById('sendBtn').disabled=true;
+  draftProgReset();
+  startJob('outreach', {prompt:instr}, outreachSession,'activity3','output3','cost3',
+    (r,sid)=>{outreachSession=sid||outreachSession;},
+    ()=>{ draftProgDone();
+      const ok=renderEmailCard(lastRawResult);
+      document.getElementById('regenBtn').disabled=false;
+      document.getElementById('toneBtn').disabled=false;
+      document.getElementById('sendBtn').disabled=!ok;
+    });
+}
+
+// ===== Loading mini-games =====
+// Two mechanics, themed per sales profile:
+//   mode 'deflect' (prospect/research): items fall, click to deflect them. All good.
+//   mode 'inbox'   (outreach/draft): SPAM falls (click to trash = +1) mixed with real
+//        PROSPECT REPLIES (do NOT click — let them land in the inbox = +1). Trashing a
+//        real reply or letting spam through costs a miss.
+const Game=(function(){
+  let raf=null, ctx=null, canvas=null, wrap=null;
+  let items=[], bursts=[], score=0, missed=0, t=0, spawnEvery=42, running=false, highAtStart=0;
+  let mode='deflect', theme=null, hsKey='';
+
+  // Per-profile themes. `verb`/`actor` skin the deflect game; `spam`/`real` skin inbox.
+  const THEMES={
+    forethought:{verb:'deflected',actor:'🤖 Forethought AI',items:['WISMO','Return','Refund','Sizing','Login','Billing','How-to','Cancel']},
+    zendesk:{verb:'resolved',actor:'🎫 Zendesk',items:['Email','Chat','Call','Refund','Order','Account','Bug','How-to']},
+    cx:{verb:'resolved',actor:'💬 Support',items:['WISMO','Return','Refund','Sizing','Complaint','How-to','Escalation','Billing']},
+    it:{verb:'resolved',actor:'🖥️ IT Desk',items:['Password','VPN','Access','Laptop','Software','Onboarding','Outage','Printer']},
+    hr:{verb:'answered',actor:'👥 People Team',items:['PTO','Payroll','Benefits','Policy','Onboarding','Expenses','Leave','Offer']},
+    contactcenter:{verb:'handled',actor:'📞 Contact Center',items:['Inbound call','Callback','Voicemail','Transfer','WISMO','Refund','Escalation','IVR']},
+    generic:{verb:'cleared',actor:'✅ Queue',items:['Request','Ticket','Inquiry','Task','Case','Issue','Lead','Reply']}
+  };
+  // Inbox-mode content (shared, lightly sales-flavored).
+  const SPAM=['Re: WINNER!!!','You won a prize','Crypto 100x 🚀','Hot singles','Invoice #00 overdue','Free gift card','Verify account NOW','Nigerian prince'];
+  const REAL=['Re: 15 min Tue?','Interested — tell me more','Looping in my VP','Sounds good, send info','Yes let\'s chat','Forwarding to our team'];
+
+  const getHigh=()=>{ try{return parseInt(localStorage.getItem(hsKey)||'0',10)||0;}catch(_){return 0;} };
+  const setHigh=v=>{ try{localStorage.setItem(hsKey,String(v));}catch(_){} };
+
+  function ensureDom(wrapId){
+    wrap=document.getElementById(wrapId);
+    const title = mode==='inbox'
+      ? '📥 Inbox Defender — trash the spam, let real replies through'
+      : '🎯 '+theme.actor+' — click to '+theme.verb+' the queue';
+    wrap.innerHTML=
+      '<div class="game-head"><span>'+title+'</span>'+
+      '<span class="gscore"><span id="g-score">0</span> · 🏆 best <span id="g-high">'+getHigh()+'</span></span></div>'+
+      '<canvas class="game-canvas" id="g-canvas"></canvas>'+
+      '<div class="game-hint">Score: <span id="g-d">0</span> · Missed: <span id="g-m">0</span> · just for fun while you wait</div>';
+    canvas=document.getElementById('g-canvas');
+    const r=canvas.getBoundingClientRect();
+    canvas.width=Math.max(320,Math.floor(r.width)); canvas.height=200;
+    ctx=canvas.getContext('2d');
+    canvas.onpointerdown=onPoke;
+  }
+  function bumpScore(d){ score+=d; if(score<0)score=0;
+    document.getElementById('g-score').textContent=score;
+    document.getElementById('g-d').textContent=score;
+    if(score>getHigh()){ setHigh(score); const h=document.getElementById('g-high'); if(h)h.textContent=score; } }
+  function bumpMiss(){ missed++; document.getElementById('g-m').textContent=missed; }
+  function burst(x,y,color){bursts.push({x,y,r:4,a:1,c:color||'0,166,86'});}
+
+  function onPoke(e){
+    const r=canvas.getBoundingClientRect();
+    const x=(e.clientX-r.left)*(canvas.width/r.width);
+    const y=(e.clientY-r.top)*(canvas.height/r.height);
+    for(let i=items.length-1;i>=0;i--){
+      const it=items[i];
+      if(x>=it.x-it.w/2&&x<=it.x+it.w/2&&y>=it.y-13&&y<=it.y+13){
+        if(mode==='inbox'){
+          if(it.spam){ items.splice(i,1); bumpScore(1); burst(it.x,it.y,'0,166,86'); }   // trashed spam = good
+          else { items.splice(i,1); bumpScore(-1); bumpMiss(); burst(it.x,it.y,'227,79,50'); } // trashed a real reply = bad
+        } else {
+          items.splice(i,1); bumpScore(1); burst(it.x,it.y,'0,166,86');
+        }
+        return;
+      }
+    }
+  }
+
+  function spawn(){
+    const isInbox=mode==='inbox';
+    const spam=isInbox && Math.random()<0.62;
+    let label;
+    if(isInbox) label = spam ? SPAM[(Math.random()*SPAM.length)|0] : REAL[(Math.random()*REAL.length)|0];
+    else label = theme.items[(Math.random()*theme.items.length)|0];
+    items.push({x:34+Math.random()*(canvas.width-68),y:-10,
+      w:Math.max(58,label.length*6.4),vy:0.7+Math.random()*0.9,label,spam});
+  }
+
+  function frame(){
+    t++;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // base bar
+    ctx.fillStyle='#0a444b'; ctx.fillRect(0,canvas.height-18,canvas.width,18);
+    ctx.fillStyle='#00A656'; ctx.font='11px ui-monospace,Menlo,monospace';
+    ctx.fillText(mode==='inbox'?'📥 Your inbox':theme.actor,8,canvas.height-5);
+
+    if(t%spawnEvery===0){ spawn(); if(spawnEvery>16&&t%300===0)spawnEvery-=2; }
+
+    for(let i=items.length-1;i>=0;i--){
+      const it=items[i]; it.y+=it.vy;
+      // color: deflect=blue; inbox spam=red, real=green
+      let fill='#1F73B7';
+      if(mode==='inbox') fill = it.spam ? '#E34F32' : '#00A656';
+      ctx.fillStyle=fill; roundRect(it.x-it.w/2,it.y-12,it.w,24,6); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='10px ui-monospace,Menlo,monospace'; ctx.textAlign='center';
+      ctx.fillText(it.label,it.x,it.y+3); ctx.textAlign='left';
+      if(it.y>canvas.height-20){
+        items.splice(i,1);
+        if(mode==='inbox'){
+          if(it.spam){ bumpMiss(); }       // spam reached inbox = bad (just a miss, no score)
+          else { bumpScore(1); burst(it.x,canvas.height-22,'0,166,86'); } // real reply landed = good
+        } else { bumpMiss(); }
+      }
+    }
+    for(let i=bursts.length-1;i>=0;i--){
+      const b=bursts[i]; b.r+=2; b.a-=0.06;
+      ctx.strokeStyle='rgba('+b.c+','+Math.max(0,b.a)+')'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,7); ctx.stroke();
+      if(b.a<=0)bursts.splice(i,1);
+    }
+    if(running)raf=requestAnimationFrame(frame);
+  }
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  return {
+    // start(wrapId, mode, profile)
+    start(wrapId, m, profile){
+      this.stop();
+      mode = (m==='inbox')?'inbox':'deflect';
+      theme = THEMES[profile] || THEMES.generic;
+      hsKey = 'game_'+mode+'_'+(profile||'generic');
+      ensureDom(wrapId);
+      items=[];bursts=[];score=0;missed=0;t=0;spawnEvery=42;running=true;
+      highAtStart=getHigh();
+      raf=requestAnimationFrame(frame);
+    },
+    stop(){ running=false; if(raf)cancelAnimationFrame(raf); raf=null;
+      if(wrap){
+        const s=wrap.querySelector('#g-score');
+        if(s&&score>0) s.textContent = (score>highAtStart? score+' — 🏆 new best!' : score+' — nice!');
+      }
+    }
+  };
+})();
+
+// ===== Demo mode: replay saved sample results instantly (no API calls, no credits) =====
+let DEMO_ON=false;
+const DEMO_DATA={
+  allbirds:{
+    label:'Allbirds (DTC footwear)',
+    profile:'forethought',
+    prospect:`## Allbirds — Prospect Summary (DEMO sample)
+
+Allbirds is a DTC sustainable-footwear brand; high-volume online support (WISMO, returns, sizing) makes it a strong AI-deflection fit.
+
+\`\`\`json
+{
+ "company":"Allbirds",
+ "companyZoomInfoUrl":"https://app.zoominfo.com/#/apps/profile/company/357906393",
+ "whyNow":"Closing US full-price stores to go all-in on e-commerce — support volume concentrates online.",
+ "accountClass":"net-new",
+ "summary":"Allbirds is pivoting hard to e-commerce/wholesale. As channels collapse into digital, repetitive support (WISMO, returns, sizing) spikes online — exactly where Forethought's Solve/Triage agents deflect tickets and scale CX without added headcount.",
+ "competitor":{"detected":["Zendesk"],"userClaim":null,"status":"verified","source":"Zendesk case study + website widget","angle":"Layer Forethought on top of existing Zendesk — no rip-out, pre-trains on historical tickets, live in <30 days.","battlecard":{"vsTool":"Zendesk","points":[{"them":"Zendesk's native automation (flow builder, basic Answer Bot) needs manual decision trees and constant upkeep as policies change.","us":"Forethought pre-trains on historical tickets and resolves autonomously — no flows to maintain, and it improves itself over time."},{"them":"Zendesk AI add-ons are priced per-resolution/per-seat and get expensive at DTC volume.","us":"Outcome-based pricing tied to tickets actually deflected — you pay for results, not seats."},{"them":"Standing up Zendesk Advanced AI is an internal project with ramp time.","us":"Layers onto their existing Zendesk via API — live in under 30 days, no rip-out."}],"trapQuestion":"When your return/WISMO policy changes, how long until your Zendesk flows reflect it — and who owns that update?","landmine":"Don't bash Zendesk as a platform — they're invested in it and it works for ticketing. Position Forethought as a layer that makes their Zendesk better, not a replacement."}},
+ "webCx":{"checked":true,"chatWidget":"none found","isAiBot":"no","helpCenter":"Self-hosted FAQ/returns pages — no KB platform detected","channels":["email/form","phone","social"],"observation":"Visitors get email, a form, phone, and static FAQs — no live chat, no AI bot, so every query becomes a human ticket. That's the gap Forethought fills.","evidence":"WebFetch of allbirds.com/pages/contact-us — no chat vendor scripts found"},
+ "news":[
+  {"headline":"Allbirds to close all remaining US full-price stores, prioritizing e-commerce","date":"2026-03","relevance":"Channel shift to digital concentrates support volume online — the case for AI deflection.","url":"https://www.google.com/search?q=allbirds+closing+stores+ecommerce"},
+  {"headline":"Allbirds launches resale + ThredUp Clean Out program","date":"2025-11","relevance":"More returns/logistics questions = more repetitive tickets to deflect.","url":null}
+ ],
+ "tiers":[
+  {"name":"C-Level","contacts":[{"name":"Lindsay Shumlas","title":"Chief Growth Officer","initials":"LS","zoomInfoUrl":"https://app.zoominfo.com/#/apps/profile/person/10866901089/contact-profile?profileId=10866901089","linkedInUrl":null,"email":"lindsay.shumlas@allbirds.com","emailVerified":true,"emailSource":"ZoomInfo","phone":"+1 415-555-0142","mobilePhone":"+1 415-555-0198","phoneSource":"ZoomInfo","sources":["ZoomInfo"],"tags":["owns digital/DTC + CX outcome","economic buyer"],"notes":"Owns the DTC growth + CX outcome; the economic buyer for an AI deflection play."}]},
+  {"name":"VP / Director","contacts":[{"name":"Scott Byrer","title":"Director of Customer Retention","initials":"SB","zoomInfoUrl":null,"linkedInUrl":"https://www.linkedin.com/in/sbyrer","email":"scott.byrer@allbirds.com","emailVerified":true,"emailSource":"CommonRoom","mobilePhone":"+1 415-555-0211","phoneSource":"CommonRoom","sources":["CommonRoom"],"tags":["CX/support adjacent"],"notes":"Owns retention/CX; close to the repetitive-ticket pain Forethought solves."}]},
+  {"name":"Functional leads","contacts":[{"name":"Clifford Bradshaw","title":"Managing Director, Engineering","initials":"CB","zoomInfoUrl":"https://app.zoominfo.com/#/apps/profile/person/1105178858/contact-profile?profileId=1105178858","linkedInUrl":null,"email":null,"emailVerified":false,"phone":null,"mobilePhone":"+1 415-555-0173","phoneSource":"ZoomInfo","sources":["ZoomInfo"],"tags":["tech evaluator"],"notes":"Technical evaluator for integrations and AI tooling."}]}
+ ]
+}
+\`\`\``,
+    outreach:`Picked Scott Byrer — owns retention/CX and sits closest to the repetitive-ticket pain.
+
+\`\`\`json
+{
+ "to":{"name":"Scott Byrer","title":"Director of Customer Retention","email":"scott.byrer@allbirds.com"},
+ "emailVerified":false,
+ "from":"[Your name] / Zendesk (Forethought)",
+ "subject":"AI deflection on top of your Zendesk",
+ "body":"Hi Scott,\\n\\nAs Allbirds leans all-in on e-commerce, every WISMO, return, and sizing question now lands digitally. Forethought layers onto your existing Zendesk (no rip-out) and auto-resolves up to 98% of those repetitive tickets before an agent touches them — YAZIO hit 80% deflection.\\n\\nWorth 15 minutes Tuesday or Thursday to see the fit?\\n\\n[Your name]",
+ "accountClass":"net-new",
+ "roeStatus":"clear",
+ "roeNote":"Net-new, not an inbound lead owned by another rep — email is allowed.",
+ "rationale":"Owns retention/CX; closest to the repetitive-ticket pain Forethought solves.",
+ "betterFit":[{"name":"Lindsay Shumlas","title":"Chief Growth Officer","why":"Owns the DTC + CX outcome and budget — the economic buyer for an AI deflection play; Scott is a great champion into her.","linkedInUrl":null}],
+ "hooks":["e-commerce pivot","verified Zendesk incumbent","WISMO/returns volume"],
+ "flags":["Email UNVERIFIED — inferred pattern; confirm before sending"],
+ "zoomInfoUrl":null,
+ "linkedInUrl":"https://www.linkedin.com/in/sbyrer",
+ "demo":{"domain":"allbirds.com","brandName":"Allbirds","widgetTitle":"Allbirds Assistant","scenario":"WISMO + a return/exchange — the two highest-volume DTC drivers","assets":{"image":"https://www.allbirds.com/cdn/shop/files/logo-seo.jpg?v=1753720776","brandColor":"#2e2a25"},"conversation":[
+  {"from":"customer","text":"Hi, I ordered the Wool Runners last week — where's my order?"},
+  {"from":"bot","text":"Happy to help! Your Wool Runners shipped yesterday and are in transit, arriving Thursday. Want me to text you tracking updates?"},
+  {"from":"customer","text":"Thanks — I think I ordered a half-size too small. Can I exchange them?"},
+  {"from":"bot","text":"Absolutely. I've started an exchange for the next size up and emailed you a prepaid return label — your new pair ships as soon as the old one's scanned. Anything else?"}
+ ]}
+}
+\`\`\``
+  },
+  uhathletics:{
+    label:'University of Hawaii Athletics 🌺',
+    profile:'cx',
+    prospect:`## University of Hawaii Athletics — Prospect Summary (DEMO sample)
+
+UH Athletics (Rainbow Warriors / Rainbow Wahine) runs high-volume fan support around ticketing, events, and merchandise — a strong fit for consolidating fan service.
+
+\`\`\`json
+{
+ "company":"University of Hawaii Athletics",
+ "companyZoomInfoUrl":null,
+ "whyNow":"Football season + new arena events drive seasonal spikes in fan ticketing/support questions.",
+ "accountClass":"net-new",
+ "summary":"UH Athletics handles fan support across ticketing, game-day logistics, donations, and merch. Seasonal spikes (football, volleyball, basketball) create surges in repetitive questions — a fit for Zendesk to consolidate fan service into one workspace with automation and self-service.",
+ "competitor":{"detected":["Ticketmaster/Paciolan (ticketing)","email-based support"],"userClaim":null,"status":"verified","source":"website review","angle":"Zendesk consolidates fan support across email/social/chat into one workspace with a fan help center — faster responses during game-day spikes."},
+ "webCx":{"checked":true,"chatWidget":"none found","isAiBot":"no","helpCenter":"FAQ pages on hawaiiathletics.com; ticketing handled off-site","channels":["email","phone","social"],"observation":"Fans get email, a phone line, and FAQ pages — no live chat or AI assistant, so game-day questions queue up. Zendesk adds messaging + self-service to absorb the spikes.","evidence":"Reviewed hawaiiathletics.com contact/FAQ pages"},
+ "news":[
+  {"headline":"UH Athletics announces upcoming football season schedule","date":"2026-05","relevance":"Season kickoff = spike in ticketing, parking, and game-day support questions.","url":"https://hawaiiathletics.com"},
+  {"headline":"New multi-sport season ticket packages released","date":"2026-04","relevance":"More transactions = more fan support inquiries to route and deflect.","url":null}
+ ],
+ "tiers":[
+  {"name":"C-Level","contacts":[{"name":"Craig Angelos","title":"Director of Athletics","initials":"CA","zoomInfoUrl":null,"linkedInUrl":null,"email":null,"emailVerified":false,"sources":["web"],"tags":["owns the athletics org","budget authority"],"notes":"Athletic Director — owns the fan-experience mandate and budget. (Sample data.)"}]},
+  {"name":"VP / Director","contacts":[{"name":"Deputy AD, External Affairs","title":"Deputy Athletic Director — External/Fan Experience","initials":"DA","zoomInfoUrl":null,"linkedInUrl":null,"email":null,"emailVerified":false,"sources":["web"],"tags":["owns fan experience / ticketing"],"notes":"Owns ticketing, marketing, and fan engagement — the day-to-day buyer for fan support tooling. (Sample data.)"}]},
+  {"name":"Functional leads","contacts":[{"name":"Director of Ticket Operations","title":"Director of Ticketing & Fan Services","initials":"DT","zoomInfoUrl":null,"linkedInUrl":null,"email":null,"emailVerified":false,"sources":["web"],"tags":["operational owner of fan support"],"notes":"Runs ticketing ops and fan inquiries — feels the seasonal spike pain directly. (Sample data.)"}]}
+ ]
+}
+\`\`\``,
+    outreach:`Picked the Deputy AD for Fan Experience — owns ticketing + fan engagement, the day-to-day buyer.
+
+\`\`\`json
+{
+ "to":{"name":"Deputy AD, External Affairs","title":"Deputy Athletic Director — Fan Experience","email":null},
+ "emailVerified":false,
+ "from":"[Your name] / Zendesk",
+ "subject":"Handling game-day fan questions without the scramble",
+ "body":"Aloha,\\n\\nFootball season means a flood of the same fan questions — where's my ticket, parking, will-call, refunds — all hitting email and DMs at once. Zendesk pulls those into one workspace with a fan help center and automation, so your team answers faster during the spike and fans self-serve the easy stuff.\\n\\nWorth 15 minutes Tuesday or Thursday to walk through how other athletics programs handle game-day support?\\n\\nGo 'Bows! 🌈\\n[Your name]",
+ "accountClass":"net-new",
+ "roeStatus":"clear",
+ "roeNote":"Net-new prospect — email allowed.",
+ "rationale":"Owns ticketing + fan engagement; feels the seasonal support spike directly.",
+ "betterFit":[{"name":"Director of Ticket Operations","title":"Director of Ticketing & Fan Services","why":"Runs ticketing ops day-to-day and feels the game-day spike most directly — strong hands-on champion (title unconfirmed in demo data).","linkedInUrl":null}],
+ "hooks":["football season spike","fragmented email/social fan support","seasonal ticketing volume"],
+ "flags":["Sample/demo contact — title illustrative, verify the real person before outreach"],
+ "zoomInfoUrl":null,
+ "linkedInUrl":null,
+ "demo":{"domain":"hawaiiathletics.com","brandName":"Hawaii Athletics","widgetTitle":"Rainbow Warriors Fan Help","scenario":"Game-day ticketing + parking — the top seasonal fan questions","assets":{"image":"https://images.sidearmdev.com/convert?url=https%3a%2f%2fdxbhsrqyrr690.cloudfront.net%2fsidearm.nextgen.sites%2fhawaiiathletics.com%2fimages%2flogos%2fsite%2fsite.png&type=jpeg","brandColor":"#005837"},"conversation":[
+  {"from":"customer","text":"I can't find my tickets for Saturday's football game — help!"},
+  {"from":"bot","text":"Aloha! I found your order for Saturday vs. the visiting team. Your 2 mobile tickets are in your account — I've re-sent them to your email and texted a direct link. Want parking info too?"},
+  {"from":"customer","text":"Yes please, where do I park?"},
+  {"from":"bot","text":"You're in Lot B (gold pass). Gates open 2 hours before kickoff — I've added the parking pass to the same email. Go 'Bows! 🌈 Anything else?"}
+ ]}
+}
+\`\`\``
+  }
+};
+
+function toggleDemo(){
+  DEMO_ON=document.getElementById('demoMode').checked;
+  document.body.classList.toggle('demo',DEMO_ON);
+  document.getElementById('whoami').textContent = DEMO_ON
+    ? 'DEMO MODE · instant samples · no API calls'
+    : 'Demo · '+(PROFILE_LABELS[salesProfile]||salesProfile)+' profile · no account connected';
+  // Swap the source input for a company picker in demo mode
+  const f=document.getElementById('f-input');
+  if(DEMO_ON){
+    f.innerHTML='<label>Demo company</label><select id="demoPick">'+
+      Object.keys(DEMO_DATA).map(k=>'<option value="'+k+'">'+DEMO_DATA[k].label+'</option>').join('')+'</select>';
+  } else {
+    f.innerHTML='<label id="f-label">Company name or domain</label>'+
+      '<input id="srcValue" placeholder="e.g. allbirds.com" data-mode="company">';
+  }
+}
+
+// ===== Reset (back to step 1 without reloading) =====
+function resetApp(){
+  Game.stop();
+  // clear screen 2
+  document.getElementById('cards').innerHTML='';
+  document.getElementById('whyNowBanner').style.display='none';
+  document.getElementById('intelBubble').style.display='none';
+  document.getElementById('activity2').innerHTML='';
+  document.getElementById('output2').textContent='—';
+  document.getElementById('s2company').textContent='Stakeholders';
+  // clear screen 3
+  document.getElementById('optionsPanel').style.display='block';
+  document.getElementById('emailCard').style.display='none';
+  document.getElementById('demoCard').style.display='none';
+  document.getElementById('cadenceCard').style.display='none';
+  document.getElementById('receiptCard').style.display='none';
+  document.getElementById('draftBadges').style.display='none';
+  document.getElementById('draft3progress').style.display='none';
+  document.getElementById('activity3').innerHTML='';
+  document.getElementById('output3').textContent='—';
+  document.getElementById('s3status').textContent='';
+  // clear screen 4 (reply handler)
+  document.getElementById('rpCard').style.display='none';
+  document.getElementById('rpBadges').style.display='none';
+  document.getElementById('reply4progress').style.display='none';
+  ['rpWho','rpText','rpNotes'].forEach(id=>{const el=document.getElementById(id); if(el)el.value='';});
+  document.getElementById('activity4').innerHTML='';
+  document.getElementById('output4').textContent='—';
+  document.getElementById('s4status').textContent='';
+  replyDraft=null; rpSession=null;
+  // reset state
+  lastCompany='';lastCompetitor=null;lastRawResult='';currentDraft=null;outreachTarget='';
+  outreachSession=null;prospectSession=null;
+  // wipe the target list so the next demo session starts clean (ephemeral by design)
+  TARGETS=[];
+  const tp=document.getElementById('tlPaste'); if(tp) tp.value='';
+  const tpw=document.getElementById('tlPasteWrap'); if(tpw) tpw.style.display='none';
+  renderTargets();
+  goto(1);
+}
+
+// ===== Feedback capture =====
+function openFeedback(){ document.getElementById('fbModal').style.display='grid';
+  document.getElementById('fbStatus').textContent=''; }
+function closeFeedback(){ document.getElementById('fbModal').style.display='none'; }
+function submitFeedback(){
+  const name=document.getElementById('fbName').value;
+  const text=document.getElementById('fbText').value.trim();
+  if(!text){ document.getElementById('fbStatus').textContent='Add a note first.'; return; }
+  const context='profile='+salesProfile+(DEMO_ON?' demo='+(demoKey||''):'')+(lastCompany?' co='+lastCompany:'');
+  fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,text,context})})
+   .then(r=>r.json()).then(d=>{
+     if(d.ok){ document.getElementById('fbStatus').textContent='Saved — mahalo!';
+       document.getElementById('fbText').value='';
+       setTimeout(closeFeedback,900); }
+     else document.getElementById('fbStatus').textContent='Could not save: '+(d.error||'error');
+   }).catch(()=>document.getElementById('fbStatus').textContent='Could not reach server.');
+}
+
+// init default mode
+document.getElementById('srcValue').dataset.mode='company';
+</script>
+</body>
+</html>
