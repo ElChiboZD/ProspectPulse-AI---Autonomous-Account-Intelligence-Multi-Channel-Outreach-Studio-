@@ -697,7 +697,8 @@
       <span>Developed by</span>
       <span style="font-weight: 700; color: #fff;">@ElChibo</span>
     </div>
-    <button class="btn btn-secondary btn-sm" onclick="openDeckModal()">📊 Architecture &amp; Deck</button>
+    <button class="btn btn-secondary btn-sm" onclick="openDeckModal()">📊 Deck</button>
+    <button class="btn btn-secondary btn-sm" onclick="openMatrixModal()">📊 Matrix</button>
     <button class="btn btn-secondary btn-sm" onclick="openBattlecardsModal()">⚔️ Battlecards</button>
     <button class="btn btn-secondary btn-sm" onclick="openHistoryModal()">📜 History</button>
     <button class="btn btn-secondary btn-sm" onclick="resetEntireProduct()" style="border-color: rgba(239, 68, 68, 0.35); color: #fca5a5; background: rgba(239, 68, 68, 0.08);" title="Reset console and start a new search">🔄 Reset</button>
@@ -876,7 +877,10 @@
         <div class="panel-card" style="border-color: rgba(245, 158, 11, 0.25);">
           <div class="panel-head">
             <span class="panel-title" style="color: var(--amber);">⚔️ Displacement Battlecard</span>
-            <button class="btn btn-secondary btn-sm" onclick="copyBattlecard()">📋 Copy Talk Track</button>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-secondary btn-sm" onclick="openMatrixModal()">📊 Comparison Matrix</button>
+              <button class="btn btn-secondary btn-sm" onclick="copyBattlecard()">📋 Copy Talk Track</button>
+            </div>
           </div>
           <div id="battlecardContent"></div>
         </div>
@@ -968,13 +972,24 @@
           </div>
 
           <!-- AI Tone Adjuster Knobs -->
-          <div style="margin-bottom: 12px;">
+          <div style="margin-bottom: 10px;">
             <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">AI Rewrite &amp; Tone Tuning:</span>
             <div class="tone-pills">
               <div class="tone-pill" onclick="tuneTone('short')">⚡ Short &amp; Punchy (&lt; 60 words)</div>
               <div class="tone-pill" onclick="tuneTone('executive')">👔 Executive ROI Focus</div>
               <div class="tone-pill" onclick="tuneTone('rush')">🔥 Urgency &amp; Rapid Turnaround</div>
               <div class="tone-pill" onclick="tuneTone('casual')">🎯 Casual &amp; Soft CTA</div>
+            </div>
+          </div>
+
+          <!-- 1-CLICK MEETING TIMES & SCHEDULER SNIPPETS -->
+          <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">📅 Propose Times:</span>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="insertMeetingSnippet('tue')">⚡ Tue 2 PM CT</button>
+              <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="insertMeetingSnippet('wed')">⚡ Wed 10 AM CT</button>
+              <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="insertMeetingSnippet('thu')">⚡ Thu 1 PM CT</button>
+              <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="insertMeetingSnippet('cal')">🔗 Add Cal Link</button>
             </div>
           </div>
 
@@ -1301,6 +1316,22 @@
       <button class="btn btn-secondary btn-sm" onclick="closeHistoryModal()">✕ Close</button>
     </div>
     <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- COMPETITOR COMPARISON MATRIX MODAL -->
+<div class="modal-overlay" id="matrixModal" onclick="if(event.target===this)closeMatrixModal()">
+  <div class="modal-content" style="max-width: 960px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <h2 style="font-size: 20px;" id="matrixModalHeader">📊 2026 Competitive Landscape &amp; Feature Comparison Matrix</h2>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" onclick="copyMatrixTable()">📋 Copy Table</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeMatrixModal()">✕ Close</button>
+      </div>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Objective breakdown of direct competitors, pricing models, turnarounds, and architectural weaknesses.</p>
+
+    <div id="matrixTableContainer" style="overflow-x: auto; font-size: 13px;"></div>
   </div>
 </div>
 
@@ -3132,6 +3163,113 @@ function showToast(msg, duration = 3000) {
     toastEl.style.opacity = '0';
     toastEl.style.transform = 'translateY(10px)';
   }, duration);
+}
+
+// 1-Click Meeting Times Snippet Inserter
+function insertMeetingSnippet(slot) {
+  const co = (currentAccountData && currentAccountData.company) || 'your team';
+  let snippet = '';
+  if (slot === 'tue') snippet = `\n\nWould next Tuesday at 2:00 PM CT or Thursday at 10:00 AM CT work for a 10-minute preview?`;
+  else if (slot === 'wed') snippet = `\n\nHow does Wednesday at 10:00 AM CT look on your calendar for a quick 10-min overview?`;
+  else if (slot === 'thu') snippet = `\n\nAre you open to connecting briefly this Thursday at 1:00 PM CT?`;
+  else if (slot === 'cal') snippet = `\n\nFeel free to grab 10 minutes directly on my calendar here: https://cal.com/travis/10min`;
+
+  const bodyEl = document.getElementById('emailBodyInput');
+  if (bodyEl) {
+    bodyEl.value += snippet;
+    runDeliverabilityAudit();
+    showToast('📅 Proposed meeting times inserted into draft!');
+  }
+}
+
+// 2026 Competitor Comparison Matrix Engine
+const COMPARISON_MATRICES = {
+  sockclub: {
+    title: "🧦 Swag & Corporate Merchandise Competitive Matrix",
+    headers: ["Vendor / Provider", "Production Source", "Fabric & Quality", "MOQ & Proofs", "Wearer Retention", "Turnaround"],
+    rows: [
+      ["Sock Club (Direct Mill)", "Direct Mill (North Carolina, USA)", "75% US Combed Cotton (Jacquard Knit)", "30 Pairs · 1-Hour Free Proofs", "95%+ Wear Rate (Hero Swag)", "5-Day Rush Delivery"],
+      ["SwagUp (Broker)", "Third-Party Broker Markup (30-50%)", "Mixed Catalog (Polyester / Screenprint)", "50-100 Minimums · 2-3 Days Proofs", "10-20% Keep Rate (High Waste)", "15-25 Business Days"],
+      ["4imprint", "Commodity Importer", "Thin 100% Polyester / Sublimated", "100+ MOQ · Self-Serve Proofs", "5-10% Keep Rate (Landfill)", "10-14 Business Days"],
+      ["Printful (POD)", "Single-Item DTG Print", "Basic Poly Blend Print (Cracks)", "1 Pair · Generic Mockup", "30% Keep Rate (Dropship)", "7-12 Business Days"]
+    ]
+  },
+  zendesk: {
+    title: "🎧 Enterprise Customer Experience & AI Support Matrix",
+    headers: ["Platform", "Total Cost of Ownership (TCO)", "Time to Value", "Autonomous AI Deflection", "Channel Native", "Admin Overhead"],
+    rows: [
+      ["Zendesk Enterprise AI", "Predictable licensing ($115-$169/seat)", "Days to Weeks (Pre-trained)", "45%+ Autonomous Resolution", "Native Voice, WhatsApp, Chat", "0 Dedicated Admins needed"],
+      ["Salesforce Service Cloud", "$300-$600/seat/mo (Add-on bloat)", "6-9+ Months ($50k-$150k SOW)", "Add-on Einstein Meter charges", "Fragmented add-ons", "2+ Dedicated Admins required"],
+      ["Intercom (Fin AI)", "$0.99/resolution penalty meter", "Weeks (Chat-centric)", "40% Deflection (High Vol Volatility)", "Weaker Voice & Complex SLAs", "1 Admin"]
+    ]
+  },
+  stripe: {
+    title: "💳 Global Payments & Fintech Infrastructure Matrix",
+    headers: ["Processor", "Card Authorization Lift", "1-Click Checkout Velocity", "Underwriting / Onboarding", "Smart Retries & Recovery"],
+    rows: [
+      ["Stripe Payments", "+3.8% Auth Lift (Adaptive AI)", "6 Seconds (Link 1-Click Pay)", "Instant Developer Self-Serve", "$182k+ Recovered via Radar AI"],
+      ["Adyen", "+1.2% Auth Lift", "Standard Form (No Universal Link)", "Strict Underwriting ($500k/mo Min)", "Basic Rule-Based Retries"],
+      ["PayPal / Braintree", "Baseline Conversion", "Modal Redirect Abandonment", "2-4 Weeks Merchant Approval", "Legacy Dunning Retries"]
+    ]
+  },
+  saas: {
+    title: "🤖 Sales Intelligence & Agentic Revenue Cloud Matrix",
+    headers: ["Solution", "Data Freshness", "Persona Mapping", "Synthesis Speed", "Multi-Channel Outputs"],
+    rows: [
+      ["ProspectPulse AI", "Live Real-Time Grounding (0-Day)", "Verified Living Current Roles (100%)", "< 5 Seconds Multi-Source", "Email, LinkedIn, Phone, PDF Brief, Proofs"],
+      ["ZoomInfo Alone", "Static DB (30%+ 6-mo Decay)", "Static Database Search", "Manual Rep Research (40m/lead)", "Raw Contact Records Only"],
+      ["Apollo.io Alone", "Static DB (25%+ Bounced Emails)", "Keyword Querying", "Manual Sequencer Setup", "Template Replacement Strings"]
+    ]
+  }
+};
+
+function openMatrixModal() {
+  renderMatrixTable();
+  document.getElementById('matrixModal').style.display = 'grid';
+}
+function closeMatrixModal() { document.getElementById('matrixModal').style.display = 'none'; }
+
+function renderMatrixTable() {
+  const m = COMPARISON_MATRICES[currentActivePreset] || COMPARISON_MATRICES.sockclub;
+  const container = document.getElementById('matrixTableContainer');
+  document.getElementById('matrixModalHeader').textContent = m.title;
+
+  let html = `
+    <table style="width: 100%; border-collapse: collapse; text-align: left; background: rgba(10,12,18,0.6); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
+      <thead>
+        <tr style="background: rgba(99,102,241,0.12); border-bottom: 2px solid var(--indigo);">
+          ${m.headers.map(h => `<th style="padding: 12px 14px; font-weight: 700; color: #fff; font-size: 12px; text-transform: uppercase;">${h}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  m.rows.forEach((r, idx) => {
+    const isOurPlatform = idx === 0;
+    html += `
+      <tr style="border-bottom: 1px solid var(--border); background: ${isOurPlatform ? 'rgba(16,185,129,0.06)' : 'transparent'};">
+        ${r.map((cell, cIdx) => `
+          <td style="padding: 12px 14px; font-size: 12.5px; ${cIdx === 0 ? 'font-weight: 700; color: ' + (isOurPlatform ? 'var(--emerald)' : 'var(--text-main)') : 'color: var(--text-muted)'};">
+            ${isOurPlatform && cIdx === 0 ? '⭐ ' : ''}${cell}
+          </td>
+        `).join('')}
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+function copyMatrixTable() {
+  const m = COMPARISON_MATRICES[currentActivePreset] || COMPARISON_MATRICES.sockclub;
+  let md = `### ${m.title}\n\n`;
+  md += `| ${m.headers.join(' | ')} |\n`;
+  md += `| ${m.headers.map(() => '---').join(' | ')} |\n`;
+  m.rows.forEach(r => {
+    md += `| ${r.join(' | ')} |\n`;
+  });
+  navigator.clipboard.writeText(md).then(() => showToast('📋 Comparison matrix copied to clipboard!'));
 }
 
 // Master Console Reset Function
