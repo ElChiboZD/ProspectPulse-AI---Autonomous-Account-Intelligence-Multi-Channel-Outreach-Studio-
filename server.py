@@ -73,10 +73,64 @@ api_tts_limiter = RateLimiter(5, 60)
 import sys
 if getattr(sys, 'frozen', False):
     ROOT = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    EXE_DIR = os.path.dirname(sys.executable)
 else:
     ROOT = os.path.dirname(os.path.abspath(__file__))
+    EXE_DIR = ROOT
 STATIC = os.path.join(ROOT, "static")
 PROMPTS = os.path.join(ROOT, "prompts")
+if not os.path.isdir(PROMPTS):
+    alt_prompts = os.path.join(EXE_DIR, "prompts")
+    if os.path.isdir(alt_prompts):
+        PROMPTS = alt_prompts
+
+def _user_data_dir():
+    if sys.platform == "darwin":
+        base = os.path.expanduser("~/Library/Application Support")
+    elif sys.platform == "win32":
+        base = os.environ.get("APPDATA", os.path.expanduser("~"))
+    else:
+        base = os.path.expanduser("~/.config")
+    path = os.path.join(base, "ProspectPulseAI")
+    try:
+        os.makedirs(path, exist_ok=True)
+    except Exception:
+        path = EXE_DIR
+    return path
+
+def persist_api_keys(**kwargs):
+    """Write API keys to the user data folder so the standalone exe keeps them."""
+    path = os.path.join(_user_data_dir(), "keys.json")
+    existing = {}
+    if os.path.isfile(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                existing = json.load(f) or {}
+        except Exception:
+            existing = {}
+    for k, v in kwargs.items():
+        if v:
+            existing[k] = str(v).strip()
+            os.environ[k] = str(v).strip()
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(existing, f)
+    except Exception as e:
+        log.warning(f"Could not persist API keys: {e}")
+    return existing
+
+def _load_persisted_keys():
+    path = os.path.join(_user_data_dir(), "keys.json")
+    if not os.path.isfile(path):
+        return
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            keys = json.load(f) or {}
+        for k, v in keys.items():
+            if v and not os.environ.get(k):
+                os.environ[k] = str(v)
+    except Exception:
+        pass
 
 DOMAIN_INTEL_CACHE = LRUCache(maxsize=500)
 SESSION = requests.Session()
@@ -98,8 +152,14 @@ def _run_tts_loop():
 threading.Thread(target=_run_tts_loop, daemon=True).start()
 
 def _load_env():
-    env_path = os.path.join(ROOT, ".env")
-    if os.path.isfile(env_path):
+    env_candidates = [
+        os.path.join(ROOT, ".env"),
+        os.path.join(EXE_DIR, ".env"),
+        os.path.join(_user_data_dir(), ".env"),
+    ]
+    for env_path in env_candidates:
+        if not env_path or not os.path.isfile(env_path):
+            continue
         try:
             with open(env_path, "r", encoding="utf-8") as f:
                 for line in f:
@@ -111,6 +171,7 @@ def _load_env():
                             os.environ[k] = v
         except Exception:
             pass
+    _load_persisted_keys()
 
 _load_env()
 
@@ -604,8 +665,11 @@ def run_simulated_job(job_id, kind, fields, profile_data=None):
 
         tavily_key = os.environ.get("TAVILY_API_KEY", "")
         sumble_key = os.environ.get("SUMBLE_API_KEY", "")
-        gemini_key = os.environ.get("GEMINI_API_KEY", "")
-        has_keys = bool(tavily_key and sumble_key and gemini_key and "your_" not in tavily_key.lower())
+        gemini_key = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")
+        xai_key = os.environ.get("XAI_API_KEY", "")
+        def _usable(val):
+            return bool(val) and "your_" not in val.lower() and "changeme" not in val.lower()
+        has_keys = _usable(gemini_key) or _usable(tavily_key) or _usable(sumble_key) or _usable(xai_key)
         
         if not has_keys:
             if domain in demo_data.DEMO_DATA:
@@ -1471,10 +1535,15 @@ class Handler(BaseHTTPRequestHandler):
             company = data.get("company", "Sock Club")
             preset = data.get("preset", "sockclub")
             api_key = data.get("api_key", "")
+            tavily_key = data.get("tavily_key", "")
+            xai_key = data.get("xai_key", "")
             avatar_url = data.get("avatar_url", "")
             db.save_user_profile(email, name, title, company, preset, api_key, avatar_url)
-            if api_key:
-                os.environ["GEMINI_API_KEY"] = api_key
+            persist_api_keys(
+                GEMINI_API_KEY=api_key,
+                TAVILY_API_KEY=tavily_key,
+                XAI_API_KEY=xai_key,
+            )
             return self._send(200, "application/json", json.dumps({"status": "saved", "profile": {"email": email, "name": name, "title": title, "company": company, "preset": preset, "avatar_url": avatar_url}}).encode())
 
         if path == "/api/auth/logout":
@@ -1544,10 +1613,9 @@ def main():
     db.init_db()
     port = int(os.environ.get("PORT", "8765"))
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print(f"\n  Prospect & Outreach Console (Universal Interview Edition)")
-    print(f"  -> http://127.0.0.1:{port}\n")
-    print(f"  claude: {CLAUDE_BIN}")
-    print(f"  workdir: {WORKDIR}\n")
+    print(f"\n  ProspectPulse AI — standalone engine")
+    print(f"  -> http://127.0.0.1:{port}")
+    print("  Uses this computer's internet. No remote server to run.")
     print("  Ctrl-C to stop.\n")
     try:
         srv.serve_forever()

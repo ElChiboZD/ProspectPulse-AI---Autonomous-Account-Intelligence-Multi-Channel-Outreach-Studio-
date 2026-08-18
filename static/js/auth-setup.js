@@ -145,22 +145,33 @@ function renderAuthModalStep() {
           <div class="auth-step-dot active"></div>
         </div>
 
-        <h2 class="auth-hero-title">Step 3: Multi-MCP Intelligence Engine</h2>
-        <p class="auth-hero-sub">Your workspace is connected to live Gemini 3.6 Google Search Grounding and Tavily LinkedIn X-Ray.</p>
+        <h2 class="auth-hero-title">Step 3: This computer is the engine</h2>
+        <p class="auth-hero-sub">No server to start. Paste a Gemini key and the app researches accounts over this PC's internet.</p>
 
         <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
           <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; color: #10B981; font-size: 13.5px; margin-bottom: 4px;">
             <div class="pulse-dot"></div>
-            <span>Connected to Built-In Gemini 3.6 Live Search Pipeline</span>
+            <span>Standalone desktop — keys stay on this machine</span>
           </div>
           <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
-            Real-time live grounding is active. Zero static data decay.
+            Saved under AppData\\ProspectPulseAI\\keys.json. Demo accounts still work without a key.
           </p>
         </div>
 
         <div class="auth-form-group">
-          <label>Optional: Custom Gemini API Key (or leave blank to use managed engine):</label>
-          <input type="password" class="auth-input" id="authApiKeyInput" placeholder="AIzaSy... (optional)">
+          <label>Gemini API key (recommended for live research):</label>
+          <input type="password" class="auth-input" id="authApiKeyInput" placeholder="AIzaSy...">
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Get one at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></div>
+        </div>
+
+        <div class="auth-form-group">
+          <label>Optional Tavily key (news / LinkedIn x-ray):</label>
+          <input type="password" class="auth-input" id="authTavilyKeyInput" placeholder="tvly-... (optional)">
+        </div>
+
+        <div class="auth-form-group">
+          <label>Optional xAI key (backup model):</label>
+          <input type="password" class="auth-input" id="authXaiKeyInput" placeholder="xai-... (optional)">
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 24px;">
@@ -204,12 +215,19 @@ function submitStep2() {
 
 function completeAuthSetup() {
   const apiKey = document.getElementById('authApiKeyInput') ? document.getElementById('authApiKeyInput').value : '';
+  const tavilyKey = document.getElementById('authTavilyKeyInput') ? document.getElementById('authTavilyKeyInput').value : '';
+  const xaiKey = document.getElementById('authXaiKeyInput') ? document.getElementById('authXaiKeyInput').value : '';
   currentAuthData.api_key = apiKey;
+  currentAuthData.tavily_key = tavilyKey;
+  currentAuthData.xai_key = xaiKey;
 
   // Persist locally
   localStorage.setItem('prospectpulse_google_user', JSON.stringify(currentAuthData));
+  if (apiKey) localStorage.setItem('prospectpulse_gemini_key', apiKey.trim());
+  if (tavilyKey) localStorage.setItem('prospectpulse_tavily_key', tavilyKey.trim());
+  if (xaiKey) localStorage.setItem('prospectpulse_xai_key', xaiKey.trim());
 
-  // Sync with backend SQLite
+  // Sync with bundled local engine
   fetch('/api/auth/save-profile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

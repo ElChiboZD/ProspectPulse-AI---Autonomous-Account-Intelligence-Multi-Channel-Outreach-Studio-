@@ -19,19 +19,12 @@ def build_standalone():
     print("=" * 65)
 
     static_dir = os.path.join(ROOT, "static")
+    prompts_dir = os.path.join(ROOT, "prompts")
     if not os.path.isdir(static_dir):
         print("[!] Error: static/ directory not found!")
         return False
 
-    # 1. Build Single-File Standalone Portable EXE
-    print("\n[*] Building Single-File Standalone Portable Executable (--onefile)...")
-    cmd_onefile = [
-        sys.executable, "-m", "PyInstaller",
-        "--noconfirm",
-        "--onefile",
-        "--windowed",
-        "--name", "ProspectPulse-AI-Standalone",
-        "--add-data", f"{static_dir};static",
+    common_hidden = [
         "--hidden-import", "edge_tts",
         "--hidden-import", "aiohttp",
         "--hidden-import", "cachetools",
@@ -42,6 +35,24 @@ def build_standalone():
         "--hidden-import", "webview.platforms.winforms",
         "--hidden-import", "clr_loader",
         "--hidden-import", "pythonnet",
+        "--hidden-import", "server",
+        "--hidden-import", "db",
+        "--hidden-import", "demo_data",
+    ]
+    data_args = ["--add-data", f"{static_dir};static"]
+    if os.path.isdir(prompts_dir):
+        data_args += ["--add-data", f"{prompts_dir};prompts"]
+
+    # 1. Build Single-File Standalone Portable EXE
+    print("\n[*] Building Single-File Standalone Portable Executable (--onefile)...")
+    cmd_onefile = [
+        sys.executable, "-m", "PyInstaller",
+        "--noconfirm",
+        "--onefile",
+        "--windowed",
+        "--name", "ProspectPulse-AI-Standalone",
+        *data_args,
+        *common_hidden,
         os.path.join(ROOT, "app.py")
     ]
     
@@ -57,17 +68,8 @@ def build_standalone():
         "--onedir",
         "--windowed",
         "--name", "ProspectPulse-AI",
-        "--add-data", f"{static_dir};static",
-        "--hidden-import", "edge_tts",
-        "--hidden-import", "aiohttp",
-        "--hidden-import", "cachetools",
-        "--hidden-import", "requests",
-        "--hidden-import", "dns.resolver",
-        "--hidden-import", "dns.rdatatype",
-        "--hidden-import", "webview",
-        "--hidden-import", "webview.platforms.winforms",
-        "--hidden-import", "clr_loader",
-        "--hidden-import", "pythonnet",
+        *data_args,
+        *common_hidden,
         os.path.join(ROOT, "app.py")
     ]
     

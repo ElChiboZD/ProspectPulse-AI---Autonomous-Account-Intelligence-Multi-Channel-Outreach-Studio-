@@ -3,13 +3,35 @@
   "appName": "ProspectPulse AI",
   "webDir": "static",
   "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": [
+      "https://generativelanguage.googleapis.com/*",
+      "https://api.x.ai/*",
+      "https://api.tavily.com/*",
+      "https://en.wikipedia.org/*",
+      "https://logo.clearbit.com/*",
+      "https://aistudio.google.com/*",
+      "https://console.x.ai/*",
+      "https://wa.me/*",
+      "https://www.linkedin.com/*",
+      "https://mail.google.com/*"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "StatusBar": {
       "style": "DARK",
       "backgroundColor": "#08090D"
     },
     "SplashScreen": {
-      "launchShowDuration": 3000,
+      "launchShowDuration": 1800,
       "launchAutoHide": true,
       "backgroundColor": "#08090D",
       "androidSplashResourceName": "splash",

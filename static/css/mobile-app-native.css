@@ -84,7 +84,7 @@ html, body {
   display: flex;
   align-items: center;
   padding: 0 8px 0 16px;
-  gap: 12px;
+  gap: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.2s;
   pointer-events: auto;
@@ -114,6 +114,20 @@ html, body {
 .m3-search-input::placeholder {
   color: var(--md-sys-color-outline);
   font-size: 15px;
+}
+
+.m3-camera-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--md-sys-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .m3-avatar-button {
@@ -329,7 +343,60 @@ html, body {
 }
 
 /* ----------------------------------------------------
-   5. M3 BOTTOM NAVIGATION BAR (Google Material 3)
+   5. M3 MULTI-APP DISPATCHER BUTTONS
+   ---------------------------------------------------- */
+.m3-dispatch-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.m3-dispatch-btn {
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.m3-dispatch-btn:active {
+  transform: scale(0.94);
+}
+
+.btn-whatsapp {
+  background: rgba(37, 211, 102, 0.15);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  color: #25D366;
+}
+
+.btn-sms {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60A5FA;
+}
+
+.btn-linkedin {
+  background: rgba(10, 102, 194, 0.15);
+  border: 1px solid rgba(10, 102, 194, 0.3);
+  color: #38BDF8;
+}
+
+.btn-gmail {
+  background: rgba(234, 67, 53, 0.15);
+  border: 1px solid rgba(234, 67, 53, 0.3);
+  color: #F87171;
+}
+
+/* ----------------------------------------------------
+   6. M3 BOTTOM NAVIGATION BAR (Google Material 3)
    ---------------------------------------------------- */
 .m3-nav-bar {
   position: fixed;

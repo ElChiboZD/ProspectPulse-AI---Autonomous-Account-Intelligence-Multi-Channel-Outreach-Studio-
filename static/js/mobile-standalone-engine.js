@@ -1,7 +1,17 @@
 /**
  * ProspectPulse AI - Mobile Standalone Intelligence Engine
- * Intercepts fetch calls and serves local data for offline/native mobile usage.
+ * Intercepts /api/ calls only inside the native mobile shell.
+ * Desktop standalone keeps talking to its bundled local engine.
  */
+
+function isMobileStandaloneShell() {
+  const path = (window.location && window.location.pathname) || '';
+  return !!(window.Capacitor || path.endsWith('mobile.html') || path.endsWith('/mobile.html'));
+}
+
+if (!isMobileStandaloneShell()) {
+  console.log('[MobileEngine] Desktop window detected — leaving /api/ on the bundled engine.');
+} else {
 
 window.ProspectPulseNative = true;
 
@@ -171,18 +181,14 @@ window.fetch = async function(...args) {
 
             let baseData = getCompanyData(query);
 
-            // If online on mobile data/Wi-Fi, asynchronously attempt live web enrichment
-            if (navigator.onLine && window.MobileLiveWebEngine && typeof window.MobileLiveWebEngine.fetchLiveCompanyData === 'function') {
+            if (navigator.onLine && window.StandaloneClientEngine) {
                 try {
-                    const liveWebData = await window.MobileLiveWebEngine.fetchLiveCompanyData(query);
-                    if (liveWebData && liveWebData.description) {
-                        baseData.description = liveWebData.description;
-                        if (liveWebData.name) baseData.name = liveWebData.name;
-                        if (liveWebData.revenue) baseData.revenue = liveWebData.revenue;
-                        if (liveWebData.headcount) baseData.headcount = liveWebData.headcount;
-                        if (liveWebData.pain_points) baseData.painPoints = liveWebData.pain_points;
-                        if (liveWebData.competitor_incumbent) baseData.competitorIncumbent = liveWebData.competitor_incumbent;
-                        baseData.liveEnriched = true;
+                    const liveWebData = await window.StandaloneClientEngine.generateAccountIntel(query);
+                    if (liveWebData) {
+                        baseData = {
+                            dossier: liveWebData,
+                            ...liveWebData
+                        };
                     }
                 } catch (err) {
                     console.warn('[MobileEngine] Live web enrichment fallback to on-device:', err);
@@ -316,3 +322,5 @@ window.fetch = async function(...args) {
 // Dispatch ready event
 document.dispatchEvent(new CustomEvent('prospectpulse:native-ready'));
 console.log('ProspectPulse Mobile Standalone Engine initialized.');
+
+}

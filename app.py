@@ -31,14 +31,15 @@ SERVER_PORT = find_free_port(8765)
 SERVER_URL = f"http://127.0.0.1:{SERVER_PORT}"
 
 def start_server():
-    """Starts the Python ThreadingHTTPServer in a background daemon thread."""
+    """Starts the bundled engine inside this window. User never starts a server."""
     try:
         db.init_db()
+        server._load_env()
         srv = server.ThreadingHTTPServer(("127.0.0.1", SERVER_PORT), server.Handler)
-        print(f"[*] ProspectPulse AI Standalone Engine running on {SERVER_URL}")
+        print(f"[*] ProspectPulse AI standalone engine on {SERVER_URL}")
         srv.serve_forever()
     except Exception as e:
-        print(f"[!] Server error: {e}")
+        print(f"[!] Engine error: {e}")
 
 def wait_for_server(url, timeout=10):
     """Waits until the local server responds with HTTP 200."""
