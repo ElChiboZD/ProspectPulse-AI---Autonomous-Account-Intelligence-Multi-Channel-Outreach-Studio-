@@ -1,0 +1,360 @@
+/* ==========================================================================
+   ProspectPulse AI — Google Material Design 3 (Material You) Mobile UI
+   Modeled precisely after Google Workspace (Gmail, Drive, Gemini, Maps) for Android 14/15/16.
+   ========================================================================== */
+
+:root {
+  /* Material 3 Dark Baseline Tokens */
+  --md-surface: #121316;
+  --md-surface-dim: #0E0E11;
+  --md-surface-container-lowest: #0C0D10;
+  --md-surface-container-low: #18191D;
+  --md-surface-container: #1E1F24;
+  --md-surface-container-high: #282A30;
+  --md-surface-container-highest: #33353D;
+
+  --md-primary: #A8C7FA;
+  --md-on-primary: #062E6F;
+  --md-primary-container: #0842A0;
+  --md-on-primary-container: #D3E3FD;
+
+  --md-secondary-container: #37393E;
+  --md-on-secondary-container: #E1E2E8;
+
+  --md-tertiary-container: #0F5223;
+  --md-on-tertiary-container: #C4EED0;
+
+  --md-outline: #8E9099;
+  --md-outline-variant: #44474E;
+
+  --md-on-surface: #E2E2E6;
+  --md-on-surface-variant: #C4C6D0;
+
+  --md-radius-xs: 4px;
+  --md-radius-sm: 8px;
+  --md-radius-md: 12px;
+  --md-radius-lg: 16px;
+  --md-radius-xl: 28px;
+  --md-radius-full: 9999px;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.material-you-app {
+  background-color: var(--md-surface-dim);
+  color: var(--md-on-surface);
+  font-family: 'Roboto', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  padding-bottom: calc(84px + var(--safe-bottom));
+}
+
+/* ----------------------------------------------------
+   1. MATERIAL 3 FLOATING SEARCH BAR (Gmail / Drive Style)
+   ---------------------------------------------------- */
+.m3-search-header-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: calc(8px + var(--safe-top)) 16px 8px 16px;
+  background: var(--md-surface-dim);
+}
+
+.m3-search-bar {
+  height: 56px;
+  background: var(--md-surface-container-high);
+  border-radius: var(--md-radius-xl);
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 16px;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.m3-search-bar:focus-within {
+  background: var(--md-surface-container-highest);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.m3-search-icon {
+  color: var(--md-on-surface-variant);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.m3-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: var(--md-on-surface);
+  font-family: inherit;
+}
+
+.m3-search-input::placeholder {
+  color: var(--md-outline);
+  font-size: 15px;
+}
+
+.m3-avatar-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.m3-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ----------------------------------------------------
+   2. MATERIAL 3 TONAL FILTER CHIPS
+   ---------------------------------------------------- */
+.m3-chips-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 16px 14px 16px;
+  scrollbar-width: none;
+}
+
+.m3-chips-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.m3-chip {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--md-radius-sm);
+  background: var(--md-surface-container-low);
+  border: 1px solid var(--md-outline-variant);
+  color: var(--md-on-surface-variant);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.m3-chip.active {
+  background: var(--md-secondary-container);
+  border-color: transparent;
+  color: var(--md-on-secondary-container);
+  font-weight: 600;
+}
+
+/* ----------------------------------------------------
+   3. MATERIAL 3 STREAMLINED CONTENT CARDS
+   ---------------------------------------------------- */
+.m3-content-view {
+  padding: 0 16px;
+}
+
+.m3-section-headline {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-primary);
+  margin: 12px 0 10px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.m3-card {
+  background: var(--md-surface-container);
+  border-radius: var(--md-radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+
+.m3-card:active {
+  background: var(--md-surface-container-high);
+}
+
+.m3-account-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.m3-account-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--md-radius-md);
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.m3-account-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.m3-account-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--md-on-surface);
+}
+
+.m3-account-subtitle {
+  font-size: 13px;
+  color: var(--md-on-surface-variant);
+}
+
+.m3-badge-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--md-radius-xs);
+  background: var(--md-tertiary-container);
+  color: var(--md-on-tertiary-container);
+}
+
+/* ----------------------------------------------------
+   4. MATERIAL 3 TONAL SEGMENTED CONTROLS
+   ---------------------------------------------------- */
+.m3-segmented-row {
+  display: flex;
+  background: var(--md-surface-container-low);
+  border-radius: var(--md-radius-full);
+  padding: 4px;
+  margin-bottom: 14px;
+  border: 1px solid var(--md-outline-variant);
+}
+
+.m3-segment-item {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--md-radius-full);
+  border: none;
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.m3-segment-item.active {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+/* ----------------------------------------------------
+   5. MATERIAL 3 BUTTONS (FILLED & TONAL)
+   ---------------------------------------------------- */
+.m3-btn-filled {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--md-radius-xl);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s;
+}
+
+.m3-btn-filled:active {
+  background: #8AB4F8;
+}
+
+/* ----------------------------------------------------
+   6. MATERIAL 3 BOTTOM NAVIGATION BAR (Google App Standard)
+   ---------------------------------------------------- */
+.m3-bottom-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(76px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: var(--md-surface-container-low);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 3000;
+}
+
+.m3-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--md-on-surface-variant);
+  cursor: pointer;
+}
+
+.m3-nav-icon-pill {
+  width: 56px;
+  height: 30px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: background-color 0.2s;
+}
+
+.m3-nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.m3-nav-item.active .m3-nav-icon-pill {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.m3-nav-item.active .m3-nav-label {
+  color: var(--md-primary);
+  font-weight: 700;
+}
