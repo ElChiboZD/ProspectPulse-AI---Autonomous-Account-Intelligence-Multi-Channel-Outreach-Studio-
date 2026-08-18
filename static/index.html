@@ -2758,6 +2758,37 @@ function runProspectSearch() {
   });
 }
 
+// Modern Toast Notification Engine
+function showToast(msg) {
+  let toast = document.getElementById('appToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'appToast';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.right = '24px';
+    toast.style.background = 'rgba(15,23,42,0.95)';
+    toast.style.color = '#fff';
+    toast.style.border = '1px solid rgba(99,102,241,0.4)';
+    toast.style.borderRadius = '8px';
+    toast.style.padding = '10px 18px';
+    toast.style.fontSize = '13px';
+    toast.style.fontWeight = '600';
+    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+    toast.style.zIndex = '99999';
+    toast.style.transition = 'all 0.3s ease';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateY(0)';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+  }, 2800);
+}
+
 // Dynamic ROI Calculator Engine
 function renderRoiWidget() {
   const type = PROFILE_PRESETS[currentActivePreset] ? PROFILE_PRESETS[currentActivePreset].type : 'swag';
@@ -2765,22 +2796,24 @@ function renderRoiWidget() {
   const fullBox = document.getElementById('fullRoiTeardownView');
 
   if (type === 'swag') {
-    box.innerHTML = `
-      <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Order Volume: <strong id="roiUnitsVal">500</strong> pairs</div>
-      <input type="range" min="50" max="2500" step="50" value="500" oninput="calculateSwagRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
-        <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); padding: 8px; border-radius: 6px;">
-          <div style="color: var(--rose); font-weight: 700;">🗑️ Generic Swag Waste</div>
-          <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">$4,500 (90% trash)</div>
+    if (box) {
+      box.innerHTML = `
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Order Volume: <strong id="roiUnitsVal">500</strong> pairs</div>
+        <input type="range" min="50" max="2500" step="50" value="500" oninput="calculateSwagRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+          <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); padding: 8px; border-radius: 6px;">
+            <div style="color: var(--rose); font-weight: 700;">🗑️ Generic Swag Waste</div>
+            <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">$4,500 (90% trash)</div>
+          </div>
+          <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
+            <div style="color: var(--emerald); font-weight: 700;">🧦 Sock Club Keep Rate</div>
+            <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">475 Active Wearers (95%)</div>
+          </div>
         </div>
-        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
-          <div style="color: var(--emerald); font-weight: 700;">🧦 Sock Club Keep Rate</div>
-          <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">475 Active Wearers (95%)</div>
-        </div>
-      </div>
-      <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">Produces ~57,000 annual brand impressions at ~$0.08 / impression.</div>
-    `;
+        <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">Produces ~57,000 annual brand impressions at ~$0.08 / impression.</div>
+      `;
+    }
 
     if (fullBox) {
       fullBox.innerHTML = `
@@ -2799,60 +2832,71 @@ function renderRoiWidget() {
       `;
     }
   } else if (type === 'cx') {
-    box.innerHTML = `
-      <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Support Headcount: <strong id="roiUnitsVal">50</strong> agents</div>
-      <input type="range" min="10" max="300" step="5" value="50" oninput="calculateCxRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
-        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
-          <div style="color: var(--emerald); font-weight: 700;">🤖 AI Ticket Deflection</div>
-          <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">$18,000 / mo saved</div>
+    if (box) {
+      box.innerHTML = `
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Support Headcount: <strong id="roiUnitsVal">50</strong> agents</div>
+        <input type="range" min="10" max="300" step="5" value="50" oninput="calculateCxRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+          <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
+            <div style="color: var(--emerald); font-weight: 700;">🤖 AI Ticket Deflection</div>
+            <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">$18,000 / mo saved</div>
+          </div>
+          <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); padding: 8px; border-radius: 6px;">
+            <div style="color: var(--indigo); font-weight: 700;">⏱️ Response Speed</div>
+            <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">4.2h → 45 Seconds</div>
+          </div>
         </div>
-        <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); padding: 8px; border-radius: 6px;">
-          <div style="color: var(--indigo); font-weight: 700;">⏱️ Response Speed</div>
-          <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">4.2h → 45 Seconds</div>
-        </div>
-      </div>
-      <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">Annual net cost reduction of ~$216,000 across tier-1 tickets.</div>
-    `;
+        <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">Annual net cost reduction of ~$216,000 across tier-1 tickets.</div>
+      `;
+    }
   } else {
-    box.innerHTML = `
-      <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Sales/Eng Team: <strong id="roiUnitsVal">25</strong> users</div>
-      <input type="range" min="5" max="150" step="5" value="25" oninput="calculateSaasRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
-        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
-          <div style="color: var(--emerald); font-weight: 700;">⚡ Time Reclaimed</div>
-          <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">1,000 hrs / month</div>
+    if (box) {
+      box.innerHTML = `
+        <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Sales/Eng Team: <strong id="roiUnitsVal">25</strong> users</div>
+        <input type="range" min="5" max="150" step="5" value="25" oninput="calculateSaasRoi(this.value)" style="width: 100%; margin-bottom: 12px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+          <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 8px; border-radius: 6px;">
+            <div style="color: var(--emerald); font-weight: 700;">⚡ Time Reclaimed</div>
+            <div id="roiWasteVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">1,000 hrs / month</div>
+          </div>
+          <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); padding: 8px; border-radius: 6px;">
+            <div style="color: var(--indigo); font-weight: 700;">📈 Pipeline Velocity</div>
+            <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">+35% Faster Cycles</div>
+          </div>
         </div>
-        <div style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); padding: 8px; border-radius: 6px;">
-          <div style="color: var(--indigo); font-weight: 700;">📈 Pipeline Velocity</div>
-          <div id="roiKeepVal" style="font-size: 14px; font-weight: 800; color: #fff; margin-top: 2px;">+35% Faster Cycles</div>
-        </div>
-      </div>
-      <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">$120,000+ in annual engineering &amp; sales productivity reclaimed.</div>
-    `;
+        <div style="margin-top: 8px; font-size: 11.5px; color: var(--text-faint);">$120,000+ in annual engineering &amp; sales productivity reclaimed.</div>
+      `;
+    }
   }
 }
 
 function calculateSwagRoi(val) {
-  document.getElementById('roiUnitsVal').textContent = val;
+  const u = document.getElementById('roiUnitsVal');
+  if (u) u.textContent = val;
   const waste = Math.round(val * 10 * 0.9);
-  const wearers = Math.round(val * 0.95);
-  document.getElementById('roiWasteVal').textContent = `$${waste.toLocaleString()} (90% trash)`;
-  document.getElementById('roiKeepVal').textContent = `${wearers.toLocaleString()} Active Wearers (95%)`;
+  const keep = Math.round(val * 0.95);
+  const wEl = document.getElementById('roiWasteVal');
+  const kEl = document.getElementById('roiKeepVal');
+  if (wEl) wEl.textContent = `$${waste.toLocaleString()} (90% trash)`;
+  if (kEl) kEl.textContent = `${keep.toLocaleString()} Active Wearers (95%)`;
 }
 
 function calculateCxRoi(val) {
-  document.getElementById('roiUnitsVal').textContent = val;
-  const savings = Math.round(val * 360);
-  document.getElementById('roiWasteVal').textContent = `$${savings.toLocaleString()} / mo saved`;
+  const u = document.getElementById('roiUnitsVal');
+  if (u) u.textContent = val;
+  const saved = Math.round(val * 360);
+  const wEl = document.getElementById('roiWasteVal');
+  if (wEl) wEl.textContent = `$${saved.toLocaleString()} / mo saved`;
 }
 
 function calculateSaasRoi(val) {
-  document.getElementById('roiUnitsVal').textContent = val;
-  const hrs = Math.round(val * 40);
-  document.getElementById('roiWasteVal').textContent = `${hrs.toLocaleString()} hrs / month`;
+  const u = document.getElementById('roiUnitsVal');
+  if (u) u.textContent = val;
+  const hours = Math.round(val * 40);
+  const wEl = document.getElementById('roiWasteVal');
+  if (wEl) wEl.textContent = `${hours.toLocaleString()} hrs / month`;
 }
 
 function insertRoiBlockToDraft() {
@@ -2892,14 +2936,18 @@ function parseAndRenderResults(raw) {
   const logoUrl = `https://logo.clearbit.com/${domain}`;
   const fallbackLogo = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 
-  document.getElementById('s2AccountTitle').innerHTML = `
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <img src="${logoUrl}" onerror="this.onerror=null; this.src='${fallbackLogo}';" style="width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.08); padding: 2px; object-fit: contain;">
-      <span>${data.company}</span>
-      <span class="badge badge-emerald">Verified Lead</span>
-    </div>
-  `;
-  document.getElementById('s2WhyNow').textContent = data.whyNow || '';
+  const titleEl = document.getElementById('s2AccountTitle');
+  if (titleEl) {
+    titleEl.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="${logoUrl}" onerror="this.onerror=null; this.src='${fallbackLogo}';" style="width: 32px; height: 32px; border-radius: 6px; background: rgba(255,255,255,0.08); padding: 2px; object-fit: contain;">
+        <span>${data.company}</span>
+        <span class="badge badge-emerald">Verified Lead</span>
+      </div>
+    `;
+  }
+  const whyEl = document.getElementById('s2WhyNow');
+  if (whyEl) whyEl.textContent = data.whyNow || '';
 
   // Intent Scorecard Calculation
   const score = Math.floor(Math.random() * 5) + 94; // 94-98
@@ -4533,5 +4581,6 @@ document.addEventListener('keydown', e => {
 });
 </script>
 
+<div id="appToast" style="display: none;"></div>
 </body>
 </html>
