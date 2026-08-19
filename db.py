@@ -22,7 +22,10 @@ DB_PATH = os.path.join(DB_DIR, "prospectpulse.db")
 
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
+    return conn
 
 
 def init_db():
@@ -38,6 +41,8 @@ def init_db():
             preset TEXT
         )
     ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_searches_domain ON searches(domain);')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_searches_timestamp ON searches(timestamp);')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS outreach_sent (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
