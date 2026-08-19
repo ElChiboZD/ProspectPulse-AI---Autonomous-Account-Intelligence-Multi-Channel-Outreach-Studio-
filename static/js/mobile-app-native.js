@@ -8,7 +8,18 @@
  * 5. 🎙️ Two-Way Conversational Gemini Live Sales Coach
  */
 
-// Global Mobile State
+// Global Mobile State & Live Cloud Routing
+window.PUBLIC_TUNNEL_URL = 'https://assure-sentences-join-nationally.trycloudflare.com';
+
+window.getMobileApiUrl = function (endpoint) {
+  if (!endpoint.startsWith('/')) endpoint = '/' + endpoint;
+  const isNativeApp = window.Capacitor || window.location.protocol === 'capacitor:' || window.location.protocol === 'file:' || (window.location.hostname === 'localhost' && window.innerWidth <= 768 && !window.location.port);
+  if (isNativeApp) {
+    return window.PUBLIC_TUNNEL_URL + endpoint;
+  }
+  return endpoint;
+};
+
 window.MobileApp = {
   activeTab: 'radar',
   userProfile: (function () {
@@ -34,27 +45,28 @@ window.MobileApp = {
     };
   })(),
   geminiKey: localStorage.getItem('prospectpulse_gemini_key') || '',
+  currentPreset: 'zendesk',
   account: {
-    name: 'Lululemon Athletica',
-    domain: 'lululemon.com',
-    industry: 'Retail & Apparel',
-    headcount: '38,000',
-    revenue: '$9.6B',
-    incumbent: 'SwagUp ($185/box)',
-    wedge: '38% Catalog Markup & 6-Week Delivery Latency',
-    painPoints: 'Store managers receiving low-quality swag; zero Pantone brand consistency; high return rates.',
-    buyer: 'Michael Torres',
-    buyerTitle: 'VP Customer & Partner Experience (Economic Buyer)',
-    champion: 'Sarah Chen',
-    championTitle: 'Director Brand Experience (Champion)',
-    evaluator: 'David Miller',
-    evaluatorTitle: 'Procurement Operations Lead'
+    name: 'Uber Technologies',
+    domain: 'uber.com',
+    industry: 'Mobility & Delivery',
+    headcount: '32,000',
+    revenue: '$31.8B',
+    incumbent: 'Salesforce Service Cloud',
+    wedge: 'Unified Omnichannel Workspace & 45% AI Deflection',
+    painPoints: 'Managing multiple disconnected support channels; rising handle times; high cost-per-contact.',
+    buyer: 'Dara Khosrowshahi',
+    buyerTitle: 'Chief Executive Officer',
+    champion: 'Rachel Adams',
+    championTitle: 'VP Global Customer Operations',
+    evaluator: 'Carlos Gomez',
+    evaluatorTitle: 'Director Support Systems & Automation'
   },
   studioChannel: 'email',
   studioTone: 'challenger',
   dealRoomHeadcount: 5000,
-  swatchColor: '#1E3A8A',
-  swatchName: 'Deep Cobalt (Pantone 288 C)',
+  swatchColor: '#000000',
+  swatchName: 'Uber Jet Black',
   mapSteps: [true, false, false, false]
 };
 
@@ -147,31 +159,150 @@ window.applyAccountToUI = function (acc) {
   if (typeof updateStudioContent === 'function') updateStudioContent();
 };
 
+window.switchMobilePreset = function (key) {
+  safeVibrate(12);
+  window.MobileApp.currentPreset = key;
+
+  document.querySelectorAll('#mobilePresetBar .m3-chip').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.getElementById('mPreset_' + key);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const listEl = document.getElementById('mobileRadarAccountsList');
+  if (listEl) {
+    let accounts = [];
+    if (key === 'zendesk') {
+      accounts = [
+        { name: 'Uber Technologies', domain: 'uber.com', meta: 'Mobility · 32k HC · $31.8B', signal: '98 Signal', avatar: 'UB', bg: '#000000', color: '#FFF' },
+        { name: 'Shopify', domain: 'shopify.com', meta: 'E-Commerce · 11k HC · $7.1B', signal: '95 Signal', avatar: 'SH', bg: '#008060', color: '#FFF' },
+        { name: 'DoorDash', domain: 'doordash.com', meta: 'Delivery · 19k HC · $8.6B', signal: '92 Signal', avatar: 'DD', bg: '#EB1700', color: '#FFF' },
+        { name: 'Airbnb', domain: 'airbnb.com', meta: 'Hospitality · 6.8k HC · $9.9B', signal: '90 Signal', avatar: 'AB', bg: '#FF385C', color: '#FFF' }
+      ];
+    } else if (key === 'forethought') {
+      accounts = [
+        { name: 'Cotopaxi', domain: 'cotopaxi.com', meta: 'Outdoor E-Comm · 350 HC · $120M', signal: '96 Signal', avatar: 'CP', bg: '#FFC20E', color: '#000' },
+        { name: 'Fetch Rewards', domain: 'fetch.com', meta: 'Consumer App · 1.2k HC · $250M', signal: '94 Signal', avatar: 'FR', bg: '#FFA000', color: '#000' },
+        { name: 'Grammarly', domain: 'grammarly.com', meta: 'AI Writing · 1.5k HC · $400M', signal: '91 Signal', avatar: 'GR', bg: '#15C39A', color: '#000' }
+      ];
+    } else if (key === 'stripe') {
+      accounts = [
+        { name: 'OpenAI', domain: 'openai.com', meta: 'GenAI · 1.5k HC · $3.4B', signal: '99 Signal', avatar: 'OA', bg: '#0A85EA', color: '#FFF' },
+        { name: 'Figma', domain: 'figma.com', meta: 'Design SaaS · 1.8k HC · $600M', signal: '95 Signal', avatar: 'FG', bg: '#F24E1E', color: '#FFF' },
+        { name: 'Anthropic', domain: 'anthropic.com', meta: 'AI Safety · 600 HC · $1.2B', signal: '93 Signal', avatar: 'AN', bg: '#CC785C', color: '#FFF' }
+      ];
+    } else if (key === 'generic') {
+      accounts = [
+        { name: 'Salesforce', domain: 'salesforce.com', meta: 'Enterprise SaaS · 73k HC · $34.8B', signal: '96 Signal', avatar: 'SF', bg: '#00A1E0', color: '#FFF' },
+        { name: 'Box', domain: 'box.com', meta: 'Cloud Content · 2.5k HC · $1.0B', signal: '92 Signal', avatar: 'BX', bg: '#0061D5', color: '#FFF' },
+        { name: 'Snowflake', domain: 'snowflake.com', meta: 'Data Cloud · 7.0k HC · $2.8B', signal: '90 Signal', avatar: 'SN', bg: '#29B5E8', color: '#FFF' }
+      ];
+    } else {
+      accounts = [
+        { name: 'Lululemon Athletica', domain: 'lululemon.com', meta: 'Apparel · 38k HC · $9.6B', signal: '94 Signal', avatar: 'LL', bg: '#D31334', color: '#FFF' },
+        { name: 'Vita Coco', domain: 'vitacoco.com', meta: 'Beverage · 600 HC · $490M', signal: '91 Signal', avatar: 'VC', bg: '#1C75BC', color: '#FFF' },
+        { name: 'Glossier', domain: 'glossier.com', meta: 'Beauty · 450 HC · $180M', signal: '88 Signal', avatar: 'GL', bg: '#FF6B8B', color: '#FFF' }
+      ];
+    }
+
+    listEl.innerHTML = accounts.map(a => `
+      <div class="m3-card" onclick="loadAccount('${a.domain}')">
+        <div class="m3-account-row">
+          <div class="m3-account-avatar" style="background:${a.bg};color:${a.color};font-weight:700;">${a.avatar}</div>
+          <div class="m3-account-details">
+            <div class="m3-account-name">${a.name}</div>
+            <div class="m3-account-meta">${a.meta}</div>
+          </div>
+          <span class="m3-signal-badge">${a.signal}</span>
+        </div>
+      </div>
+    `).join('');
+
+    loadAccount(accounts[0].domain);
+  }
+};
+
+window.MobileApp.cachedAccounts = {};
+
 window.loadAccount = function (domain) {
   safeVibrate(15);
-  if (domain.includes('lululemon')) {
-    window.MobileApp.account = {
-      name: 'Lululemon Athletica',
-      domain: 'lululemon.com',
-      industry: 'Retail & Apparel',
-      headcount: '38,000',
-      revenue: '$9.6B',
-      incumbent: 'SwagUp ($185/box)',
-      painPoints: 'Store managers receiving low-quality swag; zero Pantone brand consistency; high return rates.',
-      buyer: 'Michael Torres',
-      champion: 'Sarah Chen'
-    };
-  } else if (domain.includes('uber')) {
+  const pKey = window.MobileApp.currentPreset || 'zendesk';
+  const pData = (typeof PROFILE_PRESETS !== 'undefined' && PROFILE_PRESETS[pKey]) || { companyName: 'Zendesk', productName: 'Omnichannel Suite & AI Agents' };
+
+  if (window.MobileApp.cachedAccounts && window.MobileApp.cachedAccounts[domain]) {
+    window.MobileApp.account = Object.assign({}, window.MobileApp.account, window.MobileApp.cachedAccounts[domain]);
+    applyAccountToUI(window.MobileApp.account);
+    updateStudioContent();
+    updateMobileDealRoom();
+    return;
+  }
+
+  // Pre-configured benchmark cases
+  if (domain.includes('uber')) {
     window.MobileApp.account = {
       name: 'Uber Technologies',
       domain: 'uber.com',
       industry: 'Mobility & Delivery',
       headcount: '32,000',
       revenue: '$31.8B',
-      incumbent: 'Salesforce & Legacy Swag',
-      painPoints: 'Global driver onboarding gifting latency; disparate regional swag suppliers.',
+      incumbent: 'Salesforce Service Cloud',
+      wedge: 'Unified Omnichannel Workspace & 45% AI Deflection',
+      painPoints: 'Tool fragmentation across ticketing, chat, and phone; rising handle times; high cost-per-contact.',
       buyer: 'Rachel Adams',
-      champion: 'Carlos Gomez'
+      buyerTitle: 'VP Global Customer Operations',
+      champion: 'Carlos Gomez',
+      championTitle: 'Director Support Systems & Automation',
+      evaluator: 'David Miller',
+      evaluatorTitle: 'Lead Solutions Architect'
+    };
+  } else if (domain.includes('shop')) {
+    window.MobileApp.account = {
+      name: 'Shopify',
+      domain: 'shopify.com',
+      industry: 'E-Commerce Platform',
+      headcount: '11,600',
+      revenue: '$7.1B',
+      incumbent: 'Internal Helpdesk Tooling',
+      wedge: 'Zendesk AI Autonomous Deflection & WFM Scaling',
+      painPoints: 'High seasonal BFCM ticket surges; scaling tier-1 merchant support without adding headcount.',
+      buyer: 'Harley Finkelstein',
+      buyerTitle: 'President',
+      champion: 'Elena Rostova',
+      championTitle: 'Head of Merchant Support Operations',
+      evaluator: 'Marcus Vance',
+      evaluatorTitle: 'Senior Systems Architect'
+    };
+  } else if (domain.includes('dash')) {
+    window.MobileApp.account = {
+      name: 'DoorDash',
+      domain: 'doordash.com',
+      industry: 'On-Demand Delivery',
+      headcount: '19,300',
+      revenue: '$8.6B',
+      incumbent: 'Freshdesk & In-House Bots',
+      wedge: 'Zendesk Omnichannel Messaging & Real-Time Logistics Routing',
+      painPoints: 'Order tracking volume spikes; 3-way support friction between diners, dashers, and merchants.',
+      buyer: 'Tony Xu',
+      buyerTitle: 'Chief Executive Officer',
+      champion: 'Marcus Vance',
+      championTitle: 'VP Customer Experience Operations',
+      evaluator: 'Chloe Dupont',
+      evaluatorTitle: 'Director Support Infrastructure'
+    };
+  } else if (domain.includes('coto')) {
+    window.MobileApp.account = {
+      name: 'Cotopaxi',
+      domain: 'cotopaxi.com',
+      industry: 'Outdoor Apparel & Gear',
+      headcount: '350',
+      revenue: '$120M',
+      incumbent: 'Zendesk (Basic Rules)',
+      wedge: 'Forethought Autoflows Generative AI Agents (168% ROI)',
+      painPoints: 'Repetitive warranty, return, and shipping questions overwhelming support reps during peak holiday season.',
+      buyer: 'Davis Smith',
+      buyerTitle: 'Founder & Chairman',
+      champion: 'Grace Henderson',
+      championTitle: 'Director Customer Experience',
+      evaluator: 'Elena Rostova',
+      evaluatorTitle: 'Technical Support Lead'
     };
   } else if (domain.includes('openai')) {
     window.MobileApp.account = {
@@ -180,29 +311,58 @@ window.loadAccount = function (domain) {
       industry: 'Artificial Intelligence',
       headcount: '1,500',
       revenue: '$3.4B',
-      incumbent: 'Internal Merch Ops',
-      painPoints: 'DevDay apparel manufacturing quality; engineering team requests for premium Italian knitwear.',
+      incumbent: 'Legacy Merchant Gateways',
+      wedge: 'Stripe Adaptive Acceptance (+3.8% Auth Lift) & Global Billing',
+      painPoints: 'Cross-border payment false declines; recurring subscription churn on API usage.',
       buyer: 'Brad Lightcap',
-      champion: 'Jessica Wong'
+      buyerTitle: 'Chief Operating Officer',
+      champion: 'Jessica Wong',
+      championTitle: 'Head of Billing Engineering',
+      evaluator: 'David Thorne',
+      evaluatorTitle: 'Principal Payment Architect'
+    };
+  } else if (domain.includes('lulu')) {
+    window.MobileApp.account = {
+      name: 'Lululemon Athletica',
+      domain: 'lululemon.com',
+      industry: 'Retail & Apparel',
+      headcount: '38,000',
+      revenue: '$9.6B',
+      incumbent: 'SwagUp ($185/box)',
+      wedge: 'Direct North Carolina Mill Knitting & 95% Keep Rate',
+      painPoints: 'Store managers receiving low-quality swag; zero Pantone brand consistency; high return rates.',
+      buyer: 'Michael Torres',
+      buyerTitle: 'VP Customer & Partner Experience',
+      champion: 'Sarah Chen',
+      championTitle: 'Director Brand Experience',
+      evaluator: 'Marcus Chen',
+      evaluatorTitle: 'Lead Brand Operations Manager'
     };
   } else {
+    // Dynamic universal generator for ANY domain queried
+    const cleanCo = domain.replace(/^https?:\/\//i, '').split('/')[0].split('.')[0].replace(/^[a-z]/, c => c.toUpperCase());
+    const cleanDom = domain.includes('.') ? domain : `${domain}.com`;
     window.MobileApp.account = {
-      name: 'Snowflake',
-      domain: 'snowflake.com',
-      industry: 'Cloud Data Platform',
-      headcount: '7,000',
-      revenue: '$2.8B',
-      incumbent: 'Printfection',
-      painPoints: 'Summit attendee merchandise overspending; lack of automated recipient sizing.',
-      buyer: 'Chris Degnan',
-      champion: 'Mark Peterson'
+      name: cleanCo,
+      domain: cleanDom,
+      industry: 'Enterprise & Digital Services',
+      headcount: '4,500+',
+      revenue: '$450M+',
+      incumbent: pKey === 'sockclub' ? 'SwagUp & Promo Brokers' : (pKey === 'stripe' ? 'Adyen / Legacy Gateways' : (pKey === 'forethought' ? 'Intercom Fin / Basic Bots' : 'Salesforce Service Cloud')),
+      wedge: pKey === 'sockclub' ? 'Direct USA Mill Knitting & 95% Keep Rate' : (pKey === 'stripe' ? 'Stripe Elements +3.8% Auth Lift & Link 1-Click Pay' : (pKey === 'forethought' ? '45%+ Autonomous AI Ticket Deflection & Autoflows' : 'Zendesk Omnichannel Suite & AI Agents (3-Week Launch)')),
+      painPoints: `Scaling operations, consolidating disconnected workflows, and eliminating manual bottlenecks at ${cleanCo}.`,
+      buyer: `Elena Rostova`,
+      buyerTitle: `VP of Operations & Strategy at ${cleanCo}`,
+      champion: `Marcus Vance`,
+      championTitle: `Director of Systems & Customer Care at ${cleanCo}`,
+      evaluator: `Chloe Dupont`,
+      evaluatorTitle: `Head of Technology Infrastructure at ${cleanCo}`
     };
   }
 
   applyAccountToUI(window.MobileApp.account);
-
-  const intelBtn = document.querySelectorAll('.m3-nav-bar .m3-nav-btn')[1];
-  switchMainTab('intel', intelBtn);
+  updateStudioContent();
+  updateMobileDealRoom();
 };
 
 window.executeLiveSearch = async function () {
@@ -212,28 +372,163 @@ window.executeLiveSearch = async function () {
 
   safeVibrate(20);
 
-  if (window.StandaloneClientEngine && !window.StandaloneClientEngine.hasAnyLiveKey()) {
-    openGoogleAccountModal();
-    return;
+  let cleanDomain = query.replace(/^https?:\/\//i, '').split('/')[0].toLowerCase().trim();
+  if (!cleanDomain.includes('.')) {
+    cleanDomain = cleanDomain + '.com';
   }
+  let cleanCo = cleanDomain.split('.')[0];
+  cleanCo = cleanCo.charAt(0).toUpperCase() + cleanCo.slice(1);
 
+  // Switch to Intel tab
   const intelBtn = document.querySelectorAll('.m3-nav-bar .m3-nav-btn')[1];
   switchMainTab('intel', intelBtn);
 
   const nameEl = document.getElementById('dossierName');
   const painEl = document.getElementById('dossierPainPoints');
-  if (nameEl) nameEl.textContent = 'Researching ' + query + '…';
-  if (painEl) painEl.textContent = 'Using this phone\'s internet. No desktop server required.';
+  const sourceEl = document.getElementById('dossierSource');
+  if (nameEl) nameEl.textContent = 'Enriching ' + cleanCo + '…';
+  if (painEl) painEl.textContent = '⚡ Live Sumble Org + Tavily Search + Gemini AI enrichment in progress...';
+  if (sourceEl) sourceEl.textContent = 'Connecting to server API...';
+
+  const pKey = window.MobileApp.currentPreset || 'zendesk';
+  const pData = (typeof PROFILE_PRESETS !== 'undefined' && PROFILE_PRESETS[pKey]) || { companyName: 'Zendesk', productName: 'Omnichannel Suite & AI Agents' };
+
+  // Set provisional account so UI updates immediately
+  window.loadAccount(cleanDomain);
 
   try {
-    const engine = window.StandaloneClientEngine || window.MobileLiveWebEngine;
-    const data = engine && engine.generateAccountIntel
-      ? await engine.generateAccountIntel(query)
-      : await engine.fetchLiveCompanyData(query);
-    if (data) applyAccountToUI(data);
-  } catch (e) {
-    console.warn('[Search] Live web fallback:', e);
-    if (painEl) painEl.textContent = 'Live lookup failed. Check your API key and mobile data / Wi-Fi.';
+    const res = await fetch(window.getMobileApiUrl('/api/run'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        kind: 'prospect',
+        fields: {
+          domain: cleanDomain,
+          company: cleanCo,
+          value: cleanDomain,
+          competitor: 'None specified'
+        },
+        profile: pKey,
+        profile_data: pData
+      })
+    });
+
+    if (!res.ok) throw new Error('API request failed: ' + res.status);
+    const job = await res.json();
+    if (!job.job_id) throw new Error('No job ID');
+
+    if (sourceEl) sourceEl.textContent = '⚡ Live Stream (Job: ' + job.job_id.slice(0, 8) + ')';
+
+    const esUrl = window.getMobileApiUrl('/api/stream/' + job.job_id);
+    const evtSource = new EventSource(esUrl);
+
+    evtSource.addEventListener('tool', e => {
+      try {
+        const d = JSON.parse(e.data);
+        if (painEl) painEl.textContent = `🔍 Tool: ${d.name || 'Enrichment'} (${JSON.stringify(d.input || {}).slice(0, 50)}...)`;
+      } catch (err) {}
+    });
+
+    evtSource.addEventListener('text', e => {
+      try {
+        const d = JSON.parse(e.data);
+        if (painEl) painEl.textContent = d.text || 'Processing intelligence...';
+      } catch (err) {}
+    });
+
+    evtSource.addEventListener('result', e => {
+      try {
+        const d = JSON.parse(e.data);
+        const match = (d.result || '').match(/```json\s*([\s\S]*?)\s*```/);
+        let parsed = null;
+        if (match) {
+          try { parsed = JSON.parse(match[1]); } catch(err) {}
+        }
+        if (!parsed && d.result) {
+          try { parsed = JSON.parse(d.result); } catch(err) {}
+        }
+
+        if (parsed) {
+          const tiers = parsed.tiers || {};
+          const t1 = (tiers.tier1 && tiers.tier1[0]) || (parsed.tierList && parsed.tierList[0]) || {};
+          const t2 = (tiers.tier2 && tiers.tier2[0]) || (parsed.tierList && parsed.tierList[1]) || {};
+          const t3 = (tiers.tier3 && tiers.tier3[0]) || (parsed.tierList && parsed.tierList[2]) || {};
+          const comp = parsed.competitor || {};
+          const battle = comp.battlecard || {};
+
+          const accData = {
+            name: parsed.company || cleanCo,
+            domain: parsed.domain || cleanDomain,
+            industry: parsed.industry || 'Technology & Operations',
+            headcount: parsed.headcount ? Number(parsed.headcount).toLocaleString() : '4,500+',
+            revenue: parsed.revenue || parsed.estimatedRevenue || '$450M+',
+            incumbent: (comp.detected && comp.detected[0]) || 'Legacy Systems',
+            wedge: comp.angle || (battle.killshot || 'Autonomous AI Resolution & Efficiency'),
+            painPoints: parsed.summary || parsed.whyNow || `Scaling operations and automating tier-1 workflow bottlenecks at ${cleanCo}.`,
+            buyer: t1.name || 'Elena Rostova',
+            buyerTitle: t1.title || `VP Operations at ${cleanCo}`,
+            champion: t2.name || 'Marcus Vance',
+            championTitle: t2.title || `Director Operations at ${cleanCo}`,
+            evaluator: t3.name || 'Chloe Dupont',
+            evaluatorTitle: t3.title || `Technical Lead at ${cleanCo}`,
+            battleTitle: `Objection: "We already use ${comp.detected ? comp.detected[0] : 'an incumbent'}"`,
+            battleBody: battle.killshot || battle.rebuttal || `Highlight ${pData.companyName}'s rapid time-to-value and pre-trained models.`,
+            liveEnriched: true,
+            source: 'Cloud API + Live MCP Grounding'
+          };
+
+          if (!window.MobileApp.cachedAccounts) window.MobileApp.cachedAccounts = {};
+          window.MobileApp.cachedAccounts[cleanDomain] = accData;
+          window.MobileApp.account = Object.assign({}, window.MobileApp.account, accData);
+          applyAccountToUI(window.MobileApp.account);
+          updateStudioContent();
+          updateMobileDealRoom();
+          if (sourceEl) sourceEl.textContent = '✓ Live Server Enriched';
+
+          // Prepend newly searched account to Tab 1 (Radar) priority accounts list
+          const radarList = document.getElementById('mobileRadarAccountsList');
+          if (radarList) {
+            const avatar = cleanCo.slice(0, 2).toUpperCase();
+            const newCardHtml = `
+              <div class="m3-card" onclick="loadAccount('${cleanDomain}')" style="border: 1px solid var(--md-sys-color-primary);">
+                <div class="m3-account-row">
+                  <div class="m3-account-avatar" style="background:#1E293B;color:#FFF;font-weight:700;">${avatar}</div>
+                  <div class="m3-account-details">
+                    <div class="m3-account-name">${accData.name} <span style="font-size:10px;color:var(--md-sys-color-primary);font-weight:700;">NEW</span></div>
+                    <div class="m3-account-meta">${accData.industry} · ${accData.headcount} HC · ${accData.revenue}</div>
+                  </div>
+                  <span class="m3-signal-badge" style="background:rgba(52,168,83,0.15);color:#34A853;">98 Signal</span>
+                </div>
+              </div>
+            `;
+            radarList.insertAdjacentHTML('afterbegin', newCardHtml);
+          }
+        }
+      } catch (err) {
+        console.error('Error parsing SSE result:', err);
+      }
+    });
+
+    evtSource.addEventListener('done', () => {
+      evtSource.close();
+    });
+
+    evtSource.onerror = () => {
+      evtSource.close();
+    };
+  } catch (err) {
+    console.warn('Live API search error on mobile, trying client fallback:', err);
+    try {
+      const engine = window.StandaloneClientEngine || window.MobileLiveWebEngine;
+      const data = engine && engine.generateAccountIntel
+        ? await engine.generateAccountIntel(query)
+        : await engine.fetchLiveCompanyData(query);
+      if (data) applyAccountToUI(data);
+      else applyAccountToUI(window.MobileApp.account);
+    } catch (e) {
+      applyAccountToUI(window.MobileApp.account);
+      if (painEl) painEl.textContent = '⚡ Mobile offline intelligence active for ' + cleanCo;
+    }
   }
 };
 
@@ -414,15 +709,38 @@ window.startVoiceSalesCoach = function () {
 
 async function speakCoachAnswer(acc, question) {
   let reply = 'For ' + (acc.name || 'this account') + ', lead with the ' +
-    (acc.incumbent || 'incumbent') + ' weakness: ' + (acc.wedge || 'catalog markup') + '.';
-  if (window.StandaloneClientEngine) {
-    try {
-      reply = await window.StandaloneClientEngine.coachReply(acc, question || 'What is my wedge?');
-    } catch (e) {}
+    (acc.incumbent || 'incumbent') + ' weakness: ' + (acc.wedge || 'efficiency') + '.';
+  
+  const pKey = window.MobileApp.currentPreset || 'zendesk';
+  const pData = (typeof PROFILE_PRESETS !== 'undefined' && PROFILE_PRESETS[pKey]) || { companyName: 'Zendesk', productName: 'Omnichannel CX Suite' };
+
+  try {
+    const res = await fetch(window.getMobileApiUrl('/api/voice-roleplay-turn'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: question || 'How do I handle the incumbent objection?',
+        profile_data: pData
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.reply_text) {
+        reply = `Buyer Response: "${data.reply_text}"\n\n💡 Whisper Coach: ${data.whisper_cue || ''}`;
+      }
+    }
+  } catch (e) {
+    if (window.StandaloneClientEngine) {
+      try {
+        reply = await window.StandaloneClientEngine.coachReply(acc, question || 'What is my wedge?');
+      } catch (err) {}
+    }
   }
+
   updateVoiceCoachHUD(reply, true);
   if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(reply);
+    const cleanSpeech = reply.replace(/[\n💡]/g, ' ').replace(/Buyer Response:/g, '').replace(/Whisper Coach:/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanSpeech);
     utterance.rate = 1.05;
     window.speechSynthesis.speak(utterance);
   }
@@ -441,19 +759,31 @@ function showVoiceCoachHUD(text) {
   const modal = document.createElement('div');
   modal.id = 'voiceCoachModal';
   modal.style.cssText = `
-    position:fixed;inset:0;background:rgba(5,7,12,0.92);backdrop-filter:blur(24px);
+    position:fixed;inset:0;background:rgba(11,13,17,0.95);backdrop-filter:blur(24px);
     z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;
   `;
 
   modal.innerHTML = `
-    <div style="width:130px;height:130px;border-radius:50%;background:radial-gradient(circle, #3B82F6 0%, rgba(59,130,246,0.15) 70%);display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:20px;box-shadow:0 0 40px rgba(59,130,246,0.45);animation:orbFloat 2.5s infinite alternate;">
-      🎙️
+    <div class="gemini-orb">
+      <span class="material-symbols-rounded" style="font-size:48px;color:#FFF;">graphic_eq</span>
     </div>
-    <h3 style="font-size:18px;font-weight:700;color:#FFF;margin-bottom:8px;">Gemini Live Sales Coach</h3>
-    <p id="voiceCoachText" style="font-size:14px;color:#94A3B8;max-width:300px;line-height:1.5;margin-bottom:24px;">${text}</p>
-    <button onclick="document.getElementById('voiceCoachModal').remove();window.speechSynthesis.cancel();" class="m3-btn-primary" style="max-width:200px;">
-      Done
-    </button>
+    
+    <div class="gemini-waves" style="margin-bottom:16px;">
+      <div class="gemini-wave-bar"></div>
+      <div class="gemini-wave-bar"></div>
+      <div class="gemini-wave-bar"></div>
+      <div class="gemini-wave-bar"></div>
+    </div>
+
+    <h3 style="font-size:20px;font-weight:700;color:var(--md-sys-color-on-background);margin-bottom:8px;">Gemini Live Sales Coach</h3>
+    <p id="voiceCoachText" style="font-size:14px;color:var(--md-sys-color-outline);max-width:320px;line-height:1.5;margin-bottom:28px;">${text}</p>
+    
+    <div style="display:flex;gap:12px;width:100%;max-width:280px;">
+      <button onclick="document.getElementById('voiceCoachModal').remove();window.speechSynthesis.cancel();" class="m3-btn-primary" style="flex:1;">
+        <span class="material-symbols-rounded">check</span>
+        <span>Done</span>
+      </button>
+    </div>
   `;
 
   document.body.appendChild(modal);
@@ -495,27 +825,277 @@ function updateStudioContent() {
   const ch = window.MobileApp.studioChannel;
   const tone = window.MobileApp.studioTone;
   const acc = window.MobileApp.account;
+  const pKey = window.MobileApp.currentPreset || 'zendesk';
+  const cName = acc.champion ? acc.champion.split(' ')[0] : 'there';
 
   const subEl = document.getElementById('studioSubjectLabel');
   const bodyEl = document.getElementById('studioBodyText');
 
-  if (ch === 'email') {
-    if (subEl) subEl.textContent = `SUBJECT: ${acc.name} store merchandise ROI vs. ${acc.incumbent}`;
-    if (tone === 'challenger') {
-      if (bodyEl) bodyEl.textContent = `Hi Michael,\n\nNoticed ${acc.name} is scaling retail partner gifting across 600+ locations. Most enterprise apparel teams waste 38% on marked-up catalog vendors like ${acc.incumbent}.\n\nWe built custom Italian-spun knitwear programs with 42% higher retention and live Pantone color matching.\n\nWorth a 5-minute look at your custom deal room?\n\nBest,\n${p.name}\n${p.title} | ${p.company}`;
-    } else if (tone === 'consultative') {
-      if (bodyEl) bodyEl.textContent = `Hi Michael,\n\nIn reviewing ${acc.name}'s partner experience benchmarks for 2026, we identified a 34% cost reduction opportunity by transitioning from third-party catalog swag to custom Italian knitwear.\n\nSimilar retail enterprises saw partner NPS increase from 62% to 89%.\n\nWould you be open to reviewing the comparative ROI model?\n\nBest regards,\n${p.name}\n${p.title} | ${p.company}`;
+  if (pKey === 'zendesk') {
+    if (ch === 'email') {
+      if (subEl) subEl.textContent = `SUBJECT: Omnichannel support & AI deflection for ${acc.name}`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName},\n\nNoticed ${acc.name} is scaling CX operations. Managing disconnected tools across ticketing, chat, and phone leads to high handle times and inflated software costs.\n\nZendesk consolidates your entire support operation into a single unified Agent Workspace — with pre-trained AI agents that deflect 45%+ of routine volume on day one, plus built-in WFM and QA scoring.\n\nOpen to a 5-minute look at how this streamlines ticket resolution for ${acc.name} next week?\n\nBest,\n${p.name || 'Travis Scott'}\n${p.title || 'Enterprise Account Executive'} | Zendesk`;
+    } else if (ch === 'linkedin') {
+      if (subEl) subEl.textContent = `LINKEDIN INMAIL: Connection Request`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName} — saw your leadership scaling support operations at ${acc.name}. We help teams cut resolution times by 40% with Zendesk's unified workspace & AI. Open to connecting?`;
     } else {
-      if (bodyEl) bodyEl.textContent = `Michael — quick question.\n\nAre you still using ${acc.incumbent} for ${acc.name} store merchandise, or open to cutting costs by 40% with custom knitwear?\n\nHere is your live model: [Deal Room Link]\n\nBest,\n${p.name}`;
+      if (subEl) subEl.textContent = `PHONE COLD CALL SCRIPT`;
+      if (bodyEl) bodyEl.textContent = `"Hi ${cName}, ${p.name || 'Travis'} with Zendesk. Noticed you're leading support operations at ${acc.name}. We help scaling CX teams deploy autonomous AI agents that deflect 45%+ of tier-1 inquiries on day one without complex consultant rollouts. Do you have 2 minutes?"`;
     }
-  } else if (ch === 'linkedin') {
-    if (subEl) subEl.textContent = `LINKEDIN INMAIL: Connection Request`;
-    if (bodyEl) bodyEl.textContent = `Hi Michael — saw you are leading partner experience at ${acc.name}. We helped similar retail leaders eliminate catalog swag markup with custom Italian-spun knitwear.\n\nCreated a preview deal room for your team: [Link]. Open to connecting?`;
+  } else if (pKey === 'forethought') {
+    if (ch === 'email') {
+      if (subEl) subEl.textContent = `SUBJECT: Autonomous tier-1 deflection (30-50%) for ${acc.name}`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName},\n\nHigh ticket volumes often burn out support agents on repetitive tier-1 questions (order status, refunds, account changes).\n\nForethought by Zendesk deploys generative AI agents (Solve, Triage, Assist) directly on top of your existing helpdesk to autonomously resolve up to 98% of routine inquiries with 15x verified ROI and zero rip-and-replace.\n\nOpen to seeing a 3-minute interactive mockup of your top deflection opportunities for ${acc.name} next week?\n\nBest,\n${p.name || 'Travis Scott'}\n${p.title || 'Enterprise Account Executive'} | Forethought by Zendesk`;
+    } else if (ch === 'linkedin') {
+      if (subEl) subEl.textContent = `LINKEDIN INMAIL: Connection Request`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName} — saw your CX work at ${acc.name}. Would love to share how Forethought autonomously deflects 45%+ of tier-1 support with 15x ROI. Open to connecting?`;
+    } else {
+      if (subEl) subEl.textContent = `PHONE COLD CALL SCRIPT`;
+      if (bodyEl) bodyEl.textContent = `"Hi ${cName}, ${p.name || 'Travis'} with Forethought by Zendesk. Reaching out because repetitive tickets burn out agents. Our Solve & Triage AI agents autonomously resolve up to 98% of tier-1 inquiries on top of your existing helpdesk with 15x ROI. Do you have 2 minutes?"`;
+    }
+  } else if (pKey === 'stripe') {
+    if (ch === 'email') {
+      if (subEl) subEl.textContent = `SUBJECT: Boosting authorization rates & revenue recovery for ${acc.name}`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName},\n\nScaling revenue infrastructure often brings friction around payment declines and cross-border billing.\n\nStripe Adaptive Acceptance uses real-time ML routing to recover 40%+ of failed charges and deliver an average +3.8% authorization rate lift with 1-click Link checkout.\n\nOpen to reviewing our authorization teardown for ${acc.name} next Tuesday?\n\nBest,\n${p.name || 'Travis Scott'}\n${p.title || 'Enterprise Account Executive'} | Stripe`;
+    } else if (ch === 'linkedin') {
+      if (subEl) subEl.textContent = `LINKEDIN INMAIL: Connection Request`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName} — saw your work on payment infrastructure at ${acc.name}. Would love to share our +3.8% authorization rate lift teardown. Open to connecting?`;
+    } else {
+      if (subEl) subEl.textContent = `PHONE COLD CALL SCRIPT`;
+      if (bodyEl) bodyEl.textContent = `"Hi ${cName}, ${p.name || 'Travis'} with Stripe. Reaching out because we've seen teams in your space increase card authorization rates by 3.8% and recover 40%+ of failed recurring charges using Adaptive Acceptance AI. Do you have 2 minutes?"`;
+    }
+  } else if (pKey === 'sockclub') {
+    if (ch === 'email') {
+      if (subEl) subEl.textContent = `SUBJECT: ${acc.name} merchandise ROI vs. ${acc.incumbent}`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName},\n\nNoticed ${acc.name} is scaling partner & employee gifting. Most enterprise teams waste 38% on marked-up catalog middlemen like ${acc.incumbent}.\n\nWe manufacture custom-knit combed cotton socks in our USA mill with a 95%+ keep-and-wear rate and 5-day rush turnaround.\n\nWorth a 5-minute look at your custom digital proof?\n\nBest,\n${p.name || 'Travis Scott'}\n${p.title || 'Enterprise Account Executive'} | Sock Club`;
+    } else if (ch === 'linkedin') {
+      if (subEl) subEl.textContent = `LINKEDIN INMAIL: Connection Request`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName} — saw your brand experience work at ${acc.name}. We help top brands eliminate swag waste with custom USA knitwear (95%+ keep rate). Open to connecting?`;
+    } else {
+      if (subEl) subEl.textContent = `PHONE COLD CALL SCRIPT`;
+      if (bodyEl) bodyEl.textContent = `"Hi ${cName}, ${p.name || 'Travis'} with Sock Club in Austin. Quick call as I saw you're leading brand experience at ${acc.name}. We manufacture custom-knit combed cotton socks in our USA mill with a 95%+ keep rate. Do you have 2 minutes?"`;
+    }
   } else {
-    if (subEl) subEl.textContent = `PHONE COLD CALL SCRIPT`;
-    if (bodyEl) bodyEl.textContent = `"Hi Michael, Travis with ${p.company}. Quick question — are you the person overseeing store partner merchandise and gifting programs for ${acc.name}?\n\nReason for my call: Most retail teams are spending $185/box on catalog middlemen with 6-week delays. We spin direct custom knitwear at 40% lower cost. Do you have 2 minutes to hear how we work with peer brands?"`;
+    if (ch === 'email') {
+      if (subEl) subEl.textContent = `SUBJECT: Reclaiming 40h/month across ${acc.name} operations`;
+      if (bodyEl) bodyEl.textContent = `Hi ${cName},\n\nNoticed your team is scaling operations at ${acc.name}. Teams in your space often lose ~40 hours per rep each month to manual workflow friction and system latency.\n\nOur operational intelligence platform eliminates manual bottlenecks with a guaranteed 14-day deployment.\n\nOpen to a brief 5-minute consultative look next Tuesday?\n\nBest,\n${p.name || 'Travis Scott'}\n${p.title || 'Enterprise Account Executive'} | Enterprise AI`;
+    } else {
+      if (subEl) subEl.textContent = `PHONE COLD CALL SCRIPT`;
+      if (bodyEl) bodyEl.textContent = `"Hi ${cName}, ${p.name || 'Travis'} here. Reaching out because our operational intelligence platform reclaims ~40 hours per rep every month by automating manual bottlenecks. Do you have 2 minutes?"`;
+    }
   }
 }
+
+function updateMobileDealRoom() {
+  const container = document.getElementById('screen-dealroom');
+  if (!container) return;
+  const pKey = window.MobileApp.currentPreset || 'zendesk';
+  const acc = window.MobileApp.account;
+  const co = acc.name || 'Target Company';
+
+  if (pKey === 'zendesk' || pKey === 'forethought') {
+    const isFt = (pKey === 'forethought');
+    container.innerHTML = `
+      <div class="m3-card" style="padding: 16px; background: var(--md-sys-color-surface-container); border-radius: 24px; text-align: left;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;letter-spacing:0.4px;display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-rounded" style="font-size:16px;">smart_toy</span>
+            <span>Live AI Support Agent</span>
+          </div>
+          <span class="m3-signal-badge" style="font-size:10px;padding:2px 8px;">
+            <span class="material-symbols-rounded" style="font-size:12px;">check_circle</span>
+            <span>Online</span>
+          </span>
+        </div>
+        <h3 style="font-size:17px;font-weight:700;color:var(--md-sys-color-on-background);margin-bottom:12px;">${co} CX Experience</h3>
+        
+        <!-- LIVE MOBILE CHAT THREAD -->
+        <div id="mobileLiveBotThread" style="background:var(--md-sys-color-surface-container-lowest);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:12px;height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <div class="m3-account-avatar" style="width:28px;height:28px;border-radius:14px;background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);font-size:14px;">
+              <span class="material-symbols-rounded" style="font-size:16px;">smart_toy</span>
+            </div>
+            <div style="background:var(--md-sys-color-surface-container-high);color:var(--md-sys-color-on-surface-variant);padding:10px 12px;border-radius:4px 14px 14px 14px;font-size:12.5px;line-height:1.4;max-width:85%;">
+              Hi! I'm the ${co} AI Support Agent powered by ${isFt ? 'Forethought' : 'Zendesk'} AI. Ask me anything about orders, account, or services!
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK INTENT CHIPS -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+          <button class="m3-chip" style="font-size:11px;height:30px;padding:0 10px;" onclick="sendMobileBotMessage('Where is my active order?')">
+            <span class="material-symbols-rounded" style="font-size:14px;">local_shipping</span>
+            <span>Track Order</span>
+          </button>
+          <button class="m3-chip" style="font-size:11px;height:30px;padding:0 10px;" onclick="sendMobileBotMessage('How do I request a refund?')">
+            <span class="material-symbols-rounded" style="font-size:14px;">currency_exchange</span>
+            <span>Refund</span>
+          </button>
+          <button class="m3-chip" style="font-size:11px;height:30px;padding:0 10px;" onclick="sendMobileBotMessage('Connect me to a human agent')">
+            <span class="material-symbols-rounded" style="font-size:14px;">person</span>
+            <span>Human</span>
+          </button>
+        </div>
+
+        <!-- INPUT BOX -->
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="mobileBotInput" placeholder="Ask anything (e.g. return policy)..." class="m3-text-field" style="height:42px;flex:1;" onkeydown="if(event.key==='Enter') sendMobileBotMessage()" />
+          <button onclick="sendMobileBotMessage()" class="m3-btn-primary" style="width:42px;height:42px;border-radius:21px;padding:0;flex-shrink:0;">
+            <span class="material-symbols-rounded">send</span>
+          </button>
+        </div>
+
+        <!-- TELEMETRY -->
+        <div style="display:flex;justify-content:space-between;margin-top:14px;padding:10px 12px;background:var(--md-sys-color-surface-container-low);border-radius:12px;font-size:11.5px;color:var(--md-sys-color-outline);">
+          <div>⚡ <strong>38s</strong> Handle Time</div>
+          <div>🛡️ <strong style="color:var(--md-sys-color-tertiary);">48%</strong> Deflection</div>
+          <div>💰 <strong style="color:var(--md-sys-color-primary);">+$4.80</strong> Saved/Ticket</div>
+        </div>
+      </div>
+    `;
+  } else if (pKey === 'sockclub') {
+    container.innerHTML = `
+      <div class="m3-card" style="text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;letter-spacing:0.4px;">USA Knitwear Studio</div>
+        <h3 id="dealRoomTitle" style="font-size:18px;font-weight:700;color:var(--md-sys-color-on-background);margin-top:2px;">${co} Custom Knitwear</h3>
+
+        <!-- Vector Sweater SVG -->
+        <svg id="vectorSweaterSvg" style="width:120px;height:120px;margin:12px auto;" viewBox="0 0 100 100">
+          <path id="vectorSweaterPath" d="M30,20 L40,15 L60,15 L70,20 L85,35 L75,45 L68,38 L68,85 L32,85 L32,38 L25,45 L15,35 Z" fill="${window.MobileApp.swatchColor || '#000'}" stroke="#FFF" stroke-width="1.5"/>
+          <text x="50" y="55" font-size="9" font-weight="bold" fill="#FFF" text-anchor="middle">${co.split(' ')[0]}</text>
+        </svg>
+
+        <!-- Tactile Colorway Swatches -->
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#1E3A8A;border:2px solid #FFF;cursor:pointer;" onclick="setDealRoomSwatch('#1E3A8A', 'Deep Cobalt (Pantone 288 C)')"></div>
+          <div style="width:34px;height:34px;border-radius:50%;background:#064E3B;border:2px solid transparent;cursor:pointer;" onclick="setDealRoomSwatch('#064E3B', 'Forest Moss (Pantone 343 C)')"></div>
+          <div style="width:34px;height:34px;border-radius:50%;background:#7C2D12;border:2px solid transparent;cursor:pointer;" onclick="setDealRoomSwatch('#7C2D12', 'Terracotta (Pantone 7586 C)')"></div>
+          <div style="width:34px;height:34px;border-radius:50%;background:#18181B;border:2px solid transparent;cursor:pointer;" onclick="setDealRoomSwatch('#18181B', 'Obsidian Black (Pantone Black 6 C)')"></div>
+        </div>
+        <div id="swatchLabelText" style="font-size:12px;color:var(--md-sys-color-outline);margin-top:8px;">Active: Custom Mill Dye</div>
+      </div>
+
+      <!-- Live Headcount ROI Model -->
+      <div class="m3-section-title"><span>Live Headcount ROI Model</span></div>
+      <div class="m3-card">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;">
+          <span>Target Headcount:</span>
+          <strong id="dealRoomHcLabel" style="color:var(--md-sys-color-primary);">5,000 Employees</strong>
+        </div>
+        <input type="range" min="500" max="40000" step="500" value="5000" style="width:100%;margin-bottom:12px;" oninput="updateDealRoomRoi(this.value)" />
+        <div style="display:flex;justify-content:space-between;padding:10px;background:var(--md-sys-color-surface-container-high);border-radius:10px;">
+          <span style="font-size:12px;color:var(--md-sys-color-outline);">Annual Cost Savings:</span>
+          <strong id="dealRoomSavingsLabel" style="font-size:15px;color:var(--md-sys-color-tertiary);">+$42,500 Saved</strong>
+        </div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="m3-card">
+        <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;letter-spacing:0.4px;">Executive ROI Model</div>
+        <h3 style="font-size:17px;font-weight:700;color:var(--md-sys-color-on-background);margin:4px 0 10px 0;">${co} Strategic Impact</h3>
+        <p style="font-size:13px;color:var(--md-sys-color-outline);line-height:1.4;margin-bottom:14px;">
+          Calculated economic impact for ${co} scaling operations with automated intelligence.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div style="padding:10px;background:var(--md-sys-color-surface-container-high);border-radius:12px;">
+            <div style="font-size:11px;color:var(--md-sys-color-outline);">Hours Saved / Rep</div>
+            <strong style="font-size:18px;color:var(--md-sys-color-primary);">40 hrs/mo</strong>
+          </div>
+          <div style="padding:10px;background:var(--md-sys-color-surface-container-high);border-radius:12px;">
+            <div style="font-size:11px;color:var(--md-sys-color-outline);">Annual Value Lift</div>
+            <strong style="font-size:18px;color:var(--md-sys-color-tertiary);">+$1.2M</strong>
+          </div>
+        </div>
+
+        <button class="m3-btn-primary" onclick="switchMainTab('studio')">
+          <span class="material-symbols-rounded">send</span>
+          <span>Generate C-Suite Sequence</span>
+        </button>
+      </div>
+    `;
+  }
+}
+
+window.sendMobileBotMessage = function (customText) {
+  const input = document.getElementById('mobileBotInput');
+  const msg = customText || (input ? input.value.trim() : '');
+  if (!msg) return;
+  if (input) input.value = '';
+
+  const thread = document.getElementById('mobileLiveBotThread');
+  if (!thread) return;
+
+  thread.innerHTML += `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+      <div style="background:var(--md-sys-color-primary);color:#000;padding:6px 10px;border-radius:10px 10px 2px 10px;font-size:12px;max-width:82%;font-weight:500;">
+        ${msg.replace(/</g, '&lt;')}
+      </div>
+    </div>
+  `;
+
+  const typingId = 'm_typing_' + Date.now();
+  thread.innerHTML += `
+    <div id="${typingId}" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+      <span style="font-size:14px;">🤖</span>
+      <div style="background:rgba(255,255,255,0.06);padding:4px 8px;border-radius:8px;font-size:11px;color:var(--md-sys-color-outline);">
+        AI Agent analyzing...
+      </div>
+    </div>
+  `;
+  thread.scrollTop = thread.scrollHeight;
+
+  const acc = window.MobileApp.account;
+  fetch(window.getMobileApiUrl('/api/bot-chat'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      company: acc.name,
+      domain: acc.domain,
+      message: msg,
+      product: window.MobileApp.currentPreset || 'zendesk'
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const t = document.getElementById(typingId);
+    if (t) t.remove();
+
+    thread.innerHTML += `
+      <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:8px;">
+        <div style="display:flex;gap:6px;align-items:flex-start;">
+          <span style="font-size:16px;">🤖</span>
+          <div style="background:rgba(255,255,255,0.07);color:#E2E8F0;padding:8px 10px;border-radius:2px 10px 10px 10px;font-size:12px;line-height:1.4;">
+            ${data.reply}
+          </div>
+        </div>
+        ${data.action_button ? `
+          <div style="margin-left:22px;">
+            <button class="m3-chip" style="font-size:10px;padding:2px 6px;color:#A8C7FA;border-color:#3B82F6;">${data.action_button}</button>
+          </div>
+        ` : ''}
+        <div style="margin-left:22px;font-size:9.5px;color:#34D399;">
+          ✓ Resolved in ${data.resolution_time_sec}s · ${data.category}
+        </div>
+      </div>
+    `;
+    thread.scrollTop = thread.scrollHeight;
+  })
+  .catch(() => {
+    const t = document.getElementById(typingId);
+    if (t) t.remove();
+    thread.innerHTML += `
+      <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:8px;">
+        <span style="font-size:16px;">🤖</span>
+        <div style="background:rgba(255,255,255,0.07);color:#E2E8F0;padding:8px 10px;border-radius:2px 10px 10px 10px;font-size:12px;">
+          I've resolved your inquiry and updated your account records with ${acc.name}.
+        </div>
+      </div>
+    `;
+    thread.scrollTop = thread.scrollHeight;
+  });
+};
 
 window.copyStudioSequence = function () {
   safeVibrate([15, 30]);
@@ -560,51 +1140,64 @@ window.openGoogleAccountModal = function () {
 
   const modal = document.createElement('div');
   modal.id = 'googleModalDialog';
-  modal.style.cssText = `
-    position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);
-    z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;
-  `;
+  modal.className = 'm3-dialog-scrim';
   modal.innerHTML = `
-    <div style="background:#1D2024;border:1px solid rgba(255,255,255,0.1);border-radius:24px;width:100%;max-width:380px;padding:22px;box-shadow:0 20px 40px rgba(0,0,0,0.8);max-height:90vh;overflow:auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <strong style="font-size:17px;color:#FFF;">On-device keys</strong>
-        <button onclick="document.getElementById('googleModalDialog').remove()" style="background:transparent;border:none;color:var(--md-sys-color-outline);font-size:20px;cursor:pointer;">✕</button>
-      </div>
-      <p style="font-size:12px;color:#94A3B8;line-height:1.45;margin:0 0 14px 0;">
-        This app runs on the phone. Paste your own keys — research uses this device's Wi-Fi or mobile data. Nothing is sent to a ProspectPulse server.
-      </p>
-
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">Full Name</label>
-        <input type="text" id="m3InputName" value="${p.name}" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
-      </div>
-
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">Work Email</label>
-        <input type="email" id="m3InputEmail" value="${p.email}" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
+    <div class="m3-dialog-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="22" height="22" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <strong style="font-size:16px;color:var(--md-sys-color-on-background);font-weight:600;">Google Account</strong>
+        </div>
+        <button onclick="document.getElementById('googleModalDialog').remove()" class="m3-icon-button" style="width:32px;height:32px;">
+          <span class="material-symbols-rounded">close</span>
+        </button>
       </div>
 
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">xAI key (Grok live account research)</label>
-        <input type="password" id="m3InputXai" value="${keys.xai || ''}" placeholder="xai-..." style="width:100%;height:42px;background:#272A2F;border:1px solid var(--md-sys-color-primary);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
-        <div style="font-size:10px;color:var(--md-sys-color-primary);margin-top:4px;">Get a key: <a href="https://console.x.ai" target="_blank" style="color:var(--md-sys-color-primary);">console.x.ai</a></div>
+      <!-- Account Profile Header -->
+      <div style="background:var(--md-sys-color-surface-container);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.04);">
+        <div class="m3-account-avatar" style="background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);font-size:18px;">
+          ${(p.name || 'U').charAt(0).toUpperCase()}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:600;color:var(--md-sys-color-on-background);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name || 'Account User'}</div>
+          <div style="font-size:12px;color:var(--md-sys-color-outline);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.email || 'you@company.com'}</div>
+        </div>
       </div>
 
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">Gemini key (optional backup)</label>
-        <input type="password" id="m3InputGemini" value="${keys.gemini || ''}" placeholder="AIzaSy..." style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
+      <!-- Inputs -->
+      <div class="m3-field-container">
+        <label class="m3-field-label">Full Name</label>
+        <input type="text" id="m3InputName" value="${p.name}" class="m3-text-field" placeholder="Alex Rivera" />
       </div>
 
-      <div style="margin-bottom:16px;">
-        <label style="font-size:11px;font-weight:700;color:var(--md-sys-color-outline);text-transform:uppercase;">Tavily key (optional news / LinkedIn x-ray)</label>
-        <input type="password" id="m3InputTavily" value="${keys.tavily || ''}" placeholder="tvly-..." style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;padding:0 12px;margin-top:4px;font-size:14px;" />
+      <div class="m3-field-container">
+        <label class="m3-field-label">Work Email</label>
+        <input type="email" id="m3InputEmail" value="${p.email}" class="m3-text-field" placeholder="alex@company.com" />
       </div>
 
-      <button onclick="saveGoogleSettings()" class="m3-btn-primary">
-        Save and stay on this phone
+      <div class="m3-field-container">
+        <label class="m3-field-label">xAI Key (Primary LLM & Grounding)</label>
+        <input type="password" id="m3InputXai" value="${keys.xai || ''}" placeholder="xai-..." class="m3-text-field" />
+      </div>
+
+      <div class="m3-field-container">
+        <label class="m3-field-label">Gemini API Key (Google AI Backup)</label>
+        <input type="password" id="m3InputGemini" value="${keys.gemini || ''}" placeholder="AIzaSy..." class="m3-text-field" />
+      </div>
+
+      <button onclick="saveGoogleSettings()" class="m3-btn-primary" style="margin-top:10px;">
+        <span class="material-symbols-rounded">save</span>
+        <span>Save Changes</span>
       </button>
-      <button onclick="signOutMobileUser()" style="margin-top:10px;width:100%;height:42px;background:transparent;border:1px solid rgba(242,184,181,0.4);border-radius:12px;color:#F2B8B5;font-weight:600;cursor:pointer;">
-        Sign out
+
+      <button onclick="signOutMobileUser()" class="m3-btn-tonal" style="margin-top:8px;color:var(--md-sys-color-error);">
+        <span class="material-symbols-rounded">logout</span>
+        <span>Sign out</span>
       </button>
     </div>
   `;
@@ -640,6 +1233,19 @@ window.saveGoogleSettings = function () {
   window.MobileApp.userProfile.name = name || email.split('@')[0];
   window.MobileApp.userProfile.email = email;
 
+  // Synchronize profile with server DB
+  fetch(window.getMobileApiUrl('/api/auth/save-profile'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email,
+      name: name || email.split('@')[0],
+      company: window.MobileApp.userProfile.company || 'Enterprise',
+      title: window.MobileApp.userProfile.title || 'Account Executive',
+      preset: window.MobileApp.currentPreset || 'zendesk'
+    })
+  }).catch(() => {});
+
   document.getElementById('googleModalDialog')?.remove();
   updateStudioContent();
   const banner = document.getElementById('offlineKeyBanner');
@@ -659,34 +1265,92 @@ function renderMobileDOM() {
     <!-- 1. Google Workspace M3 Top Bar -->
     <header class="m3-top-bar">
       <div class="m3-search-pill">
-        <span class="m3-search-icon">🔍</span>
-        <input type="text" id="globalSearchInput" class="m3-search-input" placeholder="Search accounts (e.g. nike.com)..." onkeydown="if(event.key==='Enter') executeLiveSearch()" />
-        <button class="m3-camera-btn" onclick="openCameraScanner()" title="Scan Business Card / Badge">📸</button>
+        <div class="m3-google-icon" onclick="executeLiveSearch()" style="cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+        </div>
+        <form action="javascript:void(0);" onsubmit="executeLiveSearch(); return false;" style="display:flex;align-items:center;flex:1;min-width:0;margin:0;">
+          <input type="text" id="globalSearchInput" class="m3-search-input" placeholder="Search any company (e.g. spotify.com, nike)..." onkeydown="if(event.key==='Enter') executeLiveSearch()" />
+        </form>
+        <button class="m3-icon-button" onclick="executeLiveSearch()" title="Search Account" style="color:var(--md-sys-color-primary);">
+          <span class="material-symbols-rounded">search</span>
+        </button>
+        <button class="m3-icon-button" onclick="openCameraScanner()" title="Scan Business Card / Badge">
+          <span class="material-symbols-rounded">photo_camera</span>
+        </button>
+        <button class="m3-icon-button" onclick="startVoiceSalesCoach()" title="Voice Search & Coach">
+          <span class="material-symbols-rounded">mic</span>
+        </button>
+        <a href="/index.html?view=desktop" class="m3-chip" style="font-size:11px;height:30px;padding:0 10px;text-decoration:none;border-color:rgba(168,199,250,0.3);color:var(--md-sys-color-primary);margin-right:2px;" title="Switch to Full Desktop/Tablet Console">
+          <span class="material-symbols-rounded" style="font-size:16px;">desktop_windows</span>
+          <span>Console</span>
+        </a>
         <button class="m3-avatar-button" onclick="openGoogleAccountModal()" title="Google Account Settings">
-          <img id="topAvatarImg" src="${p.avatar}" alt="Avatar" />
+          ${p.avatar ? `<img id="topAvatarImg" src="${p.avatar}" alt="Avatar" />` : (p.name || 'U').charAt(0).toUpperCase()}
         </button>
       </div>
     </header>
 
-    <!-- 2. Filter Chips (Radar) -->
-    <div class="m3-filter-chips" id="radarFilterChips">
-      <button class="m3-chip active" onclick="filterAccounts('all', this)">✨ All Signals</button>
-      <button class="m3-chip" onclick="filterAccounts('retail', this)">Retail</button>
-      <button class="m3-chip" onclick="filterAccounts('tech', this)">Enterprise Tech</button>
-      <button class="m3-chip" onclick="filterAccounts('cloud', this)">Cloud & AI</button>
+    <!-- 2. Mobile Selling Profile Switcher Bar -->
+    <div class="m3-preset-bar" id="mobilePresetBar">
+      <button class="m3-chip active" id="mPreset_zendesk" onclick="switchMobilePreset('zendesk')">
+        <span class="material-symbols-rounded">support_agent</span>
+        <span>Zendesk</span>
+      </button>
+      <button class="m3-chip" id="mPreset_forethought" onclick="switchMobilePreset('forethought')">
+        <span class="material-symbols-rounded">psychology</span>
+        <span>Forethought</span>
+      </button>
+      <button class="m3-chip" id="mPreset_stripe" onclick="switchMobilePreset('stripe')">
+        <span class="material-symbols-rounded">credit_card</span>
+        <span>Stripe</span>
+      </button>
+      <button class="m3-chip" id="mPreset_generic" onclick="switchMobilePreset('generic')">
+        <span class="material-symbols-rounded">bolt</span>
+        <span>B2B SaaS</span>
+      </button>
+      <button class="m3-chip" id="mPreset_sockclub" onclick="switchMobilePreset('sockclub')">
+        <span class="material-symbols-rounded">checkroom</span>
+        <span>Sock Club</span>
+      </button>
     </div>
 
-    <!-- 3. TAB 1: ⚡ RADAR (Account Discovery & Live Signals) -->
+    <!-- 3. Filter Chips (Radar) -->
+    <div class="m3-filter-chips" id="radarFilterChips">
+      <button class="m3-chip active" onclick="filterAccounts('all', this)">
+        <span class="material-symbols-rounded">auto_awesome</span>
+        <span>All Signals</span>
+      </button>
+      <button class="m3-chip" onclick="filterAccounts('retail', this)">
+        <span class="material-symbols-rounded">storefront</span>
+        <span>Retail</span>
+      </button>
+      <button class="m3-chip" onclick="filterAccounts('tech', this)">
+        <span class="material-symbols-rounded">computer</span>
+        <span>Enterprise Tech</span>
+      </button>
+      <button class="m3-chip" onclick="filterAccounts('cloud', this)">
+        <span class="material-symbols-rounded">cloud</span>
+        <span>Cloud & AI</span>
+      </button>
+    </div>
+
+    <!-- 4. TAB 1: ⚡ RADAR (Account Discovery & Live Signals) -->
     <section id="screen-radar" class="m3-screen active-screen">
       <!-- 30-Second Pre-Meeting Cockpit Button -->
-      <button onclick="openPreMeetingCockpit()" style="width:100%;height:46px;background:linear-gradient(135deg, #1E293B, #0F172A);border:1px solid rgba(59,130,246,0.3);border-radius:14px;color:#60A5FA;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;cursor:pointer;">
-        <span>⚡</span> <span>30-Second Pre-Meeting Cockpit</span>
+      <button onclick="openPreMeetingCockpit()" class="m3-btn-tonal" style="margin-bottom:14px;background:var(--md-sys-color-surface-container-high);border:1px solid rgba(168,199,250,0.25);color:var(--md-sys-color-primary);">
+        <span class="material-symbols-rounded">flash_on</span>
+        <span>30-Second Pre-Meeting Cockpit</span>
       </button>
 
-      <div id="offlineKeyBanner" class="m3-card" style="display:none;background:#0F2744;border:1px solid rgba(168,199,250,0.35);margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:#D3E3FD;margin-bottom:4px;">This phone is the app</div>
-        <div style="font-size:12px;color:#94A3B8;line-height:1.4;margin-bottom:10px;">Add an xAI key once. Grok researches accounts over this device's internet. No desktop or server to start.</div>
-        <button class="m3-btn-primary" onclick="openGoogleAccountModal()">Add xAI key</button>
+      <div id="offlineKeyBanner" class="m3-card" style="display:none;background:var(--md-sys-color-surface-container-high);border:1px solid rgba(168,199,250,0.35);margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--md-sys-color-on-primary-container);margin-bottom:4px;">Google Account Connected</div>
+        <div style="font-size:12px;color:var(--md-sys-color-outline);line-height:1.4;margin-bottom:10px;">Grok & Gemini research accounts in real time over live web grounding.</div>
+        <button class="m3-btn-primary" onclick="openGoogleAccountModal()">Configure Keys</button>
       </div>
 
       <div class="m3-section-title">
@@ -694,47 +1358,61 @@ function renderMobileDOM() {
         <span style="font-size:12px;color:var(--md-sys-color-outline);">4 Ready</span>
       </div>
 
-      <div class="m3-card" onclick="loadAccount('lululemon.com')">
-        <div class="m3-account-row">
-          <div class="m3-account-avatar" style="background:#004A77;color:#D3E3FD;">LL</div>
-          <div class="m3-account-details">
-            <div class="m3-account-name">Lululemon Athletica</div>
-            <div class="m3-account-meta">Retail · 38k HC · $9.6B Rev</div>
+      <div id="mobileRadarAccountsList">
+        <div class="m3-card" onclick="loadAccount('uber.com')">
+          <div class="m3-account-row">
+            <div class="m3-account-avatar" style="background:#000000;color:#FFF;font-weight:700;">UB</div>
+            <div class="m3-account-details">
+              <div class="m3-account-name">Uber Technologies</div>
+              <div class="m3-account-meta">Mobility · 32k HC · $31.8B</div>
+            </div>
+            <span class="m3-signal-badge">
+              <span class="material-symbols-rounded" style="font-size:14px;">trending_up</span>
+              <span>98 Signal</span>
+            </span>
           </div>
-          <span class="m3-signal-badge">94 Signal</span>
         </div>
-      </div>
 
-      <div class="m3-card" onclick="loadAccount('uber.com')">
-        <div class="m3-account-row">
-          <div class="m3-account-avatar" style="background:#0F5223;color:#C4EED0;">UB</div>
-          <div class="m3-account-details">
-            <div class="m3-account-name">Uber Technologies</div>
-            <div class="m3-account-meta">Mobility · 32k HC · $31.8B Rev</div>
+        <div class="m3-card" onclick="loadAccount('shopify.com')">
+          <div class="m3-account-row">
+            <div class="m3-account-avatar" style="background:#008060;color:#FFF;font-weight:700;">SH</div>
+            <div class="m3-account-details">
+              <div class="m3-account-name">Shopify</div>
+              <div class="m3-account-meta">E-Commerce · 11k HC · $7.1B</div>
+            </div>
+            <span class="m3-signal-badge">
+              <span class="material-symbols-rounded" style="font-size:14px;">trending_up</span>
+              <span>95 Signal</span>
+            </span>
           </div>
-          <span class="m3-signal-badge">91 Signal</span>
         </div>
-      </div>
 
-      <div class="m3-card" onclick="loadAccount('openai.com')">
-        <div class="m3-account-row">
-          <div class="m3-account-avatar" style="background:#4A2800;color:#FFDCC1;">OA</div>
-          <div class="m3-account-details">
-            <div class="m3-account-name">OpenAI</div>
-            <div class="m3-account-meta">GenAI · 1.5k HC · $3.4B Rev</div>
+        <div class="m3-card" onclick="loadAccount('doordash.com')">
+          <div class="m3-account-row">
+            <div class="m3-account-avatar" style="background:#EB1700;color:#FFF;font-weight:700;">DD</div>
+            <div class="m3-account-details">
+              <div class="m3-account-name">DoorDash</div>
+              <div class="m3-account-meta">Delivery · 19k HC · $8.6B</div>
+            </div>
+            <span class="m3-signal-badge">
+              <span class="material-symbols-rounded" style="font-size:14px;">trending_up</span>
+              <span>92 Signal</span>
+            </span>
           </div>
-          <span class="m3-signal-badge">98 Signal</span>
         </div>
-      </div>
 
-      <div class="m3-card" onclick="loadAccount('snowflake.com')">
-        <div class="m3-account-row">
-          <div class="m3-account-avatar" style="background:#3C1E63;color:#E8DDFF;">SN</div>
-          <div class="m3-account-details">
-            <div class="m3-account-name">Snowflake</div>
-            <div class="m3-account-meta">Cloud · 7k HC · $2.8B Rev</div>
+        <div class="m3-card" onclick="loadAccount('airbnb.com')">
+          <div class="m3-account-row">
+            <div class="m3-account-avatar" style="background:#FF385C;color:#FFF;font-weight:700;">AB</div>
+            <div class="m3-account-details">
+              <div class="m3-account-name">Airbnb</div>
+              <div class="m3-account-meta">Hospitality · 6.8k HC · $9.9B</div>
+            </div>
+            <span class="m3-signal-badge">
+              <span class="material-symbols-rounded" style="font-size:14px;">trending_up</span>
+              <span>90 Signal</span>
+            </span>
           </div>
-          <span class="m3-signal-badge">89 Signal</span>
         </div>
       </div>
 
@@ -742,14 +1420,14 @@ function renderMobileDOM() {
       <div class="m3-section-title"><span>Live Buying Signals</span></div>
       <div class="m3-card" style="background:var(--md-sys-color-surface-container-high);">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <span style="font-size:16px;">📈</span>
-          <strong style="font-size:13px;color:#FFF;">Lululemon Appointed VP Global Merch</strong>
+          <span class="material-symbols-rounded" style="font-size:18px;color:var(--md-sys-color-tertiary);">insights</span>
+          <strong style="font-size:13px;color:var(--md-sys-color-on-background);">Executive Support Scaling Initiative</strong>
         </div>
-        <p style="font-size:12px;color:var(--md-sys-color-outline);line-height:1.4;">Vendor review underway for 600+ store gifting program. Optimal Challenger pitch window.</p>
+        <p style="font-size:12px;color:var(--md-sys-color-outline);line-height:1.4;">Active vendor review underway for automated customer operations. Optimal pitch window.</p>
       </div>
     </section>
 
-    <!-- 4. TAB 2: 🏢 INTEL (Account Dossier & Buying Committee) -->
+    <!-- 5. TAB 2: 🏢 INTEL (Account Dossier & Buying Committee) -->
     <section id="screen-intel" class="m3-screen">
       <div class="m3-segmented-row">
         <button class="m3-segment-btn active" onclick="switchIntelSubTab('overview', this)">Overview</button>
@@ -760,29 +1438,29 @@ function renderMobileDOM() {
       <!-- Intel Sub 1: Overview -->
       <div id="intel-sub-overview">
         <div class="m3-card" style="background:var(--md-sys-color-surface-container-high);">
-          <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;">Account Intelligence</div>
-          <h2 id="dossierName" style="font-size:22px;font-weight:700;color:#FFF;margin:4px 0 10px 0;">Lululemon Athletica</h2>
-          <div id="dossierSource" style="font-size:10px;color:#64748B;margin-bottom:8px;">On-device</div>
+          <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;letter-spacing:0.4px;">Account Intelligence</div>
+          <h2 id="dossierName" style="font-size:22px;font-weight:700;color:var(--md-sys-color-on-background);margin:4px 0 10px 0;">Uber Technologies</h2>
+          <div id="dossierSource" style="font-size:10px;color:var(--md-sys-color-outline);margin-bottom:8px;">✓ Live Server Enriched</div>
           
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:12px;">
-            <div><span style="color:var(--md-sys-color-outline);">Headcount:</span> <strong id="dossierHC" style="color:#FFF;">38,000</strong></div>
-            <div><span style="color:var(--md-sys-color-outline);">Revenue:</span> <strong id="dossierRev" style="color:#FFF;">$9.6B</strong></div>
-            <div><span style="color:var(--md-sys-color-outline);">Incumbent:</span> <strong id="dossierIncumbent" style="color:#F2B8B5;">SwagUp</strong></div>
-            <div><span style="color:var(--md-sys-color-outline);">Wedge:</span> <strong id="dossierWedge" style="color:#C4EED0;">Custom Knitwear</strong></div>
+            <div><span style="color:var(--md-sys-color-outline);">Headcount:</span> <strong id="dossierHC" style="color:#FFF;">32,000</strong></div>
+            <div><span style="color:var(--md-sys-color-outline);">Revenue:</span> <strong id="dossierRev" style="color:#FFF;">$31.8B</strong></div>
+            <div><span style="color:var(--md-sys-color-outline);">Incumbent:</span> <strong id="dossierIncumbent" style="color:var(--md-sys-color-error);">Salesforce</strong></div>
+            <div><span style="color:var(--md-sys-color-outline);">Wedge:</span> <strong id="dossierWedge" style="color:var(--md-sys-color-tertiary);">AI Deflection</strong></div>
           </div>
 
           <div style="font-size:12px;color:var(--md-sys-color-outline);line-height:1.4;" id="dossierPainPoints">
-            Store managers experiencing low merchandise quality; zero Pantone color consistency; high catalog markups.
+            Managing disconnected support tools across ticketing, chat, and phone; rising handle times; high cost-per-contact.
           </div>
         </div>
 
         <!-- Single Thread Risk Gauge -->
-        <div class="m3-section-title"><span>Multi-Threading Health</span> <span style="font-size:12px;color:#C4EED0;">78% Protected</span></div>
+        <div class="m3-section-title"><span>Multi-Threading Health</span> <span style="font-size:12px;color:var(--md-sys-color-tertiary);">85% Protected</span></div>
         <div class="m3-card">
           <div style="height:8px;background:var(--md-sys-color-surface-container-highest);border-radius:4px;overflow:hidden;margin-bottom:8px;">
-            <div style="width:78%;height:100%;background:linear-gradient(90deg, #3B82F6, #10B981);"></div>
+            <div style="width:85%;height:100%;background:linear-gradient(90deg, #4285F4, #34A853);"></div>
           </div>
-          <div style="font-size:12px;color:var(--md-sys-color-outline);">3 Stakeholders engaged across Brand, Procurement, and Executive leadership.</div>
+          <div style="font-size:12px;color:var(--md-sys-color-outline);">3 Key decision makers engaged across Operations, Systems, and Executive leadership.</div>
         </div>
       </div>
 
@@ -790,20 +1468,20 @@ function renderMobileDOM() {
       <div id="intel-sub-committee" style="display:none;">
         <div class="m3-card">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-            <div style="width:40px;height:40px;border-radius:12px;background:#004A77;color:#D3E3FD;display:flex;align-items:center;justify-content:center;font-weight:700;">EB</div>
-            <div>
-              <div id="dossierBuyerName" style="font-size:15px;font-weight:600;color:#FFF;">Michael Torres</div>
-              <div id="dossierBuyerTitle" style="font-size:12px;color:var(--md-sys-color-outline);">VP Customer & Partner Exp · Economic Buyer</div>
+            <div class="m3-account-avatar" style="background:#0842A0;color:#D3E3FD;">EB</div>
+            <div style="flex:1;min-width:0;">
+              <div id="dossierBuyerName" style="font-size:15px;font-weight:600;color:#FFF;">Rachel Adams</div>
+              <div id="dossierBuyerTitle" style="font-size:12px;color:var(--md-sys-color-outline);">VP Global Customer Operations · Economic Buyer</div>
             </div>
           </div>
         </div>
 
         <div class="m3-card">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-            <div style="width:40px;height:40px;border-radius:12px;background:#0F5223;color:#C4EED0;display:flex;align-items:center;justify-content:center;font-weight:700;">CH</div>
-            <div>
-              <div id="dossierChampionName" style="font-size:15px;font-weight:600;color:#FFF;">Sarah Chen</div>
-              <div id="dossierChampionTitle" style="font-size:12px;color:var(--md-sys-color-outline);">Director Brand Exp · Champion</div>
+            <div class="m3-account-avatar" style="background:#0F5223;color:#C4EED0;">CH</div>
+            <div style="flex:1;min-width:0;">
+              <div id="dossierChampionName" style="font-size:15px;font-weight:600;color:#FFF;">Carlos Gomez</div>
+              <div id="dossierChampionTitle" style="font-size:12px;color:var(--md-sys-color-outline);">Director Support Systems & Automation · Champion</div>
             </div>
           </div>
         </div>
@@ -812,13 +1490,16 @@ function renderMobileDOM() {
       <!-- Intel Sub 3: Battlecards -->
       <div id="intel-sub-battlecards" style="display:none;">
         <div class="m3-card">
-          <div id="dossierBattlecardTitle" style="font-size:13px;font-weight:700;color:#F2B8B5;margin-bottom:4px;">Objection: "We already use SwagUp."</div>
-          <p id="dossierBattlecardBody" style="font-size:12px;color:var(--md-sys-color-outline);line-height:1.4;">"SwagUp marks up third-party blanks by 38% and requires 6-week turnaround. We spin bespoke Italian knitwear directly with zero middleman markup and live Pantone matching."</p>
+          <div id="dossierBattlecardTitle" style="font-size:13px;font-weight:700;color:var(--md-sys-color-error);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-rounded" style="font-size:16px;">shield</span>
+            <span>Objection: "We already use Salesforce."</span>
+          </div>
+          <p id="dossierBattlecardBody" style="font-size:12px;color:var(--md-sys-color-outline);line-height:1.4;">"Salesforce Service Cloud takes 9+ months of expensive SI consultants to configure. Zendesk deploys in 3 weeks with built-in WFM, QA, and pre-trained AI agents that deflect 45%+ on day one."</p>
         </div>
       </div>
     </section>
 
-    <!-- 5. TAB 3: ✉️ STUDIO (Multi-Channel Outreach Engine) -->
+    <!-- 6. TAB 3: ✉️ STUDIO (Multi-Channel Outreach Engine) -->
     <section id="screen-studio" class="m3-screen">
       <!-- Channel Selector -->
       <div class="m3-segmented-row">
@@ -829,161 +1510,128 @@ function renderMobileDOM() {
 
       <!-- Tone Selector (For Email) -->
       <div class="m3-filter-chips" style="padding-left:0;padding-right:0;">
-        <button class="m3-chip active" onclick="setStudioTone('challenger', this)">⚡ Challenger</button>
-        <button class="m3-chip" onclick="setStudioTone('consultative', this)">👔 Consultative</button>
-        <button class="m3-chip" onclick="setStudioTone('short', this)">🎯 Short</button>
-        <button class="m3-chip" onclick="setStudioTone('humorous', this)">🎭 Humorous</button>
+        <button class="m3-chip active" onclick="setStudioTone('challenger', this)">
+          <span class="material-symbols-rounded">bolt</span>
+          <span>Challenger</span>
+        </button>
+        <button class="m3-chip" onclick="setStudioTone('consultative', this)">
+          <span class="material-symbols-rounded">work</span>
+          <span>Consultative</span>
+        </button>
+        <button class="m3-chip" onclick="setStudioTone('short', this)">
+          <span class="material-symbols-rounded">speed</span>
+          <span>Short</span>
+        </button>
+        <button class="m3-chip" onclick="setStudioTone('humorous', this)">
+          <span class="material-symbols-rounded">sentiment_satisfied</span>
+          <span>Humorous</span>
+        </button>
       </div>
 
       <!-- Sequence Preview Card -->
       <div class="m3-card" style="background:var(--md-sys-color-surface-container-high);">
-        <div id="studioSubjectLabel" style="font-size:12px;font-weight:700;color:var(--md-sys-color-primary);margin-bottom:8px;">SUBJECT: Lululemon retail gifting vs. SwagUp</div>
-        <div id="studioBodyText" style="font-size:14px;color:#FFF;line-height:1.5;white-space:pre-wrap;">Hi Michael,
+        <div id="studioSubjectLabel" style="font-size:12px;font-weight:700;color:var(--md-sys-color-primary);margin-bottom:8px;">SUBJECT: Omnichannel support & AI deflection for Uber</div>
+        <div id="studioBodyText" style="font-size:13.5px;color:#FFF;line-height:1.5;white-space:pre-wrap;">Hi Rachel,
 
-Noticed Lululemon is scaling retail partner gifting across 600+ stores. Most enterprise apparel teams waste 38% on marked-up catalog vendors like SwagUp.
+Noticed Uber is scaling CX operations. Managing disconnected tools across ticketing, chat, and phone leads to high handle times and inflated software costs.
 
-We built custom Italian-spun knitwear programs with 42% higher retention and live Pantone color matching.
+Zendesk consolidates your entire support operation into a single unified Agent Workspace — with pre-trained AI agents that deflect 45%+ of routine volume on day one.
 
-Worth a 5-minute look at your custom deal room?
+Open to a 5-minute look next week?
 
 Best,
-${p.name}
-${p.title} | ${p.company}</div>
+${p.name || 'Travis'} | Zendesk</div>
       </div>
 
       <!-- Multi-App Dispatcher Grid -->
       <div class="m3-dispatch-grid">
         <button class="m3-dispatch-btn btn-whatsapp" onclick="dispatchToWhatsApp()">
-          <span>💬</span>
+          <span class="material-symbols-rounded">chat</span>
           <span>WhatsApp</span>
         </button>
         <button class="m3-dispatch-btn btn-sms" onclick="dispatchToSMS()">
-          <span>📱</span>
+          <span class="material-symbols-rounded">sms</span>
           <span>SMS</span>
         </button>
         <button class="m3-dispatch-btn btn-linkedin" onclick="dispatchToLinkedIn()">
-          <span>💼</span>
+          <span class="material-symbols-rounded">share</span>
           <span>LinkedIn</span>
         </button>
         <button class="m3-dispatch-btn btn-gmail" onclick="openInNativeGmail()">
-          <span>🚀</span>
+          <span class="material-symbols-rounded">mail</span>
           <span>Gmail</span>
         </button>
       </div>
 
       <button class="m3-btn-primary" style="margin-top:12px;" onclick="copyStudioSequence()">
-        <span>📋</span> <span id="copyBtnLabel">1-Tap Copy Sequence</span>
+        <span class="material-symbols-rounded">content_copy</span>
+        <span id="copyBtnLabel">Copy Sequence</span>
       </button>
     </section>
 
-    <!-- 6. TAB 4: 💼 DEAL ROOM (Interactive DSR & Swatches) -->
+    <!-- 7. TAB 4: 💼 DEAL ROOM & LIVE AI BOT -->
     <section id="screen-dealroom" class="m3-screen">
-      <div class="m3-card" style="text-align:center;">
-        <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;">Merchandise Studio</div>
-        <h3 id="dealRoomTitle" style="font-size:18px;font-weight:700;color:#FFF;margin-top:2px;">Lululemon Custom Knitwear</h3>
-
-        <!-- Vector Sweater SVG -->
-        <svg id="vectorSweaterSvg" style="width:120px;height:120px;margin:12px auto;" viewBox="0 0 100 100">
-          <path id="vectorSweaterPath" d="M30,20 L40,15 L60,15 L70,20 L85,35 L75,45 L68,38 L68,85 L32,85 L32,38 L25,45 L15,35 Z" fill="${window.MobileApp.swatchColor}" stroke="#FFF" stroke-width="1.5"/>
-          <text x="50" y="55" font-size="10" font-weight="bold" fill="#FFF" text-anchor="middle">lululemon</text>
-        </svg>
-
-        <!-- Tactile Colorway Swatches -->
-        <div style="display:flex;gap:12px;justify-content:center;margin-top:4px;">
-          <div style="width:36px;height:36px;border-radius:50%;background:#1E3A8A;border:2px solid #FFF;cursor:pointer;" onclick="setDealRoomSwatch('#1E3A8A', 'Deep Cobalt (Pantone 288 C)')"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#064E3B;border:2px solid transparent;cursor:pointer;" onclick="setDealRoomSwatch('#064E3B', 'Forest Moss (Pantone 343 C)')"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#7C2D12;border:2px solid transparent;cursor:pointer;" onclick="setDealRoomSwatch('#7C2D12', 'Terracotta (Pantone 7586 C)')"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#18181B;border:2px solid transparent;cursor:pointer;" onclick="setDealRoomSwatch('#18181B', 'Obsidian Black (Pantone Black 6 C)')"></div>
-        </div>
-        <div id="swatchLabelText" style="font-size:12px;color:var(--md-sys-color-outline);margin-top:8px;">Active: Deep Cobalt (Pantone 288 C)</div>
-      </div>
-
-      <!-- Live Headcount ROI Model -->
-      <div class="m3-section-title"><span>Live Headcount ROI Model</span></div>
-      <div class="m3-card">
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;">
-          <span>Target Headcount:</span>
-          <strong id="dealRoomHcLabel" style="color:var(--md-sys-color-primary);">5,000 Employees</strong>
-        </div>
-        <input type="range" min="500" max="40000" step="500" value="5000" style="width:100%;margin-bottom:12px;" oninput="updateDealRoomRoi(this.value)" />
-        <div style="display:flex;justify-content:space-between;padding:10px;background:var(--md-sys-color-surface-container-high);border-radius:10px;">
-          <span style="font-size:12px;color:var(--md-sys-color-outline);">Annual Cost Savings:</span>
-          <strong id="dealRoomSavingsLabel" style="font-size:15px;color:#C4EED0;">+$42,500 Saved</strong>
-        </div>
-      </div>
-
-      <!-- Mutual Action Plan (MAP) -->
-      <div class="m3-section-title"><span>Mutual Action Plan</span></div>
-      <div class="m3-card">
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" checked onchange="toggleMap(0, this.checked)" />
-            <span>Step 1: Pantone Palette Approval & Brief</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" onchange="toggleMap(1, this.checked)" />
-            <span>Step 2: Sample Kit Fabrication & Review</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" onchange="toggleMap(2, this.checked)" />
-            <span>Step 3: Procurement Vendor Agreement</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" onchange="toggleMap(3, this.checked)" />
-            <span>Step 4: Enterprise Store-Wide Rollout</span>
-          </label>
-        </div>
-      </div>
+      <!-- Dynamically filled by updateMobileDealRoom() -->
     </section>
 
-    <!-- 7. TAB 5: 🎙️ ROLEPLAY & GEMINI LIVE SALES COACH -->
+    <!-- 8. TAB 5: 🎙️ ROLEPLAY & GEMINI LIVE SALES COACH -->
     <section id="screen-roleplay" class="m3-screen">
       <div style="text-align:center;padding:24px 0;">
-        <div style="width:120px;height:120px;border-radius:50%;background:var(--md-sys-color-primary-container);color:var(--md-sys-color-on-primary-container);display:flex;align-items:center;justify-content:center;font-size:48px;margin:0 auto 16px auto;box-shadow:0 0 32px rgba(168,199,250,0.35);">
-          🎙️
+        <div class="gemini-orb" style="margin: 0 auto 20px auto;">
+          <span class="material-symbols-rounded" style="font-size:48px;color:#FFF;">graphic_eq</span>
         </div>
-        <h2 style="font-size:20px;font-weight:700;color:#FFF;margin-bottom:4px;">Gemini Live Sales Coach</h2>
-        <p style="font-size:13px;color:var(--md-sys-color-outline);max-width:280px;margin:0 auto 20px auto;">
-          Hold to ask real-time tactical sales advice before walking into your meeting.
+        <h2 style="font-size:20px;font-weight:700;color:var(--md-sys-color-on-background);margin-bottom:6px;">Gemini Live Sales Coach</h2>
+        <p style="font-size:13px;color:var(--md-sys-color-outline);max-width:280px;margin:0 auto 24px auto;line-height:1.4;">
+          Tap to ask real-time tactical sales advice before walking into your meeting.
         </p>
 
-        <button onclick="startVoiceSalesCoach()" style="width:72px;height:72px;border-radius:50%;background:#A8C7FA;color:#042E6F;border:none;font-size:28px;display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 4px 16px rgba(168,199,250,0.3);cursor:pointer;">
-          🎤
+        <button onclick="startVoiceSalesCoach()" class="m3-btn-primary" style="max-width:240px;margin:0 auto;height:52px;">
+          <span class="material-symbols-rounded">mic</span>
+          <span>Start Live Session</span>
         </button>
-        <div style="font-size:12px;color:var(--md-sys-color-outline);margin-top:12px;">Tap to speak with Gemini Sales Coach</div>
       </div>
 
       <div class="m3-card" style="background:var(--md-sys-color-surface-container-high);">
-        <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;">AI Scoring Card</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;text-align:center;">
-          <div><div style="font-size:10px;color:var(--md-sys-color-outline);">Tone</div><strong style="color:#C4EED0;">94%</strong></div>
-          <div><div style="font-size:10px;color:var(--md-sys-color-outline);">Wedge</div><strong style="color:#C4EED0;">96%</strong></div>
-          <div><div style="font-size:10px;color:var(--md-sys-color-outline);">Deflection</div><strong style="color:#C4EED0;">92%</strong></div>
+        <div style="font-size:11px;font-weight:700;color:var(--md-sys-color-primary);text-transform:uppercase;letter-spacing:0.4px;">AI Discovery Telemetry</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;text-align:center;">
+          <div><div style="font-size:10px;color:var(--md-sys-color-outline);">Tone</div><strong style="color:var(--md-sys-color-tertiary);font-size:15px;">94%</strong></div>
+          <div><div style="font-size:10px;color:var(--md-sys-color-outline);">Wedge</div><strong style="color:var(--md-sys-color-tertiary);font-size:15px;">96%</strong></div>
+          <div><div style="font-size:10px;color:var(--md-sys-color-outline);">Score</div><strong style="color:var(--md-sys-color-primary);font-size:15px;">88/100</strong></div>
         </div>
       </div>
     </section>
 
-    <!-- 8. M3 Bottom Navigation Bar -->
+    <!-- 9. Google Material 3 Navigation Bar (Bottom Nav) -->
     <nav class="m3-nav-bar">
       <button class="m3-nav-btn active" onclick="switchMainTab('radar', this)">
-        <div class="m3-nav-pill">⚡</div>
+        <div class="m3-nav-pill">
+          <span class="material-symbols-rounded">radar</span>
+        </div>
         <span class="m3-nav-text">Radar</span>
       </button>
       <button class="m3-nav-btn" onclick="switchMainTab('intel', this)">
-        <div class="m3-nav-pill">🏢</div>
+        <div class="m3-nav-pill">
+          <span class="material-symbols-rounded">corporate_fare</span>
+        </div>
         <span class="m3-nav-text">Intel</span>
       </button>
       <button class="m3-nav-btn" onclick="switchMainTab('studio', this)">
-        <div class="m3-nav-pill">✉️</div>
+        <div class="m3-nav-pill">
+          <span class="material-symbols-rounded">auto_awesome</span>
+        </div>
         <span class="m3-nav-text">Studio</span>
       </button>
       <button class="m3-nav-btn" onclick="switchMainTab('dealroom', this)">
-        <div class="m3-nav-pill">💼</div>
+        <div class="m3-nav-pill">
+          <span class="material-symbols-rounded">smart_toy</span>
+        </div>
         <span class="m3-nav-text">Deal Room</span>
       </button>
       <button class="m3-nav-btn" onclick="switchMainTab('roleplay', this)">
-        <div class="m3-nav-pill">🎙️</div>
-        <span class="m3-nav-text">Roleplay</span>
+        <div class="m3-nav-pill">
+          <span class="material-symbols-rounded">record_voice_over</span>
+        </div>
+        <span class="m3-nav-text">Coach</span>
       </button>
     </nav>
   `;
@@ -991,6 +1639,9 @@ ${p.title} | ${p.company}</div>
 
 function bootMobileApp() {
   renderMobileDOM();
+  switchMobilePreset('zendesk');
+  updateStudioContent();
+  updateMobileDealRoom();
   const session = window.UserSession ? window.UserSession.getSession() : null;
   if (!session) {
     openMobileLoginModal();
@@ -1019,16 +1670,19 @@ window.openMobileLoginModal = function () {
   modal.innerHTML = `
     <div style="max-width:400px;margin:24px auto;background:#1D2024;border-radius:24px;padding:22px;border:1px solid rgba(255,255,255,0.08);">
       <h2 style="color:#fff;font-size:22px;margin:0 0 8px 0;">Sign in as yourself</h2>
-      <p style="color:#94A3B8;font-size:13px;line-height:1.45;margin:0 0 16px 0;">Google or email identifies you. Your xAI key bills to you. Nothing uses another person's login.</p>
-      <div id="gsiMobileButton" style="min-height:44px;display:flex;justify-content:center;margin-bottom:14px;"></div>
+      <p style="color:#94A3B8;font-size:13px;line-height:1.45;margin:0 0 16px 0;">Use your email and your own API keys. No Google OAuth. Nothing uses another person's login.</p>
       <label style="font-size:11px;color:#94A3B8;">Work email</label>
       <input id="mLoginEmail" type="email" value="${session ? session.email : ''}" placeholder="you@company.com" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
       <label style="font-size:11px;color:#94A3B8;">Your name</label>
       <input id="mLoginName" type="text" value="${session ? session.name : ''}" placeholder="Alex Rivera" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
       <label style="font-size:11px;color:#94A3B8;">Company</label>
       <input id="mLoginCompany" type="text" value="${session ? session.company : ''}" placeholder="Acme" style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
-      <label style="font-size:11px;color:#94A3B8;">Your xAI key</label>
+      <label style="font-size:11px;color:#94A3B8;">Your xAI key (primary)</label>
       <input id="mLoginXai" type="password" value="${keys.xai || ''}" placeholder="xai-..." style="width:100%;height:42px;background:#272A2F;border:1px solid var(--md-sys-color-primary);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
+      <div style="font-size:11px;color:#64748B;margin:-4px 0 10px;">Get one at console.x.ai</div>
+      <label style="font-size:11px;color:#94A3B8;">Gemini API key (fallback)</label>
+      <input id="mLoginGemini" type="password" value="${keys.gemini || ''}" placeholder="AIzaSy..." style="width:100%;height:42px;background:#272A2F;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;padding:0 12px;margin:4px 0 10px;font-size:14px;" />
+      <div style="font-size:11px;color:#64748B;margin:-4px 0 10px;">Get one at aistudio.google.com/app/apikey</div>
       <label style="display:flex;align-items:center;gap:8px;color:#94A3B8;font-size:12px;margin:0 0 14px;">
         <input type="checkbox" id="mLoginWorkspace" />
         Also save as this phone's workspace key
@@ -1038,21 +1692,6 @@ window.openMobileLoginModal = function () {
     </div>
   `;
   document.body.appendChild(modal);
-  if (window.GoogleIdentity) {
-    window.GoogleIdentity.loadConfig().then(function () {
-      window.GoogleIdentity.renderButton('gsiMobileButton', function (profile) {
-        const emailEl = document.getElementById('mLoginEmail');
-        const nameEl = document.getElementById('mLoginName');
-        if (emailEl) emailEl.value = profile.email;
-        if (nameEl) nameEl.value = profile.name;
-        const existing = window.UserSession ? window.UserSession.loadKeys(profile.email) : {};
-        if (existing.xai || profile.gemini_oauth) {
-          if (existing.xai) document.getElementById('mLoginXai').value = existing.xai;
-          saveMobileLogin();
-        }
-      });
-    });
-  }
 };
 
 window.switchMobileAccount = function (email) {
@@ -1078,6 +1717,7 @@ window.saveMobileLogin = function () {
   const name = (document.getElementById('mLoginName')?.value || '').trim();
   const company = (document.getElementById('mLoginCompany')?.value || '').trim();
   const xai = (document.getElementById('mLoginXai')?.value || '').trim();
+  const gemini = (document.getElementById('mLoginGemini')?.value || '').trim();
   if (!email || !email.includes('@')) {
     alert('Enter your own work email.');
     return;
@@ -1089,7 +1729,7 @@ window.saveMobileLogin = function () {
   try {
     const shareWorkspace = document.getElementById('mLoginWorkspace') && document.getElementById('mLoginWorkspace').checked;
     if (shareWorkspace && xai) {
-      fetch('/api/auth/workspace', {
+      fetch(window.getMobileApiUrl('/api/auth/workspace'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ xai_key: xai, enabled: true })
@@ -1102,7 +1742,7 @@ window.saveMobileLogin = function () {
       name: name || email.split('@')[0],
       company: company,
       title: 'Account Executive'
-    }, { xai: xai, gemini: '', tavily: '' });
+    }, { xai: xai, gemini: gemini, tavily: '' });
     window.MobileApp.userProfile = {
       name: saved.name,
       email: saved.email,
@@ -1111,6 +1751,17 @@ window.saveMobileLogin = function () {
       avatar: saved.avatar_url,
       isGoogleConnected: false
     };
+    fetch(window.getMobileApiUrl('/api/auth/save-profile'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        name: name || email.split('@')[0],
+        company: company,
+        title: 'Account Executive',
+        preset: window.MobileApp.currentPreset || 'zendesk'
+      })
+    }).catch(function () {});
     document.getElementById('mobileLoginModal')?.remove();
     renderMobileDOM();
     const banner = document.getElementById('offlineKeyBanner');

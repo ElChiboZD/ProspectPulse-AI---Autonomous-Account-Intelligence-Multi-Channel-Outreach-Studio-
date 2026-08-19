@@ -48,6 +48,15 @@
     "Keyboard": {
       "resize": "body",
       "style": "dark"
+    },
+    "GoogleAuth": {
+      "scopes": [
+        "profile",
+        "email",
+        "openid",
+        "https://www.googleapis.com/auth/generative-language"
+      ],
+      "forceCodeForRefreshToken": true
     }
   }
 }

@@ -54,7 +54,7 @@
   }
 
   function hasAnyLiveKey() {
-    return !!(readKey(KEYS.gemini) || readKey(KEYS.xai) || readKey(KEYS.tavily) || googleAccessToken());
+    return !!(readKey(KEYS.gemini) || readKey('prospectpulse_google_api_key') || readKey(KEYS.xai) || readKey(KEYS.tavily) || googleAccessToken());
   }
 
   function parseDomain(raw) {
@@ -118,7 +118,7 @@
   }
 
   async function callGemini(prompt, { jsonMode } = {}) {
-    const apiKey = readKey(KEYS.gemini);
+    const apiKey = readKey(KEYS.gemini) || readKey('prospectpulse_google_api_key');
     const oauth = googleAccessToken();
     if (!apiKey && !oauth) return null;
 
@@ -140,6 +140,10 @@
         });
       }
       if (apiKey) {
+        attempts.push({
+          url: base,
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey }
+        });
         attempts.push({
           url: base + '?key=' + encodeURIComponent(apiKey),
           headers: { 'Content-Type': 'application/json' }

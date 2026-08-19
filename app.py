@@ -27,8 +27,10 @@ def find_free_port(start_port=8765, max_attempts=50):
                 continue
     return start_port
 
+# Keep 8765 so Google OAuth redirect stays http://127.0.0.1:8765/api/auth/google/callback
 SERVER_PORT = find_free_port(8765)
 SERVER_URL = f"http://127.0.0.1:{SERVER_PORT}"
+os.environ["PROSPECTPULSE_ORIGIN"] = SERVER_URL
 
 def start_server():
     """Starts the bundled engine inside this window. User never starts a server."""
@@ -62,10 +64,18 @@ def main():
     if not wait_for_server(SERVER_URL, timeout=8):
         print(f"[!] Warning: Server did not respond within 8s at {SERVER_URL}, launching anyway...")
 
+    class DesktopBridge:
+        def start_google_login(self, client_id=""):
+            import webbrowser
+            q = f"?client_id={client_id}" if client_id else ""
+            webbrowser.open(f"{SERVER_URL}/api/auth/google/start{q}")
+            return True
+
     # 3. Create native desktop window
     window = webview.create_window(
         title="ProspectPulse AI — Autonomous Account Intelligence Studio",
         url=SERVER_URL,
+        js_api=DesktopBridge(),
         width=1420,
         height=920,
         min_size=(1100, 720),

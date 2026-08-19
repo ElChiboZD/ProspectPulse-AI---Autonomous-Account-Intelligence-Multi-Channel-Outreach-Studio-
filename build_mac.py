@@ -21,6 +21,11 @@ def build_mac():
         print("[!] Error: static/ directory not found!")
         return False
 
+    prompts_dir = os.path.join(ROOT, "prompts")
+    data_args = ["--add-data", f"{static_dir}:static"]
+    if os.path.isdir(prompts_dir):
+        data_args += ["--add-data", f"{prompts_dir}:prompts"]
+
     # Check for PyInstaller
     cmd = [
         sys.executable, "-m", "PyInstaller",
@@ -28,7 +33,7 @@ def build_mac():
         "--onedir",
         "--windowed",
         "--name", "ProspectPulse-AI",
-        "--add-data", f"{static_dir}:static",
+        *data_args,
         "--hidden-import", "edge_tts",
         "--hidden-import", "aiohttp",
         "--hidden-import", "cachetools",
@@ -37,6 +42,9 @@ def build_mac():
         "--hidden-import", "dns.rdatatype",
         "--hidden-import", "webview",
         "--hidden-import", "webview.platforms.cocoa",
+        "--hidden-import", "server",
+        "--hidden-import", "db",
+        "--hidden-import", "demo_data",
         "--osx-bundle-identifier", "ai.prospectpulse.desktop",
         os.path.join(ROOT, "app.py")
     ]

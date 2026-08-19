@@ -1,4 +1,173 @@
 const BATTLECARDS_BY_PRESET = {
+  zendesk: [
+    {
+      name: 'Salesforce Service Cloud & Agentforce',
+      tag: 'Enterprise CRM / Platform Suite',
+      pitch: 'Pitches Salesforce Customer 360 data unification as the all-in-one suite for sales, marketing, and customer support with Agentforce add-on bots.',
+      them: [
+        "Total cost of ownership often reaches $300–$600/agent/mo once Digital Engagement, Voice, WFM, and Data Cloud licenses are added.",
+        "Rollout takes 6–9+ months requiring expensive third-party implementation consultants ($50k–$150k+).",
+        "Requires 2+ dedicated certified Salesforce administrators for basic ongoing workflow changes and queue edits.",
+        "Agentforce requires expensive Data Cloud credits and extensive custom prompt engineering to function."
+      ],
+      us: [
+        "Days-to-weeks rapid time-to-value with intuitive modern Agent Workspace purpose-built for support.",
+        "Transparent, predictable pricing with native omnichannel (Voice, WhatsApp, Chat, Email) included out-of-the-box.",
+        "Pre-trained autonomous CX AI agents deflecting 45%+ of volume on day one with zero prompt plumbing.",
+        "Native Workforce Management (Tymeshift) and 100% Quality Assurance scoring (Klaus) in a unified suite."
+      ],
+      trap: "Walk me through your full per-agent cost once Digital Engagement, Voice, Data Cloud credits, and dedicated admin headcount are factored in — and how many months until agents are fully ramped?",
+      land: "If an enterprise is already 100% standardized on Sales Cloud and needs deep custom schema architecture across sales pipelines, Salesforce is legitimate. For high-volume agile support teams, Zendesk delivers 3x faster time-to-value at half the TCO."
+    },
+    {
+      name: 'Intercom (Fin AI)',
+      tag: 'Conversational Support & Metered AI',
+      pitch: 'Pitches Fin AI bot charging $0.99 per resolution as the modern pay-per-outcome conversational support tool.',
+      them: [
+        "Cost scales WITH success: more deflection means an exponentially higher monthly invoice (~$5,000–$15,000+ extra at scale).",
+        "Hybrid seat pricing + $0.99 resolution meter creates severe billing unpredictability and budget anxiety.",
+        "Weaker high-volume complex multi-touch ticketing, SLA governance, and enterprise audit trails.",
+        "Lacks native enterprise Workforce Management (WFM) and automated 100% QA conversation scoring."
+      ],
+      us: [
+        "Predictable, transparent platform licensing so your cost does not balloon as your automation rates improve.",
+        "Mature enterprise routing, SLA management, and multi-brand support built for millions of tickets.",
+        "Full AI agent suite (Zendesk AI + Forethought) included without punitive per-outcome meter spikes.",
+        "True omnichannel coverage including native voice, SMS, email, and social messaging in one workspace."
+      ],
+      trap: "At your monthly ticket volume, what does $0.99 per resolution total as deflection climbs from 30% to 60%, and how are you budgeting for that billing unpredictability at renewal?",
+      land: "Fin is strong for low-volume, high-margin SaaS looking for instant turnkey chat bots. For high-volume omnichannel teams with complex routing and SLAs, Zendesk provides enterprise governance and cost predictability."
+    },
+    {
+      name: 'Decagon / Sierra / Ada (Point AI Bots)',
+      tag: 'Point-Solution Autonomous AI Bots',
+      pitch: 'Pitches standalone generative AI agent bots that sit in front of customer support to handle tier-1 chat.',
+      them: [
+        "Point-solution silos requiring maintenance of two separate tech stacks, two vendor contracts, and two admin portals.",
+        "Complex custom integration work to pass context between the bot and the human helpdesk without dropped data.",
+        "Expensive six-figure upfront annual platform fees on top of existing helpdesk seat costs.",
+        "Lacks integrated agent tooling, post-resolution QA, and workforce forecasting."
+      ],
+      us: [
+        "End-to-end unified CX ecosystem: autonomous AI deflection, agent copilot, ticketing, WFM, and QA in one platform.",
+        "Seamless bot-to-human escalation with complete conversational memory and customer history preserved.",
+        "Forethought by Zendesk provides helpdesk-agnostic multi-agent autonomy with Autoflows and live API actions.",
+        "Single vendor relationship, lower total software spend, and continuous unified product updates."
+      ],
+      trap: "How are you handling bot-to-human escalation context when the customer moves from chat to email or voice, and how much are you spending maintaining two distinct CX platforms?",
+      land: "Point AI vendors offer slick chat demos. But when you need enterprise omnichannel context, real-time agent handoffs, and operational visibility, Zendesk + Forethought delivers complete end-to-end resolution."
+    },
+    {
+      name: 'Freshworks / Freshdesk',
+      tag: 'Mid-Market / SMB Support Software',
+      pitch: 'Pitches low-cost SMB ticketing software with bundled sales and marketing tools.',
+      them: [
+        "Lacks enterprise-scale omnichannel routing and real-time intraday queue management.",
+        "Limited custom reporting (Explore equivalent) and rigid data export capabilities.",
+        "Shallow native Workforce Management and lack of automated 100% QA scoring.",
+        "High churn and performance degradation when ticket volume exceeds 50k tickets/month."
+      ],
+      us: [
+        "Proven enterprise scalability powering global giants like Uber, Airbnb, and Shopify.",
+        "Deep custom analytics in Zendesk Explore with custom calculated attributes and live dashboards.",
+        "Enterprise WFM (Tymeshift) with automated AI forecasting and shift scheduling.",
+        "1,500+ pre-built enterprise marketplace apps and open Sunshine API platform."
+      ],
+      trap: "As your support team scales past 30 agents, how are you handling complex SLA tiers, intraday workforce adherence, and custom BI reporting without hitting Freshdesk's platform limits?",
+      land: "Freshdesk is a solid starter tool for 5-person teams with simple email needs. For growing organizations that require omnichannel SLAs, robust analytics, and enterprise AI, Zendesk is the gold standard."
+    },
+    {
+      name: 'ServiceNow CSM (Customer Service Management)',
+      tag: 'ITSM Platform / Enterprise Service Management',
+      pitch: 'Pitches enterprise workflow engine connecting customer service to internal IT and engineering back-office teams.',
+      them: [
+        "Heavy legacy UI designed for IT ticket dispatchers, resulting in slow agent ramp times and high friction.",
+        "Astronomical implementation costs ($150k–$300k+) and heavy ongoing ServiceNow developer overhead.",
+        "Poor native modern consumer messaging (WhatsApp, Instagram, Apple Messages) experience.",
+        "Clunky knowledge base and customer self-service portal compared to modern help centers."
+      ],
+      us: [
+        "Modern, agent-friendly workspace that minimizes clicks and reduces handle time by 25–40%.",
+        "Fast consumer-grade messaging and conversational channels out of the box.",
+        "Deploy in weeks with no specialized ServiceNow developer certifications required.",
+        "Substantially lower licensing and operational overhead."
+      ],
+      trap: "How much are you spending on ServiceNow specialized developers just to build new customer-facing routing flows, and what is your average agent onboarding time?",
+      land: "ServiceNow is unmatched for internal ITIL service desks. But for external customer-facing CX where speed, empathy, and omnichannel delight matter, Zendesk provides a vastly superior customer experience."
+    }
+  ],
+  forethought: [
+    {
+      name: 'Decagon / Sierra (Point AI Bots)',
+      tag: 'Point-Solution Generative AI Agents',
+      pitch: 'Pitches bespoke LLM voice/chat agent bots requiring custom engineering builds.',
+      them: [
+        "Requires heavy custom Python engineering and bespoke prompt maintenance for every workflow change.",
+        "Expensive $80k–$150k+ upfront platform minimum commitments before seeing real deflection.",
+        "Lacks pre-trained customer support data models; cold start requires months of manual data grooming.",
+        "Disconnect between bot conversations and back-office human agent queue management."
+      ],
+      us: [
+        "Autoflows: build, test, and adapt complex resolution logic in plain natural language with zero code.",
+        "Helpdesk-agnostic (plugs directly into Zendesk, Salesforce, Freshdesk, ServiceNow in under 30 days).",
+        "Pre-trained on millions of CX interactions with instant 90%+ accurate Triage and 98% resolution on Solve.",
+        "Verified 15x ROI with proven case studies (Fetch Rewards 90% deflection, Cotopaxi 168% ROI)."
+      ],
+      trap: "When product policies change, does your non-technical CX ops team update workflows in natural language, or do you have to wait for an external prompt engineer to push updates?",
+      land: "Decagon and Sierra are exciting startups. Forethought provides enterprise-grade stability, natural language Autoflows, and a complete multi-agent suite (Solve, Triage, Assist, Discover, QA) backed by Zendesk."
+    },
+    {
+      name: 'Intercom (Fin AI)',
+      tag: 'Conversational Support & Metered AI',
+      pitch: 'Pitches Fin AI charging $0.99 per resolution for chat support deflection.',
+      them: [
+        "Penalizes your efficiency: as your team successfully deflects more tickets, your software invoice spikes.",
+        "Limited to chat-centric workflows; weaker on complex multi-paragraph email tickets and voice triage.",
+        "Lacks an Assist Agent copilot that learns from historical human resolutions inside the agent workspace."
+      ],
+      us: [
+        "Outcome-based transparent pricing without meter shock as deflection scales past 50%.",
+        "True omnichannel AI resolving both real-time chat AND complex async email / voice tickets.",
+        "Multi-Agent architecture: Solve handles customers, Assist empowers human reps, Discover fixes knowledge gaps, and QA grades 100% of tickets."
+      ],
+      trap: "If your support team deflects 10,000 tickets during peak season, how does adding $9,900 in unbudgeted Fin meter fees impact your operational margins?",
+      land: "Fin is great for instant chat-only FAQ deflection. Forethought is a comprehensive multi-agent enterprise platform that automates email, chat, routing, and quality assurance."
+    },
+    {
+      name: 'Salesforce Agentforce',
+      tag: 'Enterprise CRM Add-on Bot',
+      pitch: 'Pitches autonomous AI agents built on Salesforce Data Cloud and Atlas Reasoning Engine.',
+      them: [
+        "Requires massive Data Cloud infrastructure prerequisites and expensive per-conversation credit meters.",
+        "Locked strictly into the Salesforce ecosystem — cannot easily be deployed on heterogeneous stacks.",
+        "High complexity requiring specialized Salesforce developers and systems integrators to configure."
+      ],
+      us: [
+        "Live in under 30 days with zero database re-architecting or Data Cloud prerequisite fees.",
+        "Helpdesk-agnostic: operates seamlessly across Salesforce, Zendesk, Freshdesk, or custom internal systems.",
+        "Custom Actions execute real-time transactional API calls (refunds, order updates) effortlessly."
+      ],
+      trap: "What are your total Data Cloud and credit consumption costs projected to be once Agentforce is handling all tier-1 volume across channels?",
+      land: "Agentforce is a compelling vision for organizations completely locked into Salesforce Data Cloud. Forethought provides immediate, helpdesk-agnostic generative AI with zero consultant overhead."
+    },
+    {
+      name: 'Ada Support (Legacy Intent Trees)',
+      tag: 'Rule-Based & Hybrid Chatbot',
+      pitch: 'Pitches automated CX platform with conversational AI and generative routing.',
+      them: [
+        "Legacy architecture rooted in rigid intent decision trees that require tedious ongoing maintenance.",
+        "Brittle bot flows break when customers phrase inquiries in non-standard ways.",
+        "Lacks native back-office Browser Agent to automate internal legacy tools without APIs."
+      ],
+      us: [
+        "Pure Generative AI understanding complex customer intent with dynamic Autoflow generation.",
+        "Browser Agent enables automation across legacy back-office tools that lack REST APIs.",
+        "Proven 55% reduction in first response time and up to 98% resolution accuracy."
+      ],
+      trap: "How many hours per month does your team spend building and repairing branching decision trees in Ada when new products or policies launch?",
+      land: "Ada was a pioneer in rule-based chatbots. Forethought represents the next-generation autonomous multi-agent architecture with natural language logic and self-healing knowledge discovery."
+    }
+  ],
   sockclub: [
     {
       name: 'SwagUp / Swag Brokers & Distributors',
@@ -38,77 +207,6 @@ const BATTLECARDS_BY_PRESET = {
       ],
       trap: "When you hand out printed promotional items at trade shows, does it represent your brand as a premium leader, or does it look like disposable giveaway clutter?",
       land: "4imprint is great when you need 5,000 $0.50 plastic pens for a festival. For corporate client gifting and VIP onboarding, premium custom-knit socks deliver 10x higher brand impressions."
-    },
-    {
-      name: 'Custom Ink / Online Screenprinters',
-      tag: 'Merchandise · Online Apparel & Screenprinting',
-      pitch: 'Pitches online self-service design tools for custom t-shirts, hoodies, and basic apparel.',
-      them: [
-        "T-shirt and screenprinting focus; socks are outsourced third-party catalog addons.",
-        "Limited custom knit capabilities (mostly printed blanks or basic stock colors).",
-        "Slow design turnaround for complex corporate brand guidelines.",
-        "High per-unit costs on non-apparel items."
-      ],
-      us: [
-        "Specialized custom knitwear manufacturer with proprietary knitting machines.",
-        "In-house design team creates pantone-matched proofs in under 60 minutes.",
-        "Seamless turn-key delivery directly to event venues or employee homes."
-      ],
-      trap: "Is your team spending hours fiddling with online canvas tools, or would you rather have professional designers deliver ready-to-order custom knit concepts in under an hour?",
-      land: "Custom Ink is king of screenprinted t-shirts. For specialized, high-retention corporate gifts, Sock Club's custom knit engineering is unmatched."
-    },
-    {
-      name: 'Printful / Print-on-Demand (POD)',
-      tag: 'Merchandise · Print on Demand Dropshipper',
-      pitch: 'Pitches on-demand fulfillment for e-commerce stores with zero upfront inventory.',
-      them: [
-        "Heavy synthetic polyester sublimation: white lines appear when stretched.",
-        "Expensive $16–$22+ single pair baseline costs.",
-        "Slow individual production with unpredictable international shipping."
-      ],
-      us: [
-        "Breathable 75% US-grown combed cotton with nylon and spandex blend.",
-        "Volume tiering from $6.50–$12/pair with custom retail packaging included.",
-        "Guaranteed 5-day rush production from North Carolina mill."
-      ],
-      trap: "Are your recipients experiencing stretched, faded polyester prints, or breathable combed cotton they actually wear every week?",
-      land: "Printful is useful for zero-inventory single-item dropshipping. For corporate batches of 30–5,000+ pairs, Sock Club provides far superior retail quality and direct pricing."
-    }
-  ],
-  zendesk: [
-    {
-      name: 'Salesforce Service Cloud',
-      tag: 'Enterprise CRM / Platform Suite',
-      pitch: 'Pitches Salesforce Customer 360 data unification as the all-in-one suite for sales, marketing, and customer support.',
-      them: [
-        "Total cost of ownership often reaches $300–$600/agent/mo once Digital Engagement, Voice, and Data Cloud licenses are added.",
-        "Rollout takes 6–9+ months requiring expensive third-party implementation consultants ($50k–$150k+).",
-        "Requires 2+ dedicated Salesforce administrators for ongoing workflow changes."
-      ],
-      us: [
-        "Days-to-weeks rapid time-to-value with intuitive modern agent workspace.",
-        "Transparent, predictable pricing with native omnichannel (Voice, WhatsApp, Chat, Email) included.",
-        "Pre-trained autonomous AI agents that deflect 45%+ of volume on day one."
-      ],
-      trap: "Walk me through your full per-agent cost once Digital Engagement, Voice, Data Cloud, and dedicated admin headcount are factored in — and how many months until agents are fully ramped?",
-      land: "If an enterprise is already 100% standardized on Sales Cloud and needs deep custom object customization, Salesforce is legitimate. For high-volume agile support teams, Zendesk delivers 3x faster time-to-value at half the TCO."
-    },
-    {
-      name: 'Intercom (Fin AI)',
-      tag: 'Conversational Support & Outcome AI',
-      pitch: 'Pitches Fin AI agent charging $0.99 per resolution as the modern pay-per-outcome conversational support bot.',
-      them: [
-        "Cost scales WITH success: more deflection means an exponentially higher monthly invoice (~$5,000+ extra at 5k resolutions).",
-        "Hybrid seat pricing + $0.99 resolution meter creates unpredictable billing volatility.",
-        "Weaker high-volume complex multi-touch ticketing and SLA routing."
-      ],
-      us: [
-        "Predictable, transparent platform licensing so your cost does not balloon as automation improves.",
-        "Mature enterprise routing, SLA management, and multi-brand support for complex operations.",
-        "Full AI agent suite included without punitive per-outcome meter spikes."
-      ],
-      trap: "At your monthly ticket volume, what does $0.99 per resolution total as deflection climbs from 30% to 60%, and how are you budgeting for that billing unpredictability?",
-      land: "Fin is strong for low-volume, high-margin SaaS looking for instant turnkey chat bots. For high-volume omnichannel teams, Zendesk provides enterprise governance and cost predictability."
     }
   ],
   stripe: [

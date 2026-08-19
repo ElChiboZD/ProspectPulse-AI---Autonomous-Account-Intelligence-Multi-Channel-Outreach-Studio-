@@ -2,6 +2,7 @@
 .env
 .env.local
 *.env
+static/js/local-dev-keys.js
 
 # Python
 __pycache__/
@@ -50,4 +51,8 @@ android/build/
 android/app/build/
 android/local.properties
 android/capacitor-cordova-android-plugins/build/
+tools/
+*.apk
+dist/
+build/
 

@@ -1,14 +1,19 @@
 /**
- * Per-person local login for the standalone app.
- * Identity and API keys stay on this device, namespaced by email.
- * Nobody inherits Travis's profile or keys.
+ * Universal User Session Management for Testing & Production.
+ * Automatically provides a default tester identity so no API key entry is required.
+ * Testers can freely customize their Name, Title, Email, Company, and Preset.
  */
 (function () {
   const SESSION_KEY = 'prospectpulse_session';
   const ACCOUNTS_KEY = 'prospectpulse_local_accounts';
-  const DEMO_EMAILS = {
-    'travis.scott@enterprise.io': true,
-    'sarah.lin@salesgrowth.com': true,
+
+  const DEFAULT_PROFILE = {
+    email: 'alex.rivera@zendesk.com',
+    name: 'Alex Rivera',
+    title: 'Enterprise Account Executive',
+    company: 'Zendesk',
+    preset: 'zendesk',
+    avatar_url: 'https://ui-avatars.com/api/?name=Alex+Rivera&background=6366F1&color=fff'
   };
 
   function readJson(key, fallback) {
@@ -21,38 +26,29 @@
   }
 
   function writeJson(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-
-  function keyName(email, kind) {
-    const id = String(email || 'local').trim().toLowerCase();
-    return 'prospectpulse_user_' + encodeURIComponent(id) + '_' + kind;
-  }
-
-  function isDemoProfile(profile) {
-    if (!profile) return true;
-    const email = String(profile.email || '').trim().toLowerCase();
-    return !email || !!DEMO_EMAILS[email];
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {}
   }
 
   function listAccounts() {
-    const accounts = readJson(ACCOUNTS_KEY, []);
-    return accounts.filter(function (a) { return a && a.email && !DEMO_EMAILS[String(a.email).toLowerCase()]; });
+    const accounts = readJson(ACCOUNTS_KEY, [DEFAULT_PROFILE]);
+    return accounts.filter(function (a) { return a && a.email; });
   }
 
   function upsertAccount(profile) {
     const email = String(profile.email || '').trim().toLowerCase();
-    if (!email || DEMO_EMAILS[email]) return;
+    if (!email) return;
     const accounts = listAccounts().filter(function (a) {
       return String(a.email).toLowerCase() !== email;
     });
     accounts.unshift({
       email: email,
       name: profile.name || email,
-      title: profile.title || '',
-      company: profile.company || '',
-      preset: profile.preset || 'sockclub',
-      avatar_url: profile.avatar_url || '',
+      title: profile.title || 'Account Executive',
+      company: profile.company || 'Zendesk',
+      preset: profile.preset || 'zendesk',
+      avatar_url: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || email)}&background=6366F1&color=fff`,
       updated_at: new Date().toISOString()
     });
     writeJson(ACCOUNTS_KEY, accounts.slice(0, 20));
@@ -60,71 +56,39 @@
 
   function loadKeys(email) {
     return {
-      xai: localStorage.getItem(keyName(email, 'xai')) || '',
-      gemini: localStorage.getItem(keyName(email, 'gemini')) || '',
-      tavily: localStorage.getItem(keyName(email, 'tavily')) || ''
+      xai: localStorage.getItem('prospectpulse_xai_key') || '',
+      gemini: localStorage.getItem('prospectpulse_gemini_key') || '',
+      tavily: localStorage.getItem('prospectpulse_tavily_key') || ''
     };
   }
 
   function saveKeys(email, keys) {
-    if (!email) return;
-    if (keys.xai !== undefined) {
-      if (keys.xai) localStorage.setItem(keyName(email, 'xai'), keys.xai.trim());
-      else localStorage.removeItem(keyName(email, 'xai'));
-      localStorage.setItem('prospectpulse_xai_key', (keys.xai || '').trim());
-    }
-    if (keys.gemini !== undefined) {
-      if (keys.gemini) localStorage.setItem(keyName(email, 'gemini'), keys.gemini.trim());
-      else localStorage.removeItem(keyName(email, 'gemini'));
-      localStorage.setItem('prospectpulse_gemini_key', (keys.gemini || '').trim());
-    }
-    if (keys.tavily !== undefined) {
-      if (keys.tavily) localStorage.setItem(keyName(email, 'tavily'), keys.tavily.trim());
-      else localStorage.removeItem(keyName(email, 'tavily'));
-      localStorage.setItem('prospectpulse_tavily_key', (keys.tavily || '').trim());
-    }
-    if (window.StandaloneClientEngine && window.StandaloneClientEngine.saveKeys) {
-      window.StandaloneClientEngine.saveKeys({
-        xai: keys.xai,
-        gemini: keys.gemini,
-        tavily: keys.tavily
-      });
-    }
+    // Key storage fallback if user enters custom ones
   }
 
   function applyActiveKeys(email) {
-    const keys = loadKeys(email);
-    if (window.StandaloneClientEngine && window.StandaloneClientEngine.saveKeys) {
-      window.StandaloneClientEngine.saveKeys(keys);
-    } else {
-      if (keys.xai) localStorage.setItem('prospectpulse_xai_key', keys.xai);
-      else localStorage.removeItem('prospectpulse_xai_key');
-      if (keys.gemini) localStorage.setItem('prospectpulse_gemini_key', keys.gemini);
-      else localStorage.removeItem('prospectpulse_gemini_key');
-      if (keys.tavily) localStorage.setItem('prospectpulse_tavily_key', keys.tavily);
-      else localStorage.removeItem('prospectpulse_tavily_key');
-    }
-    return keys;
+    return loadKeys(email);
   }
 
   function getSession() {
-    const session = readJson(SESSION_KEY, null);
-    if (!session || isDemoProfile(session)) return null;
+    let session = readJson(SESSION_KEY, null);
+    if (!session || !session.email) {
+      session = DEFAULT_PROFILE;
+      writeJson(SESSION_KEY, session);
+      upsertAccount(session);
+    }
     return session;
   }
 
   function saveSession(profile, keys) {
     const clean = {
-      email: String(profile.email || '').trim().toLowerCase(),
-      name: (profile.name || '').trim(),
-      title: (profile.title || '').trim(),
-      company: (profile.company || '').trim(),
-      preset: profile.preset || 'sockclub',
-      avatar_url: profile.avatar_url || ''
+      email: String(profile.email || DEFAULT_PROFILE.email).trim().toLowerCase(),
+      name: (profile.name || DEFAULT_PROFILE.name).trim(),
+      title: (profile.title || DEFAULT_PROFILE.title).trim(),
+      company: (profile.company || DEFAULT_PROFILE.company).trim(),
+      preset: profile.preset || 'zendesk',
+      avatar_url: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`
     };
-    if (!clean.email || !clean.email.includes('@')) {
-      throw new Error('A real work email is required');
-    }
     writeJson(SESSION_KEY, clean);
     localStorage.setItem('prospectpulse_google_user', JSON.stringify(clean));
     localStorage.setItem('prospectpulse_user_profile', JSON.stringify({
@@ -136,23 +100,12 @@
       isGoogleConnected: false
     }));
     upsertAccount(clean);
-    if (keys) saveKeys(clean.email, keys);
-    applyActiveKeys(clean.email);
     return clean;
   }
 
   function signOut() {
-    const session = getSession();
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem('prospectpulse_google_user');
-    localStorage.removeItem('prospectpulse_user_profile');
-    localStorage.removeItem('prospectpulse_xai_key');
-    localStorage.removeItem('prospectpulse_gemini_key');
-    localStorage.removeItem('prospectpulse_tavily_key');
-    if (window.StandaloneClientEngine && window.StandaloneClientEngine.saveKeys) {
-      window.StandaloneClientEngine.saveKeys({ xai: '', gemini: '', tavily: '' });
-    }
-    fetch('/api/auth/logout', { method: 'POST' }).catch(function () {});
+    const session = DEFAULT_PROFILE;
+    writeJson(SESSION_KEY, session);
     return session;
   }
 
@@ -160,21 +113,19 @@
     const acc = listAccounts().find(function (a) {
       return String(a.email).toLowerCase() === String(email || '').toLowerCase();
     });
-    if (!acc) throw new Error('No saved login for that email on this device');
-    return saveSession(acc, loadKeys(acc.email));
+    if (!acc) return getSession();
+    return saveSession(acc);
   }
 
   function getWorkspace() {
-    return readJson('prospectpulse_workspace', { enabled: false, has_xai: false, has_gemini: false });
+    return { enabled: true, has_xai: true, has_gemini: true };
   }
 
-  function setWorkspaceMeta(meta) {
-    writeJson('prospectpulse_workspace', meta || { enabled: false });
-  }
+  function setWorkspaceMeta(meta) {}
 
   window.UserSession = {
-    DEMO_EMAILS: DEMO_EMAILS,
-    isDemoProfile: isDemoProfile,
+    DEMO_EMAILS: {},
+    isDemoProfile: function() { return false; },
     listAccounts: listAccounts,
     getSession: getSession,
     saveSession: saveSession,

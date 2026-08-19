@@ -1,16 +1,15 @@
 /* ==========================================================================
-   ProspectPulse AI — Native Mobile App Design System (Material You 3.0)
-   Ground-Up Complete Mobile Rewrite for Android 14/15/16 and iOS 18
+   ProspectPulse AI — Google Material Design 3 (Material You) Mobile App
+   Pixel-Perfect Google App UI for Android 15/16 and iOS 18
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-
 :root {
-  /* Google Material 3 Dark Palette Tokens */
+  /* Google Material 3 Dark Palette Tokens (M3 Baseline Dark) */
   --md-sys-color-background: #111318;
   --md-sys-color-on-background: #E2E2E9;
   --md-sys-color-surface: #111318;
   --md-sys-color-surface-dim: #0C0E12;
+  --md-sys-color-surface-bright: #37393E;
   --md-sys-color-surface-container-lowest: #0B0D11;
   --md-sys-color-surface-container-low: #191B20;
   --md-sys-color-surface-container: #1D2024;
@@ -23,17 +22,34 @@
   --md-sys-color-on-primary-container: #D3E3FD;
 
   --md-sys-color-secondary: #C3C7D2;
+  --md-sys-color-on-secondary: #2D3039;
   --md-sys-color-secondary-container: #3F4249;
   --md-sys-color-on-secondary-container: #DFE2ED;
 
   --md-sys-color-tertiary: #C4EED0;
+  --md-sys-color-on-tertiary: #073815;
   --md-sys-color-tertiary-container: #0F5223;
   --md-sys-color-on-tertiary-container: #D4F8DE;
 
   --md-sys-color-error: #F2B8B5;
+  --md-sys-color-on-error: #601410;
   --md-sys-color-error-container: #8C1D18;
+  --md-sys-color-on-error-container: #F9DEDC;
+
   --md-sys-color-outline: #8E919A;
   --md-sys-color-outline-variant: #44474E;
+
+  /* Google Brand Colors */
+  --google-blue: #4285F4;
+  --google-red: #EA4335;
+  --google-yellow: #FBBC05;
+  --google-green: #34A853;
+
+  /* Elevation Shadows */
+  --md-elevation-1: 0 1px 3px 1px rgba(0,0,0,0.15), 0 1px 2px 0 rgba(0,0,0,0.3);
+  --md-elevation-2: 0 2px 6px 2px rgba(0,0,0,0.15), 0 1px 2px 0 rgba(0,0,0,0.3);
+  --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px 0 rgba(0,0,0,0.3);
+  --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,0.15), 0 2px 3px 0 rgba(0,0,0,0.3);
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -54,6 +70,29 @@ html, body {
   min-height: 100vh;
   overflow-x: hidden;
   overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Material Symbols Default Config */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-rounded.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
 }
 
 #appWrapper {
@@ -66,7 +105,7 @@ html, body {
 }
 
 /* ----------------------------------------------------
-   1. M3 FLOATING TOP APP BAR (Google Workspace Style)
+   1. GOOGLE SEARCH BAR (Material 3 Search Pill)
    ---------------------------------------------------- */
 .m3-top-bar {
   position: sticky;
@@ -74,7 +113,6 @@ html, body {
   z-index: 100;
   padding: calc(10px + var(--safe-top)) 16px 8px 16px;
   background: var(--md-sys-color-surface-dim);
-  pointer-events: auto;
 }
 
 .m3-search-pill {
@@ -85,19 +123,19 @@ html, body {
   align-items: center;
   padding: 0 8px 0 16px;
   gap: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s;
-  pointer-events: auto;
+  box-shadow: var(--md-elevation-1);
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .m3-search-pill:focus-within {
   background: var(--md-sys-color-surface-container-highest);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--md-elevation-2);
 }
 
-.m3-search-icon {
-  font-size: 18px;
-  color: var(--md-sys-color-outline);
+.m3-google-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .m3-search-input {
@@ -105,62 +143,70 @@ html, body {
   background: transparent;
   border: none;
   outline: none;
-  font-size: 16px;
-  color: #FFF;
+  font-size: 15px;
+  color: var(--md-sys-color-on-background);
   font-family: inherit;
-  pointer-events: auto;
 }
 
 .m3-search-input::placeholder {
   color: var(--md-sys-color-outline);
-  font-size: 15px;
+  font-size: 14px;
 }
 
-.m3-camera-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--md-sys-color-surface-container-lowest);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--md-sys-color-primary);
+.m3-icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
   cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.m3-icon-button:active {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .m3-avatar-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
   overflow: hidden;
-  border: none;
-  background: transparent;
+  border: 2px solid transparent;
+  background: var(--md-sys-color-primary-container);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 14px;
+  font-weight: 700;
+  transition: border-color 0.2s;
+}
+
+.m3-avatar-button:active {
+  border-color: var(--md-sys-color-primary);
 }
 
 .m3-avatar-button img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  pointer-events: none;
 }
 
 /* ----------------------------------------------------
-   2. M3 HORIZONTAL FILTER CHIPS
+   2. GOOGLE FILTER & PRESET CHIPS (Material 3 Assist & Filter)
    ---------------------------------------------------- */
 .m3-filter-chips {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 6px 16px 14px 16px;
+  padding: 6px 16px 12px 16px;
   scrollbar-width: none;
-  pointer-events: auto;
 }
 
 .m3-filter-chips::-webkit-scrollbar {
@@ -168,12 +214,12 @@ html, body {
 }
 
 .m3-chip {
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 18px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 17px;
   background: var(--md-sys-color-surface-container-low);
   border: 1px solid var(--md-sys-color-outline-variant);
-  color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 13px;
   font-weight: 500;
   display: flex;
@@ -181,8 +227,17 @@ html, body {
   gap: 6px;
   white-space: nowrap;
   cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  user-select: none;
+}
+
+.m3-chip .material-symbols-rounded {
+  font-size: 17px;
+}
+
+.m3-chip:active {
+  background: var(--md-sys-color-surface-container-high);
+  transform: scale(0.97);
 }
 
 .m3-chip.active {
@@ -192,14 +247,32 @@ html, body {
   font-weight: 600;
 }
 
+.m3-chip.active .material-symbols-rounded {
+  font-variation-settings: 'FILL' 1, 'wght' 600;
+}
+
+/* Preset Switcher Bar */
+.m3-preset-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px 16px 10px 16px;
+  scrollbar-width: none;
+  background: var(--md-sys-color-surface-dim);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.m3-preset-bar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ----------------------------------------------------
-   3. SCREEN CONTAINERS & CARDS
+   3. SCREEN CONTAINERS & MATERIAL 3 CARDS
    ---------------------------------------------------- */
 .m3-screen {
   display: none;
   padding: 0 16px;
-  animation: m3Fade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: auto;
+  animation: m3Fade 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .m3-screen.active-screen {
@@ -207,15 +280,17 @@ html, body {
 }
 
 @keyframes m3Fade {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .m3-section-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
   color: var(--md-sys-color-primary);
-  margin: 14px 0 10px 4px;
+  margin: 16px 0 10px 4px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -226,19 +301,26 @@ html, body {
   border-radius: 20px;
   padding: 16px;
   margin-bottom: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.15s, transform 0.1s;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--md-elevation-1);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   cursor: pointer;
-  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
 }
 
 .m3-card:active {
   background: var(--md-sys-color-surface-container-high);
-  transform: scale(0.99);
+  transform: scale(0.985);
 }
 
-/* Priority Account Row */
+.m3-card-outlined {
+  background: transparent;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: none;
+}
+
+/* Account Row Card */
 .m3-account-row {
   display: flex;
   align-items: center;
@@ -252,63 +334,72 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .m3-account-details {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
 }
 
 .m3-account-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #FFF;
+  color: var(--md-sys-color-on-background);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .m3-account-meta {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--md-sys-color-outline);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .m3-signal-badge {
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
   background: var(--md-sys-color-tertiary-container);
   color: var(--md-sys-color-on-tertiary-container);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ----------------------------------------------------
-   4. M3 SEGMENTED CONTROLS & BUTTONS
+   4. M3 SEGMENTED BUTTONS & CONTROLS
    ---------------------------------------------------- */
 .m3-segmented-row {
   display: flex;
-  background: var(--md-sys-color-surface-container-low);
-  border-radius: 28px;
-  padding: 4px;
+  background: var(--md-sys-color-surface-container-lowest);
+  border-radius: 24px;
+  padding: 3px;
   margin-bottom: 14px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  pointer-events: auto;
 }
 
 .m3-segment-btn {
   flex: 1;
   padding: 8px 10px;
-  border-radius: 24px;
+  border-radius: 20px;
   border: none;
   background: transparent;
   color: var(--md-sys-color-outline);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   text-align: center;
   white-space: nowrap;
 }
@@ -316,30 +407,51 @@ html, body {
 .m3-segment-btn.active {
   background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
+  box-shadow: var(--md-elevation-1);
 }
 
 .m3-btn-primary {
   width: 100%;
-  height: 50px;
-  border-radius: 25px;
+  height: 48px;
+  border-radius: 24px;
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
   border: none;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  pointer-events: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.15s;
+  box-shadow: var(--md-elevation-2);
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .m3-btn-primary:active {
   background: #8AB4F8;
   transform: scale(0.98);
+}
+
+.m3-btn-tonal {
+  width: 100%;
+  height: 44px;
+  border-radius: 22px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.m3-btn-tonal:active {
+  background: #4F525A;
 }
 
 /* ----------------------------------------------------
@@ -353,11 +465,11 @@ html, body {
 }
 
 .m3-dispatch-btn {
-  height: 44px;
-  border-radius: 12px;
+  height: 48px;
+  border-radius: 16px;
   border: none;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -368,50 +480,49 @@ html, body {
 }
 
 .m3-dispatch-btn:active {
-  transform: scale(0.94);
+  transform: scale(0.93);
 }
 
 .btn-whatsapp {
-  background: rgba(37, 211, 102, 0.15);
-  border: 1px solid rgba(37, 211, 102, 0.3);
+  background: rgba(37, 211, 102, 0.14);
+  border: 1px solid rgba(37, 211, 102, 0.28);
   color: #25D366;
 }
 
 .btn-sms {
-  background: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: #60A5FA;
+  background: rgba(66, 133, 244, 0.14);
+  border: 1px solid rgba(66, 133, 244, 0.28);
+  color: #4285F4;
 }
 
 .btn-linkedin {
-  background: rgba(10, 102, 194, 0.15);
-  border: 1px solid rgba(10, 102, 194, 0.3);
+  background: rgba(10, 102, 194, 0.14);
+  border: 1px solid rgba(10, 102, 194, 0.28);
   color: #38BDF8;
 }
 
 .btn-gmail {
-  background: rgba(234, 67, 53, 0.15);
-  border: 1px solid rgba(234, 67, 53, 0.3);
-  color: #F87171;
+  background: rgba(234, 67, 53, 0.14);
+  border: 1px solid rgba(234, 67, 53, 0.28);
+  color: #EA4335;
 }
 
 /* ----------------------------------------------------
-   6. M3 BOTTOM NAVIGATION BAR (Google Material 3)
+   6. GOOGLE MATERIAL 3 NAVIGATION BAR (Bottom Nav)
    ---------------------------------------------------- */
 .m3-nav-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(76px + var(--safe-bottom));
+  height: calc(80px + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
-  background: var(--md-sys-color-surface-container-low);
+  background: var(--md-sys-color-surface-container);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: 3000;
-  pointer-events: auto;
 }
 
 .m3-nav-btn {
@@ -425,35 +536,148 @@ html, body {
   border: none;
   color: var(--md-sys-color-outline);
   cursor: pointer;
-  padding: 6px 0;
-  pointer-events: auto;
+  padding: 8px 0;
+  transition: color 0.15s;
 }
 
 .m3-nav-pill {
-  width: 60px;
+  width: 64px;
   height: 32px;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
+  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-nav-pill .material-symbols-rounded {
+  font-size: 22px;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform 0.15s;
 }
 
 .m3-nav-text {
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.2px;
-  pointer-events: none;
+  letter-spacing: 0.3px;
+  transition: font-weight 0.15s;
 }
 
 .m3-nav-btn.active .m3-nav-pill {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  background: var(--md-sys-color-secondary-container);
+}
+
+.m3-nav-btn.active .m3-nav-pill .material-symbols-rounded {
+  color: var(--md-sys-color-on-secondary-container);
+  font-variation-settings: 'FILL' 1, 'wght' 600;
+  transform: scale(1.05);
 }
 
 .m3-nav-btn.active .m3-nav-text {
-  color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-background);
   font-weight: 700;
+}
+
+/* ----------------------------------------------------
+   7. GEMINI LIVE VOICE COACH & PULSING ORB HUD
+   ---------------------------------------------------- */
+@keyframes geminiPulse {
+  0% { transform: scale(1); box-shadow: 0 0 30px rgba(66,133,244,0.4); }
+  50% { transform: scale(1.08); box-shadow: 0 0 60px rgba(155,114,207,0.6), 0 0 30px rgba(234,67,53,0.3); }
+  100% { transform: scale(1); box-shadow: 0 0 30px rgba(66,133,244,0.4); }
+}
+
+@keyframes waveBar {
+  0%, 100% { height: 6px; }
+  50% { height: 28px; }
+}
+
+.gemini-orb {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  background: radial-gradient(circle at 35% 35%, #4285F4 0%, #9B72CF 45%, #D96570 75%, #1EA45B 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: geminiPulse 3s infinite ease-in-out;
+  margin-bottom: 24px;
+}
+
+.gemini-waves {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+}
+
+.gemini-wave-bar {
+  width: 4px;
+  border-radius: 2px;
+  background: var(--md-sys-color-primary);
+  animation: waveBar 1.2s infinite ease-in-out;
+}
+
+.gemini-wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.gemini-wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.gemini-wave-bar:nth-child(4) { animation-delay: 0.45s; }
+
+/* ----------------------------------------------------
+   8. GOOGLE ACCOUNT BOTTOM SHEET / MODAL
+   ---------------------------------------------------- */
+.m3-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: m3Fade 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-dialog-card {
+  background: var(--md-sys-color-surface-container-high);
+  border-radius: 28px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--md-elevation-4);
+}
+
+.m3-field-container {
+  margin-bottom: 14px;
+}
+
+.m3-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--md-sys-color-outline);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.m3-text-field {
+  width: 100%;
+  height: 46px;
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+  color: var(--md-sys-color-on-background);
+  padding: 0 14px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.m3-text-field:focus {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 1px var(--md-sys-color-primary);
 }

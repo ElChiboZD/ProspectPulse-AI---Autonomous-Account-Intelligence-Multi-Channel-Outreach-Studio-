@@ -1,0 +1,332 @@
+/* ==========================================================================
+   ProspectPulse AI — Native Desktop Design System (macOS Acrylic & Windows 11 Mica)
+   Pixel-Perfect Native Desktop Aesthetics for Windows 11 & macOS Sonoma/Sequoia
+   ========================================================================== */
+
+:root {
+  --font-native: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Windows 11 Fluent 2 Baseline */
+  --win-mica-bg: #18191D;
+  --win-surface: #202228;
+  --win-surface-elevated: #282B33;
+  --win-surface-card: rgba(32, 34, 40, 0.85);
+  --win-border: rgba(255, 255, 255, 0.08);
+  --win-border-hover: rgba(255, 255, 255, 0.16);
+  --win-accent: #60A5FA;
+  --win-accent-glow: rgba(96, 165, 250, 0.25);
+
+  /* macOS Sonoma/Sequoia Vibrant Translucency Baseline */
+  --mac-acrylic-bg: rgba(20, 22, 28, 0.78);
+  --mac-surface: rgba(28, 31, 40, 0.65);
+  --mac-surface-card: rgba(36, 40, 52, 0.6);
+  --mac-border: rgba(255, 255, 255, 0.09);
+  --mac-border-highlight: rgba(255, 255, 255, 0.18);
+  --mac-accent: #38BDF8;
+
+  --sidebar-width: 250px;
+}
+
+/* macOS-Specific Tweaks */
+html[data-platform='macos'] {
+  --font-native: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+}
+
+html[data-platform='macos'] body {
+  background: #0E1015 !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.07) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.07) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.04) 0px, transparent 50%) !important;
+}
+
+/* Windows-Specific Tweaks */
+html[data-platform='windows'] {
+  --font-native: 'Segoe UI Variable Display', 'Segoe UI Variable Text', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html[data-platform='windows'] body {
+  background-color: #121316 !important;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(14, 165, 233, 0.05) 0%, transparent 40%) !important;
+}
+
+/* Native Window Root Container */
+body {
+  font-family: var(--font-native);
+  color: #F8FAFC;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ----------------------------------------------------
+   1. STREAMLINED DESKTOP HEADER & TRAFFIC LIGHTS
+   ---------------------------------------------------- */
+.nav-header {
+  height: 58px;
+  background: rgba(18, 20, 26, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Traffic Lights (macOS) */
+.mac-traffic-lights {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  margin-right: 14px;
+}
+
+html[data-platform='macos'] .mac-traffic-lights {
+  display: flex !important;
+}
+
+.traffic-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+}
+
+.traffic-dot.close { background: #FF5F56; }
+.traffic-dot.min { background: #FFBD2E; }
+.traffic-dot.max { background: #27C93F; }
+
+/* ----------------------------------------------------
+   2. RAYCAST / LINEAR SPOTLIGHT COMMAND PILL
+   ---------------------------------------------------- */
+.desktop-omni-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #94A3B8;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.desktop-omni-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #F8FAFC;
+  transform: translateY(-0.5px);
+}
+
+.desktop-kbd-badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #CBD5E1;
+}
+
+/* ----------------------------------------------------
+   3. STREAMLINED WORKFLOW TABS (Native Segmented Rail)
+   ---------------------------------------------------- */
+.flow-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  padding: 6px !important;
+  border-radius: 16px !important;
+  margin: 18px 0 22px 0 !important;
+  overflow-x: auto;
+}
+
+.flow-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.flow-tab:hover {
+  color: #F8FAFC;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.flow-tab.active {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #A5B4FC !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15) !important;
+}
+
+html[data-platform='windows'] .flow-tab.active {
+  background: rgba(96, 165, 250, 0.15) !important;
+  color: #93C5FD !important;
+  border-color: rgba(96, 165, 250, 0.35) !important;
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.15) !important;
+}
+
+.flow-tab .tab-idx {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.flow-tab.active .tab-idx {
+  background: #6366F1 !important;
+  color: #FFF !important;
+}
+
+html[data-platform='windows'] .flow-tab.active .tab-idx {
+  background: #3B82F6 !important;
+  color: #FFF !important;
+}
+
+/* ----------------------------------------------------
+   4. STREAMLINED HERO SEARCH CARD
+   ---------------------------------------------------- */
+.search-hero-card {
+  background: rgba(22, 26, 35, 0.72) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 24px 28px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+  margin-bottom: 24px;
+}
+
+.omni-search-box {
+  display: flex;
+  align-items: center;
+  background: rgba(14, 17, 24, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px !important;
+  padding: 6px 8px 6px 14px !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.omni-search-box:focus-within {
+  border-color: #6366F1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), inset 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  background: #0E1118 !important;
+}
+
+html[data-platform='windows'] .omni-search-box:focus-within {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), inset 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.omni-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #FFF;
+  font-family: inherit;
+  padding: 8px;
+}
+
+.omni-search-input::placeholder {
+  color: #64748B;
+  font-size: 14.5px;
+}
+
+/* ----------------------------------------------------
+   5. STREAMLINED CARDS & PANELS
+   ---------------------------------------------------- */
+.card, .glass-card, .contact-card, .deliverability-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.card:hover, .glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ----------------------------------------------------
+   6. NATIVE BUTTONS & CONTROLS
+   ---------------------------------------------------- */
+.btn {
+  font-family: var(--font-native);
+  font-weight: 600;
+  border-radius: 10px !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: #4F46E5 !important;
+  color: #FFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35) !important;
+}
+
+.btn-primary:hover {
+  background: #4338CA !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.45) !important;
+}
+
+html[data-platform='windows'] .btn-primary {
+  background: #2563EB !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+}
+
+html[data-platform='windows'] .btn-primary:hover {
+  background: #1D4ED8 !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45) !important;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  color: #E2E8F0 !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #FFF !important;
+}
