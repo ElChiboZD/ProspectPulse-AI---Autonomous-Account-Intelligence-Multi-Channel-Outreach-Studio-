@@ -46,12 +46,7 @@ def push_branches():
     porcelain.push(ROOT, push_url, refspecs=[b"refs/heads/desktop-app:refs/heads/desktop-app"])
     print("    [SUCCESS] Branch 'desktop-app' is live on GitHub!")
 
-    # 2. Create and push 'mobile-apps' branch
-    mobile_branch = b"refs/heads/mobile-apps"
-    repo.refs[mobile_branch] = current_head
-    print("\n[*] Pushing 'mobile-apps' branch to GitHub...")
-    porcelain.push(ROOT, push_url, refspecs=[b"refs/heads/mobile-apps:refs/heads/mobile-apps"])
-    print("    [SUCCESS] Branch 'mobile-apps' is live on GitHub!")
+
 
     # 3. Create and push 'windows-exe' branch (as an alias for clarity)
     exe_branch = b"refs/heads/windows-exe"
