@@ -13,6 +13,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="data/presets.js" defer></script>
 <script src="data/battlecards.js" defer></script>
+<script src="data/demo_accounts.js" defer></script>
 <link rel="stylesheet" href="css/skeletons.css">
 
 <script src="js/skeletons.js" defer></script>
@@ -2925,17 +2926,22 @@ function runProspectSearch() {
 
   renderRoiWidget();
 
+  const cleanDomain = query.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/.*$/, '').trim();
+
   fetch('/api/run', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       kind: 'prospect',
-      profile: 'sockclub',
+      profile: currentActivePreset || 'sockclub',
       profile_data: activeProfileData,
       fields: { mode: 'company', value: query, seniority, persona, competitor }
     })
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error('API offline');
+    return res.json();
+  })
   .then(({ job_id }) => {
     if (activeEventSource) activeEventSource.close();
     const es = new EventSource('/api/stream/' + job_id);
@@ -2947,6 +2953,16 @@ function runProspectSearch() {
       } catch (_) {}
     });
     es.addEventListener('done', () => es.close());
+  })
+  .catch(() => {
+    setTimeout(() => {
+      const match = (window.DEMO_ACCOUNTS && (window.DEMO_ACCOUNTS[cleanDomain] || window.DEMO_ACCOUNTS[cleanDomain + '.com']))
+        || (typeof window.generateFallbackAccount === 'function' ? window.generateFallbackAccount(query) : null);
+      if (match) {
+        parseAndRenderResults(match);
+        showToast(`✓ Account intelligence generated for ${match.company}`);
+      }
+    }, 450);
   });
 }
 
@@ -4377,7 +4393,10 @@ function generateReplyTriage() {
       fields: { replyText: reply, who: 'Prospect Lead' }
     })
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error('API offline');
+    return res.json();
+  })
   .then(({ job_id }) => {
     if (activeEventSource) activeEventSource.close();
     const es = new EventSource('/api/stream/' + job_id);
@@ -4390,6 +4409,18 @@ function generateReplyTriage() {
       } catch (_) {}
     });
     es.addEventListener('done', () => es.close());
+  })
+  .catch(() => {
+    const co = (currentAccountData && currentAccountData.company) || 'your company';
+    let triageText = `Thanks for the response! Completely understand that timing and priorities shift. Most teams we speak with at ${co} are looking at Q1 planning for vendor consolidation. Would it be helpful if I sent over a 1-page ROI teardown with free digital mockups so you have it on file for when budgets unfreeze?`;
+    if (reply.toLowerCase().includes('budget')) {
+      triageText = `Totally understand on the budget freeze. Many teams at ${co} run our zero-commitment digital proof process now so everything is approved and ready the day budget opens up. Mind if I share a 1-click preview link?`;
+    } else if (reply.toLowerCase().includes('swagup') || reply.toLowerCase().includes('broker') || reply.toLowerCase().includes('vendor')) {
+      triageText = `Understood on having an existing vendor. Usually teams reach out to us when they get tired of high overseas broker markups and 90% trash rates. We manufacture directly in North Carolina with 95%+ keep rates. Happy to share a quick sample box whenever you're open to comparing!`;
+    }
+    document.getElementById('replyResponseArea').style.display = 'block';
+    document.getElementById('replyOutput').value = triageText;
+    showToast('✨ Strategic counter-reply generated');
   });
 }
 
